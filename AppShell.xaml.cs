@@ -1,0 +1,17 @@
+﻿using GymTracker.Services;
+using GymTracker.Views;
+
+namespace GymTracker
+{
+    public partial class AppShell : Shell
+    {
+        public AppShell()
+        {
+            InitializeComponent();
+            Routing.RegisterRoute("createroutine", typeof(CreateRoutine));
+            Routing.RegisterRoute("addexercise", typeof(AddExercise));
+            Routing.RegisterRoute("setselection", typeof(SetSelection));
+            Routing.RegisterRoute("startroutine", typeof(StartRoutine));
+        }
+    }
+}

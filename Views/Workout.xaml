@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Workout"
+             x:Name="WorkoutPage"
+             Shell.NavBarIsVisible="False">
+    <VerticalStackLayout Spacing="39">
+        <Label 
+            Text="Routines"
+            Style="{StaticResource Headline}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" 
+            Margin="0,20,0,0"/>
+        <Button
+            Text="Add Routine"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            BackgroundColor="Blue"
+            BorderColor="White"
+            Background="Blue"
+            TextColor="White"
+            Padding="20"
+            WidthRequest="200"
+            Command="{Binding AddRoutineCommand}" />
+        <Label 
+            Text="{Binding RoutinesCount, StringFormat='My Routines ({0})'}"
+            Style="{StaticResource SubHeadline}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+        <CollectionView 
+            ItemsSource="{Binding Routines}">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <HorizontalStackLayout HorizontalOptions="Center">
+                        <Frame Margin="5" Padding="10" BorderColor="Blue" CornerRadius="8">
+                            <Label Text="{Binding Name}"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   HorizontalOptions="Center"/>
+                        </Frame>
+                        <Frame Margin="5" Padding="10" BorderColor="Blue" CornerRadius="8" BackgroundColor="Blue">
+                            <Button
+                                Text="Start Routine"
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center"
+                                BackgroundColor="Blue"
+                                BorderColor="White"
+                                Background="Blue"
+                                TextColor="White"
+                                Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Name=WorkoutPage}}"
+                                CommandParameter="{Binding .}" />
+                        </Frame>
+                        <Frame Margin="5" Padding="10" BorderColor="Red" CornerRadius="8" BackgroundColor="Red">
+                            <Button
+                                Text="Delete Routine"
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center"
+                                BackgroundColor="Red"
+                                BorderColor="White"
+                                Background="Red"
+                                TextColor="White"
+                                Command="{Binding BindingContext.DeleteRoutineCommand, Source={x:Reference Name=WorkoutPage}}"
+                                CommandParameter="{Binding .}" />
+                        </Frame>
+                    </HorizontalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>

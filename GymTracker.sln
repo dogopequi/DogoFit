@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymTracker", "GymTracker.csproj", "{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57AD2A82-5619-4ADE-8BA7-AB8CC994C2A6}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C379C63-E5EB-4D89-9206-BDDD9650EEEE}
+	EndGlobalSection
+EndGlobal

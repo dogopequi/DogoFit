@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Views.StartRoutine"
+             xmlns:controls="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"  
+             Title="StartRoutine"
+             Shell.NavBarIsVisible="False"
+             x:Name="startroutine">
+    <Grid Padding="10" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="0">
+
+        <VerticalStackLayout Padding="10" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
+            <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                <Label Text="{Binding  routine.Name, StringFormat='Routine Name: {0}'}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"/>
+            </Frame>
+            <HorizontalStackLayout Padding="10" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Center">
+                <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Volume" FontSize="16" HorizontalOptions="Center"/>
+                        <Label Text="{Binding routine.Volume}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Sets" FontSize="16" HorizontalOptions="Center"/>
+                        <Label Text="{Binding routine.SetCount}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Reps" FontSize="16" HorizontalOptions="Center"/>
+                        <Label Text="{Binding routine.RepCount}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Duration" FontSize="16" HorizontalOptions="Center"/>
+                        <Label Text="{Binding routine.DurationString}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+        <CollectionView Grid.Row="2"
+                ItemsSource="{Binding routine.Exercises}"
+                ItemsLayout="VerticalList">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="5">
+                        <VerticalStackLayout Spacing="5">
+
+                            <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,0,0,20"/>
+                            <Entry Text="{Binding Description, Mode=TwoWay}"
+                                    Placeholder="Enter your exercise description here"
+                                    WidthRequest="300"
+                                    HorizontalOptions="Center"
+                                    FontSize="15" />
+                            <CollectionView ItemsSource="{Binding Sets}"
+                                    ItemsLayout="VerticalList"
+                                    Margin="10,0,0,0">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <HorizontalStackLayout Spacing="40" HorizontalOptions="Center">
+                                            <VerticalStackLayout Spacing="10">
+                                                <Label Text="Set" HorizontalTextAlignment="Center"/>
+                                                <Label Text="{Binding ID}" FontAttributes="Bold" HorizontalTextAlignment="Center" FontSize="20"/>
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="0">
+                                                <Label Text="Reps" HorizontalTextAlignment="Center"/>
+                                                <Entry Placeholder="0"
+                                                        Keyboard="Numeric"
+                                                    WidthRequest="50"
+                                                    HorizontalTextAlignment="Center"
+                                                    FontAttributes="Bold"
+                                                      FontSize="20"
+                                                    Text="{Binding Reps, Mode=TwoWay}" />
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="0">
+                                                <Label Text="Weight" HorizontalTextAlignment="Center"/>
+                                                <Entry Placeholder="0"
+                                           Keyboard="Numeric"
+                                           WidthRequest="50"
+                                           HorizontalTextAlignment="Center"
+                                            FontAttributes="Bold"
+                                            FontSize="20"
+                                           Text="{Binding Weight, Mode=TwoWay}" />
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <Button Text="Add Set"
+                            Command="{Binding BindingContext.AddSetToExerciseCommand,
+                                              Source={x:Reference startroutine}}"
+                            CommandParameter="{Binding .}"
+                            FontSize="14"
+                            BackgroundColor="Blue"
+                            BorderColor="White"
+                            Background="Blue"
+                            TextColor="White"
+                            WidthRequest="275"
+                            Padding="5" />
+                            <Button Text="Remove Set"
+                            Command="{Binding BindingContext.RemoveSetFromExerciseCommand,
+                                              Source={x:Reference startroutine}}"
+                            CommandParameter="{Binding .}"
+                            FontSize="14"
+                            BackgroundColor="Red"
+                            BorderColor="White"
+                            Background="Red"
+                            TextColor="White"
+                            WidthRequest="275"
+                            Padding="5" />
+
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+
+        <Button Grid.Row="3"  
+                Text="Finish"  
+                Command="{Binding FinishRoutineCommand}"
+                HorizontalOptions="Center"
+                BackgroundColor="Blue"
+                BorderColor="White"
+                Background="Blue"
+                TextColor="White"
+                WidthRequest="300"/>
+
+    </Grid>
+</ContentPage>

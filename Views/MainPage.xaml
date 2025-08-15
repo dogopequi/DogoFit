@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"  
+             x:Class="GymTracker.MainPage"
+             x:Name="mainpage"
+             Shell.NavBarIsVisible="False">
+    <ScrollView>
+        <VerticalStackLayout Padding="10" Spacing="15">
+
+            <Image Source="logo.png" HeightRequest="185" Aspect="AspectFit" SemanticProperties.Description="dot net bot in a race car number eight" />
+            <Label Text="DogoFit" Style="{StaticResource Headline}" SemanticProperties.HeadingLevel="Level2" SemanticProperties.Description="Welcome to DogoTracker app" />
+
+            <CollectionView ItemsSource="{Binding routines}" ItemsLayout="VerticalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BorderColor="Blue" CornerRadius="10" Padding="10" Margin="5">
+                            <VerticalStackLayout Spacing="5">
+                                <Frame BorderColor="Blue" CornerRadius="8" Padding="10">
+                                    <Label Text="{Binding Name, StringFormat='Routine: {0}'}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                </Frame>
+
+                                <HorizontalStackLayout Padding="10" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Center">
+                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                                        <VerticalStackLayout Spacing="5">
+                                            <Label Text="Volume" FontSize="16" HorizontalOptions="Center"/>
+                                            <Label Text="{Binding Volume}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                                        <VerticalStackLayout Spacing="5">
+                                            <Label Text="Sets" FontSize="16" HorizontalOptions="Center"/>
+                                            <Label Text="{Binding SetCount}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                                        <VerticalStackLayout Spacing="5">
+                                            <Label Text="Reps" FontSize="16" HorizontalOptions="Center"/>
+                                            <Label Text="{Binding RepCount}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
+                                        <VerticalStackLayout Spacing="5">
+                                            <Label Text="Duration" FontSize="16" HorizontalOptions="Center"/>
+                                            <Label Text="{Binding DurationString}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </HorizontalStackLayout>
+                                
+                                
+
+                                <CollectionView ItemsSource="{Binding Exercises}" ItemsLayout="VerticalList" Margin="10,0,0,0">
+
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="5">
+                                                <VerticalStackLayout Spacing="5">
+
+                                                    <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,0,0,0"/>
+                                                    <Label Text="{Binding Description}" FontSize="17" HorizontalTextAlignment="Center" Margin="0,0,0,20"/>
+                                                    <CollectionView ItemsSource="{Binding Sets}"
+                                                            ItemsLayout="VerticalList"
+                                                            Margin="10,0,0,0">
+                                                        <CollectionView.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <HorizontalStackLayout Spacing="70" HorizontalOptions="Center">
+                                                                    <VerticalStackLayout Spacing="10">
+                                                                        <Label Text="Set" HorizontalTextAlignment="Center"/>
+                                                                        <Label Text="{Binding ID}" FontAttributes="Bold" HorizontalTextAlignment="Center" FontSize="17"/>
+                                                                    </VerticalStackLayout>
+                                                                    <VerticalStackLayout Spacing="0">
+                                                                        <Label Text="Reps" HorizontalTextAlignment="Center"/>
+                                                                        <Entry Placeholder="0"
+                                                                                Keyboard="Numeric"
+                                                                            WidthRequest="50"
+                                                                            HorizontalTextAlignment="Center"
+                                                                            FontAttributes="Bold"
+                                                                              FontSize="17"
+                                                                            Text="{Binding Reps, Mode=TwoWay}" />
+                                                                    </VerticalStackLayout>
+                                                                    <VerticalStackLayout Spacing="0">
+                                                                        <Label Text="Weight" HorizontalTextAlignment="Center"/>
+                                                                        <Entry Placeholder="0"
+                                                                              Keyboard="Numeric"
+                                                                              WidthRequest="50"
+                                                                              HorizontalTextAlignment="Center"
+                                                                               FontAttributes="Bold"
+                                                                               FontSize="17"
+                                                                              Text="{Binding Weight, Mode=TwoWay}" />
+                                                                    </VerticalStackLayout>
+                                                                </HorizontalStackLayout>
+                                                            </DataTemplate>
+                                                        </CollectionView.ItemTemplate>
+                                                    </CollectionView>
+                                                </VerticalStackLayout>
+                                            </Frame>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Views.AddExercise"
+             x:Name="addexercise"
+             Shell.NavBarIsVisible="False">
+
+    <Grid Padding="10" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+
+        <CollectionView Grid.Row="0" ItemsSource="{Binding Categories}" ItemsLayout="HorizontalList">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Button Text="{Binding Name}" 
+                            Command="{Binding BindingContext.FilterCommand, Source={x:Reference addexercise}}" 
+                            CommandParameter="{Binding .}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="Blue"/>
+                                <Setter Property="TextColor" Value="White"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="False">
+                                <Setter Property="BackgroundColor" Value="White"/>
+                                <Setter Property="TextColor" Value="Black"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding FilteredExercises}" ItemsLayout="VerticalList">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="MidnightBlue" CornerRadius="8" Padding="0" Margin="5" BackgroundColor="Black">
+                        <Button Text="{Binding Name}"
+                                Command="{Binding BindingContext.SelectExerciseCommand, Source={x:Reference addexercise}}"
+                                CommandParameter="{Binding .}"
+                                FontSize="18"
+                                Padding="15">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="Blue" />
+                                    <Setter Property="TextColor" Value="White"/>
+                                    <Setter Property="Background" Value="Blue"/>
+                                    <Setter Property="BorderColor" Value="Blue"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Black" />
+                                    <Setter Property="TextColor" Value="White"/>
+                                    <Setter Property="Background" Value="Black"/>
+                                    <Setter Property="BorderColor" Value="Black"/>
+                                    <Setter Property="BorderWidth" Value="0"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="2"  
+                Text="Continue"  
+                Command="{Binding SaveExercisesToWorkoutCommand}"  
+                HorizontalOptions="Center"
+                BackgroundColor="Blue"
+                BorderColor="White"
+                Background="Blue"
+                TextColor="White"
+                WidthRequest="300"/>
+
+    </Grid>
+</ContentPage>
