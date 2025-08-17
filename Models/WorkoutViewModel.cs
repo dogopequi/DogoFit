@@ -49,6 +49,8 @@ namespace GymTracker.Models
 
         public ICommand DeleteRoutineCommand { get; }
 
+        public ICommand EditRoutineCommand { get; }
+
         public WorkoutViewModel()
         {
             Categories = AppState.Categories;
@@ -61,6 +63,7 @@ namespace GymTracker.Models
             StartWorkoutCommand = new Command<Routine>(OnStartWorkout);
             AddExerciseCommand = new Command(OnAddExercise);
             DeleteRoutineCommand = new Command<Routine>(OnDeleteRoutine);
+            EditRoutineCommand = new Command<Routine>(OnEditRoutine);
             AllExercises = AppState.AllExercises;
             FilteredExercises = AppState.FilteredExercises;
             FilterByCategory("All");
@@ -110,12 +113,19 @@ namespace GymTracker.Models
 
             if (exercise.IsSelected)
             {
-                if (!SelectedExercises.Contains(exercise))
-                    SelectedExercises.Add(exercise);
+                if (!SelectedExercises.Any(e => e.Name == exercise.Name))
+                {
+                    SelectedExercises.Add(new Exercise(exercise));
+                    AppState.SelectedExerciseIds.Add(exercise.Name);
+                }
             }
             else
             {
-                SelectedExercises.Remove(exercise);
+                var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
+                if (toRemove != null)
+                    SelectedExercises.Remove(toRemove);
+
+                AppState.SelectedExerciseIds.Remove(exercise.Name);
             }
         }
 
@@ -129,8 +139,13 @@ namespace GymTracker.Models
                 : AllExercises.Where(e => e.Categories.Contains(category, StringComparer.OrdinalIgnoreCase));
 
             foreach (var ex in filtered)
-                FilteredExercises.Add(ex);
+            {
+                var clone = new Exercise(ex);
+                clone.IsSelected = AppState.SelectedExerciseIds.Contains(clone.Name);
+                FilteredExercises.Add(clone);
+            }
         }
+
 
         public async void OnSetSelectionForRoutine()
         {
@@ -164,7 +179,7 @@ namespace GymTracker.Models
             {
                 if (!AppState.ValidateRoutineName(CurrentRoutineName))
                 {                     
-                    await Shell.Current.DisplayAlert("Error", "Routine name already exists. Please choose a different name.", "OK");
+                    await Shell.Current.DisplayAlert("Error", "Routine name already exists or is over 20 characters long.", "OK");
                     return;
                 }
 
@@ -197,6 +212,11 @@ namespace GymTracker.Models
             App.Db.SaveChanges();
             AppState.CurrentRoutineName = string.Empty;
             await Shell.Current.Navigation.PopToRootAsync();
+        }
+
+        public async void OnEditRoutine(Routine routine)
+        {
+
         }
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)

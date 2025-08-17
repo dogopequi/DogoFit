@@ -63,6 +63,18 @@
                                 Command="{Binding BindingContext.DeleteRoutineCommand, Source={x:Reference Name=WorkoutPage}}"
                                 CommandParameter="{Binding .}" />
                         </Frame>
+                        <Frame Margin="5" Padding="10" BorderColor="Green" CornerRadius="8" BackgroundColor="Green">
+                            <Button
+                                Text="Edit Routine"
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center"
+                                BackgroundColor="Green"
+                                BorderColor="White"
+                                Background="Green"
+                                TextColor="White"
+                                Command="{Binding BindingContext.EditRoutineCommand, Source={x:Reference Name=WorkoutPage}}"
+                                CommandParameter="{Binding .}" />
+                        </Frame>
                     </HorizontalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

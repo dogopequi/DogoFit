@@ -15,7 +15,8 @@ namespace GymTracker.Services
         public static string CurrentRoutineName { get; set; } = "";
         public static ObservableCollection<Routine> Workouts { get; set; } = new ObservableCollection<Routine>();
         public static ObservableCollection<Routine> Routines { get; set; } = new ObservableCollection<Routine>();
-
+        public static HashSet<string> SelectedExerciseIds { get; set; } = new();
+        public static Routine EditedRoutine { get; set; }
         public static Routine CurrentRoutine { get; set; } = new Routine();
         public static bool WorkoutStarted { get; set; } = false;
         public static ObservableCollection<Category> Categories { get; set; }
@@ -33,6 +34,17 @@ namespace GymTracker.Services
             var newRoutine = new Routine(routine);
             Workouts.Insert(0, newRoutine);
             RoutinesCount += 1;
+
+            newRoutine.CalculateSetDistribuition();
+
+            Profile.Push += newRoutine.Push;
+            Profile.Chest += newRoutine.Chest;
+            Profile.Back += newRoutine.Back;
+            Profile.Legs += newRoutine.Legs;
+            Profile.Arms += newRoutine.Arms;
+            Profile.Core += newRoutine.Core;
+            Profile.Shoulders += newRoutine.Shoulders;
+            Profile.Pull += newRoutine.Pull;
             Profile.Reps += routine.RepCount;
             Profile.Volume += routine.Volume;
             Profile.Sets += routine.SetCount;
@@ -73,14 +85,15 @@ namespace GymTracker.Services
         public static bool ValidateRoutineName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
                 return false;
-            }
+            else if (name.Length > 20)
+                return false;
             return !Routines.Any(r => r.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public static void Init()
         {
+            EditedRoutine = null;
             RoutinesCount = 0;
             Workouts = new ObservableCollection<Routine>(
                 App.Db.Workouts
@@ -104,86 +117,85 @@ namespace GymTracker.Services
 
             AllExercises = new ObservableCollection<Exercise>
             {
-            new Exercise { Name = "Barbell Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Incline Barbell Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Decline Barbell Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Dumbbell Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Incline Dumbbell Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Decline Dumbbell Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Machine Chest Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Cable Chest Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Cable Fly", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Dumbbell Fly", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Bench Press", Categories = new List<string>{ "Push", "Chest" } },
-            new Exercise { Name = "Dip", Categories = new List<string>{ "Push", "Chest", "Triceps" } },
-            new Exercise { Name = "Push-Up", Categories = new List<string>{ "Push", "Chest", "Triceps" } },
+            new Exercise { Name = "Barbell Bench Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Incline Barbell Bench Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Decline Barbell Bench Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Dumbbell Bench Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Incline Dumbbell Bench Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Decline Dumbbell Bench Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Machine Chest Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Cable Chest Press", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Cable Fly", Categories = new List<string>{ "Chest", "Push" } },
+            new Exercise { Name = "Dumbbell Fly", Categories = new List<string>{ "Chest", "Push" } },
+            new Exercise { Name = "Machine Fly", Categories = new List<string>{ "Chest", "Push" } },
+            new Exercise { Name = "Dip", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
+            new Exercise { Name = "Push-Up", Categories = new List<string>{ "Chest", "Triceps", "Arms", "Push" } },
 
-            new Exercise { Name = "Pull-Up", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Chin-Up", Categories = new List<string>{ "Pull", "Back", "Biceps" } },
-            new Exercise { Name = "Machine Seated Row", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Cable Seated Row", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "T Bar Row", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Bent Over Row", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Bench Dumbbell Row", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Machine Lat Pulldown", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Cable Lat Pulldown", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Close Grip Lat Pulldown", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Behind The Neck Lat Pulldown", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Reverse Grip Lat Pulldown", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Barbell Shrugs", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Dumbbell Shrugs", Categories = new List<string>{ "Pull", "Back" } },
-            new Exercise { Name = "Cable Upright Row", Categories = new List<string>{ "Shoulders" , "Back" } },
-            new Exercise { Name = "Machine Upright Row", Categories = new List<string>{ "Shoulders", "Back" } },
-            new Exercise { Name = "Dumbbell Upright Row", Categories = new List<string>{ "Shoulders", "Back" } },
-            new Exercise { Name = "Barbell Upright Row", Categories = new List<string>{ "Shoulders", "Back" } },
+            new Exercise { Name = "Pull-Up", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Chin-Up", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Machine Seated Row", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Cable Seated Row", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "T Bar Row", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Bent Over Row", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Bench Dumbbell Row", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Machine Lat Pulldown", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Cable Lat Pulldown", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Close Grip Lat Pulldown", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Behind The Neck Lat Pulldown", Categories = new List<string>{ "Back", "Biceps", "Arms", "Pull" } },
+            new Exercise { Name = "Reverse Grip Lat Pulldown", Categories = new List<string>{ "Back", "Biceps" , "Arms", "Pull"} },
+            new Exercise { Name = "Barbell Shrugs", Categories = new List<string>{ "Back", "Pull" } },
+            new Exercise { Name = "Dumbbell Shrugs", Categories = new List<string>{ "Back", "Pull" } },
+            new Exercise { Name = "Cable Upright Row", Categories = new List<string>{ "Back" , "Shoulders", "Pull" } },
+            new Exercise { Name = "Machine Upright Row", Categories = new List<string>{ "Back", "Shoulders", "Pull" } },
+            new Exercise { Name = "Dumbbell Upright Row", Categories = new List<string>{"Back" , "Shoulders", "Pull" } },
+            new Exercise { Name = "Barbell Upright Row", Categories = new List<string>{ "Back" , "Shoulders", "Pull"} },
 
-            new Exercise { Name = "Back Extension", Categories = new List<string>{"Back" } },
-            new Exercise { Name = "Superman", Categories = new List<string>{"Back" } },
+            new Exercise { Name = "Back Extension", Categories = new List<string>{"Core", "Back" } },
+            new Exercise { Name = "Superman", Categories = new List<string>{"Core", "Back" } },
 
-            new Exercise { Name = "Barbell Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Dumbbell Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Cable Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Machine Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Reverse Barbell Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Reverse Dumbbell Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Reverse Cable Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Reverse Machine Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Barbell Hammer Curl", Categories = new List<string>{ "Biceps", "Pull", "Forearm" } },
-            new Exercise { Name = "Dumbbell Hammer Curl", Categories = new List<string>{ "Biceps", "Pull", "Forearm" } },
-            new Exercise { Name = "Cable Hammer Curl", Categories = new List<string>{ "Biceps", "Pull", "Forearm" } },
-            new Exercise { Name = "Machine Hammer Curl", Categories = new List<string>{ "Biceps", "Pull", "Forearm" } },
-            new Exercise { Name = "EZ Bar Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Reverse EZ Bar Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Barbell Preacher Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Dumbbell Preacher Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Cable Preacher Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Machine Preacher Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Overhead Curl", Categories = new List<string>{ "Biceps", "Pull" } },
-            new Exercise { Name = "Incline Bicep Curl", Categories = new List<string>{ "Biceps", "Pull" } },
+            new Exercise { Name = "Barbell Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Dumbbell Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Cable Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Machine Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Reverse Barbell Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Reverse Dumbbell Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Reverse Cable Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Reverse Machine Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Barbell Hammer Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull", "Forearm" } },
+            new Exercise { Name = "Dumbbell Hammer Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull", "Forearm" } },
+            new Exercise { Name = "Cable Hammer Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull", "Forearm" } },
+            new Exercise { Name = "Machine Hammer Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull", "Forearm" } },
+            new Exercise { Name = "EZ Bar Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Reverse EZ Bar Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Barbell Preacher Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Dumbbell Preacher Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Cable Preacher Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Machine Preacher Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Overhead Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
+            new Exercise { Name = "Incline Bicep Curl", Categories = new List<string>{ "Arms", "Biceps", "Pull" } },
 
-            new Exercise { Name = "Behind the Back Bicep Wrist Curl", Categories = new List<string>{ "Forearm" } },
-            new Exercise { Name = "Seated Wrist Extension", Categories = new List<string>{ "Forearm" } },
-            new Exercise { Name = "Seated Palms Up Wrist Curl", Categories = new List<string>{ "Forearm" } },
-            new Exercise { Name = "Wrist Roller", Categories = new List<string>{ "Forearm" } },
-            new Exercise { Name = "Machine Wrist Curl", Categories = new List<string>{ "Forearm" } },
+            new Exercise { Name = "Behind the Back Bicep Wrist Curl", Categories = new List<string>{ "Arms", "Forearm", "Pull"} },
+            new Exercise { Name = "Seated Wrist Extension", Categories = new List<string>{ "Arms", "Forearm", "Push" } },
+            new Exercise { Name = "Seated Palms Up Wrist Curl", Categories = new List<string>{ "Arms", "Forearm", "Pull" } },
+            new Exercise { Name = "Wrist Roller", Categories = new List<string>{ "Arms", "Forearm", "Push" } },
+            new Exercise { Name = "Machine Wrist Curl", Categories = new List<string>{ "Arms", "Forearm", "Pull" } },
 
-            new Exercise { Name = "Dumbbell Arnold Press", Categories = new List<string>{ "Shoulders" } },
-            new Exercise { Name = "Barbell Arnold Press", Categories = new List<string>{ "Shoulders" } },
+            new Exercise { Name = "Dumbbell Arnold Press", Categories = new List<string>{ "Shoulders", "Triceps", "Push"} },
+            new Exercise { Name = "Barbell Arnold Press", Categories = new List<string>{ "Shoulders", "Triceps", "Push"} },
             new Exercise { Name = "Cable Reverse Fly", Categories = new List<string>{ "Shoulders", "Pull" } },
             new Exercise { Name = "Machine Reverse Fly", Categories = new List<string>{ "Shoulders", "Pull" } },
             new Exercise { Name = "Dumbbell Reverse Fly", Categories = new List<string>{ "Shoulders", "Pull" } },
             new Exercise { Name = "Facepull", Categories = new List<string>{ "Shoulders", "Pull" } },
-            new Exercise { Name = "Dumbbell Lateral Raise", Categories = new List<string>{ "Shoulders" } },
-            new Exercise { Name = "Cable Lateral Raise", Categories = new List<string>{ "Shoulders" } },
-            new Exercise { Name = "Machine Lateral Raise", Categories = new List<string>{ "Shoulders" } },
+            new Exercise { Name = "Dumbbell Lateral Raise", Categories = new List<string>{ "Shoulders", "Push" } },
+            new Exercise { Name = "Cable Lateral Raise", Categories = new List<string>{ "Shoulders", "Push" } },
+            new Exercise { Name = "Machine Lateral Raise", Categories = new List<string>{ "Shoulders", "Push" } },
             new Exercise { Name = "Dumbbell Front Raise", Categories = new List<string>{ "Shoulders", "Push" } },
             new Exercise { Name = "Cable Front Raise", Categories = new List<string>{ "Shoulders", "Push" } },
             new Exercise { Name = "Machine Front Raise", Categories = new List<string>{ "Shoulders", "Push" } },
-            new Exercise { Name = "Dumbbell Shoulder Press", Categories = new List<string>{ "Shoulders", "Push" } },
-            new Exercise { Name = "Barbell Shoulder Press", Categories = new List<string>{ "Shoulders" , "Push" } },
-            new Exercise { Name = "Machine Shoulder Press", Categories = new List<string>{ "Shoulders", "Push" } },
-            new Exercise { Name = "Cable Shoulder Press", Categories = new List<string>{ "Shoulders", "Push" } },
+            new Exercise { Name = "Dumbbell Shoulder Press", Categories = new List<string>{ "Shoulders", "Triceps", "Push" } },
+            new Exercise { Name = "Barbell Shoulder Press", Categories = new List<string>{ "Shoulders" , "Triceps", "Push" } },
+            new Exercise { Name = "Machine Shoulder Press", Categories = new List<string>{ "Shoulders", "Triceps", "Push" } },
+            new Exercise { Name = "Cable Shoulder Press", Categories = new List<string>{ "Shoulders", "Triceps", "Push" } },
 
             new Exercise { Name = "Plank", Categories = new List<string>{ "Core" } },
             new Exercise { Name = "Crunch", Categories = new List<string>{ "Core" } },
@@ -216,21 +228,22 @@ namespace GymTracker.Services
             new Exercise { Name = "Machine Hip Thrust", Categories = new List<string>{ "Legs" } },
             new Exercise { Name = "Dumbbell Romanian Deadlift", Categories = new List<string>{ "Legs" } },
 
-            new Exercise { Name = "Tricep Pushdown", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Bench Dip", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Barbell Skullcrusher", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Dumbbell Skullcrusher", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Overhead Barbell Extension", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Overhead Dumbbell Extension", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Overhead Machine Extension", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Overhead Cable Extension", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Barbell Pushdown", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Dumbbell Pushdown", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Machine Pushdown", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Cable Pushdown", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Cable Kickback", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Dumbbell Kickback", Categories = new List<string>{ "Triceps", "Push" } },
-            new Exercise { Name = "Machine Dip", Categories = new List<string>{ "Triceps", "Push" } }
+            new Exercise { Name = "Tricep Pushdown", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Bench Dip", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Barbell Skullcrusher", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Dumbbell Skullcrusher", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Overhead Barbell Extension", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Overhead Dumbbell Extension", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Overhead Machine Extension", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Overhead Cable Extension", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Barbell Pushdown", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Dumbbell Pushdown", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Machine Pushdown", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Cable Pushdown", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Cable Kickback", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Dumbbell Kickback", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Close Grip Bench Press", Categories = new List<string>{ "Arms", "Triceps", "Push" } },
+            new Exercise { Name = "Machine Dip", Categories = new List<string>{ "Arms", "Triceps", "Push" } }
             };
 
             Categories = new ObservableCollection<Category>
@@ -245,11 +258,12 @@ namespace GymTracker.Services
                 new Category { Name = "Shoulders" },
                 new Category { Name = "Legs" },
                 new Category { Name = "Core" },
+                new Category { Name = "Arms" },
                 new Category { Name = "Forearm" }
             };
 
-            // Initially show all
-            FilteredExercises = new ObservableCollection<Exercise>(AllExercises);
+            FilteredExercises = new ObservableCollection<Exercise>(AllExercises.Select(e => new Exercise(e)));
+
         }
     }
 }

@@ -46,7 +46,61 @@
                     </VerticalStackLayout>
                 </Frame>
             </HorizontalStackLayout>
-        </VerticalStackLayout>
+
+                <HorizontalStackLayout Padding="0" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Fill">
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Push" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Push}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Pull" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Pull}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Legs" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Legs}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Core" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Core}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Padding="0" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Fill">
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Arms" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Arms}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Chest" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Chest}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Back" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Back}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Shoulders" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Shoulders}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
     </ScrollView>
     </Grid>
 

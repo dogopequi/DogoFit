@@ -1,77 +1,75 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"  
              x:Class="GymTracker.Views.SetSelection"
              x:Name="setselection"
              Shell.NavBarIsVisible="False">
-    <VerticalStackLayout Padding="10" Spacing="10">
-        <CollectionView ItemsSource="{Binding SelectedExercises}" ItemsLayout="VerticalList">
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                    <Frame BorderColor="MidnightBlue" CornerRadius="8" Padding="10" Margin="5" BackgroundColor="Black">
+
+    <Grid Padding="10" RowDefinitions="*,Auto" RowSpacing="0">
+        <CollectionView Grid.Row="0"
+                        ItemsSource="{Binding SelectedExercises}"
+                        ItemsLayout="VerticalList">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="MidnightBlue"
+                           CornerRadius="8"
+                           Padding="10"
+                           Margin="5"
+                           BackgroundColor="Black">
                         <VerticalStackLayout>
                             <Label Text="{Binding Name}" 
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               FontSize="20"
-                               SemanticProperties.Description="add set"
-                               Padding="0"/>
+                                   HorizontalOptions="Center"
+                                   FontSize="20" />
+
                             <controls:Entry x:Name="ExerciseDesc"  
-                                Placeholder="Enter your exercise description here"  
-                                WidthRequest="300"  
-                                HorizontalOptions="Center"
-                                Text="{Binding Description}"
-                                FontSize="15"
-                                Margin="0,0,0,0"/>
+                                            Placeholder="Enter your exercise description here"  
+                                            WidthRequest="300"  
+                                            HorizontalOptions="Center"
+                                            Text="{Binding Description}"
+                                            FontSize="15" />
+
                             <HorizontalStackLayout HorizontalOptions="Center">
-                                <Label Text="Sets:"
-                                   HorizontalOptions="Center"
-                                   FontSize="20"
-                                   Padding="5"
-                                   SemanticProperties.Description="add set indicator" />
-                                <Label Text="{Binding SetCount}"
-                                   HorizontalOptions="Center"
-                                   FontSize="20"
-                                   Padding="5"
-                                   SemanticProperties.Description="add set indicator" />
+                                <Label Text="Sets:" FontSize="20" Padding="5"/>
+                                <Label Text="{Binding SetCount}" FontSize="20" Padding="5"/>
                             </HorizontalStackLayout>
+
                             <Button Text="Add Set" 
-                                Command="{Binding BindingContext.AddSetToExercise, Source={x:Reference setselection}}"
-                                BackgroundColor="Black"
-                                BorderColor="Blue"
-                                BorderWidth="2"
-                                TextColor="White"
-                                WidthRequest="300"
-                                Margin="0,5,0,15"
-                                CommandParameter="{Binding .}"
-                                Pressed="Button_Pressed"
-                                Released="Button_Released"/>
+                                    Command="{Binding BindingContext.AddSetToExercise, Source={x:Reference setselection}}"
+                                    CommandParameter="{Binding .}"
+                                    BackgroundColor="Black"
+                                    BorderColor="Blue"
+                                    BorderWidth="2"
+                                    TextColor="White"
+                                    WidthRequest="300"
+                                    Margin="0,5,0,15"
+                                    Pressed="Button_Pressed"
+                                    Released="Button_Released"/>
+
                             <Button Text="Remove Set" 
-                                Command="{Binding BindingContext.RemoveSetFromExercise, Source={x:Reference setselection}}"
-                                BackgroundColor="Black"
-                                BorderColor="Red"
-                                BorderWidth="2"
-                                TextColor="White"
-                                WidthRequest="300"
-                                Margin="0,5,0,15"
-                                CommandParameter="{Binding .}"
-                                Pressed="Button_Pressed"
-                                Released="Button_Released"/>
+                                    Command="{Binding BindingContext.RemoveSetFromExercise, Source={x:Reference setselection}}"
+                                    CommandParameter="{Binding .}"
+                                    BackgroundColor="Black"
+                                    BorderColor="Red"
+                                    BorderWidth="2"
+                                    TextColor="White"
+                                    WidthRequest="300"
+                                    Margin="0,5,0,15"
+                                    Pressed="Button_Pressed"
+                                    Released="Button_Released"/>
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
-    
-    <Button Text="Continue"
-        Command="{Binding BindingContext.SaveNewRoutineCommand, Source={x:Reference setselection}}"
-        BackgroundColor="Blue"
-        BorderColor="White"
-        Background="Blue"
-        TextColor="White"
-        Margin="0,10,0,0"
-        WidthRequest="200"
-        CommandParameter="{Binding .}" />
-    </VerticalStackLayout>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="1"
+                Text="Continue"
+                Command="{Binding BindingContext.SaveNewRoutineCommand, Source={x:Reference setselection}}"
+                BackgroundColor="Blue"
+                BorderColor="White"
+                TextColor="White"
+                Margin="0,10,0,0"
+                WidthRequest="200"
+                CommandParameter="{Binding .}" />
+    </Grid>
 </ContentPage>

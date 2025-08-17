@@ -20,6 +20,87 @@ namespace GymTracker.Services
         private TimeSpan _duration;
         private System.Timers.Timer _timer;
 
+        //muscle split
+        private int _arms;
+        private int _shoulders;
+        private int _chest;
+        private int _back;
+        private int _legs;
+        private int _core;
+
+        public int Arms
+        {
+            get => _arms;
+            private set
+            {
+                if(_arms != value)
+                {
+                    _arms = value;
+                    OnPropertyChanged(nameof(Arms));
+                }
+            }
+        }
+        public int Shoulders
+        {
+            get => _shoulders;
+            private set
+            {
+                if (_shoulders != value)
+                {
+                    _shoulders = value;
+                    OnPropertyChanged(nameof(Shoulders));
+                }
+            }
+        }
+        public int Chest
+        {
+            get => _chest;
+            private set
+            {
+                if (_chest != value)
+                {
+                    _chest = value;
+                    OnPropertyChanged(nameof(Chest));
+                }
+            }
+        }
+        public int Back
+        {
+            get => _back;
+            private set
+            {
+                if (_back != value)
+                {
+                    _back = value;
+                    OnPropertyChanged(nameof(Back));
+                }
+            }
+        }
+        public int Legs
+        {
+            get => _legs;
+            private set
+            {
+                if (_legs != value)
+                {
+                    _legs = value;
+                    OnPropertyChanged(nameof(Legs));
+                }
+            }
+        }
+        public int Core
+        {
+            get => _core;
+            private set
+            {
+                if (_core != value)
+                {
+                    _core = value;
+                    OnPropertyChanged(nameof(Core));
+                }
+            }
+        }
+
         public int Volume
         {
             get => _volume;
@@ -70,6 +151,94 @@ namespace GymTracker.Services
                 }
             }
         }
+
+        private int _pull;
+        private int _push;
+
+        public int Pull
+        {
+            get => _pull;
+            private set
+            {
+                if (_pull != value)
+                {
+                    _pull = value;
+                    OnPropertyChanged(nameof(Pull));
+                }
+            }
+        }
+
+        public int Push
+        {
+            get => _push;
+            private set
+            {
+                if (_push != value)
+                {
+                    _push = value;
+                    OnPropertyChanged(nameof(Push));
+                }
+            }
+        }
+
+        public void CalculateSetDistribuition() 
+        {
+            foreach (var exercise in Exercises)
+            {
+                bool isFirstNonPushPull = true;
+
+                foreach (var category in exercise.Categories)
+                {
+                    Console.WriteLine(category);
+                    switch (category)
+                    {
+                        case "Pull":
+                            Pull += exercise.SetCount;
+                            break;
+                        case "Push":
+                            Push += exercise.SetCount;
+                            break;
+                        case "Arms":
+                            if (isFirstNonPushPull) Arms += exercise.SetCount;
+                            isFirstNonPushPull = false;
+                            break;
+                        case "Legs":
+                            if (isFirstNonPushPull) Legs += exercise.SetCount;
+                            isFirstNonPushPull = false;
+                            break;
+                        case "Core":
+                            if (isFirstNonPushPull) Core += exercise.SetCount;
+                            isFirstNonPushPull = false;
+                            break;
+                        case "Back":
+                            if (isFirstNonPushPull) Back += exercise.SetCount;
+                            isFirstNonPushPull = false;
+                            break;
+                        case "Chest":
+                            if (isFirstNonPushPull) Chest += exercise.SetCount;
+                            isFirstNonPushPull = false;
+                            break;
+                        case "Shoulders":
+                            if (isFirstNonPushPull) Shoulders += exercise.SetCount;
+                            isFirstNonPushPull = false;
+                            break;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Push: {Push}");
+            Console.WriteLine($"Pull: {Pull}");
+            Console.WriteLine($"Arms: {Arms}");
+            Console.WriteLine($"Shoulders: {Shoulders}");
+            Console.WriteLine($"Chest: {Chest}");
+            Console.WriteLine($"Back: {Back}");
+            Console.WriteLine($"Legs: {Legs}");
+            Console.WriteLine($"Core: {Core}");
+
+
+        }
+
+
         public string DurationString => Duration.ToString(@"hh\:mm\:ss");
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
@@ -105,17 +274,10 @@ namespace GymTracker.Services
             Duration = other.Duration;
             Volume = other.Volume;
             SetCount = other.SetCount;
-            Exercises = new ObservableCollection<Exercise>(other.Exercises.Select(ex => new Exercise
-            {
-                Name = ex.Name,
-                Description = ex.Description,
-                Sets = new ObservableCollection<Set>(ex.Sets.Select(s => new Set
-                {
-                    ID = s.ID,
-                    Reps = s.Reps,
-                    Weight = s.Weight
-                }))
-            }));
+            Exercises = new ObservableCollection<Exercise>(
+                other.Exercises.Select(ex => new Exercise(ex))
+            );
+
             SubscribeExerciseEvents(Exercises);
         }
 
@@ -192,8 +354,7 @@ namespace GymTracker.Services
         }
         public void AddExercise(Exercise exercise)
         {
-            var newexercise = new Exercise(exercise);
-            Exercises.Add(newexercise);
+            Exercises.Add(exercise);
         }
 
         public void RemoveExercise(Exercise exercise)
