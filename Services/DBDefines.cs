@@ -29,4 +29,11 @@ namespace GymTracker.Services
         public int Id { get; set; } = 1;
         public string JsonProfile { get; set; }
     }
+
+    public class  DbWorkoutInProgress
+    {
+        [Key]
+        public int Id { get; set; } = 1;
+        public string JsonRoutine { get; set; }
+    }
 }

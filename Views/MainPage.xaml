@@ -1,109 +1,343 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"  
              x:Class="GymTracker.MainPage"
              x:Name="mainpage"
-             Shell.NavBarIsVisible="False">
-    <ScrollView>
-        <VerticalStackLayout Padding="10" Spacing="15">
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="Black">
 
-            <Image Source="logo.png" HeightRequest="185" Aspect="AspectFit" SemanticProperties.Description="dot net bot in a race car number eight" />
-            <Label Text="DogoFit" Style="{StaticResource Headline}" SemanticProperties.HeadingLevel="Level2" SemanticProperties.Description="Welcome to DogoTracker app" />
+    <CollectionView ItemsSource="{Binding routines}" ItemsLayout="VerticalList">
 
-            <CollectionView ItemsSource="{Binding routines}" ItemsLayout="VerticalList">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame BorderColor="Blue" CornerRadius="10" Padding="10" Margin="5">
-                            <VerticalStackLayout Spacing="5">
-                                <Frame BorderColor="Blue" CornerRadius="8" Padding="10">
-                                    <Label Text="{Binding Name, StringFormat='Routine: {0}'}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                </Frame>
+        <CollectionView.Header>
+            <VerticalStackLayout Padding="10" Spacing="10" Margin="0,0,0,40">
+                <Image Source="logo.png" HeightRequest="185" Aspect="AspectFit" />
+                <Label Text="DogoFit" 
+                       Style="{StaticResource Headline}" 
+                       SemanticProperties.HeadingLevel="Level2"/>
+            </VerticalStackLayout>
+        </CollectionView.Header>
 
-                                <HorizontalStackLayout Padding="10" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Center">
-                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
-                                        <VerticalStackLayout Spacing="5">
-                                            <Label Text="Volume" FontSize="16" HorizontalOptions="Center"/>
-                                            <Label Text="{Binding Volume}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Frame BorderColor="Gray" CornerRadius="10" Padding="10" Margin="5">
+                    <VerticalStackLayout Spacing="5">
+
+                        <Frame BorderColor="Black" CornerRadius="8" Padding="10">
+                            <Label Text="{Binding Name}" 
+                                   FontSize="18" 
+                                   FontAttributes="Bold" 
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </Frame>
+
+                        <HorizontalStackLayout Padding="10" Spacing="10" HorizontalOptions="Center">
+                            <Frame BorderColor="Gray" CornerRadius="8" Padding="10">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="Volume" FontSize="16" HorizontalOptions="Center"/>
+                                    <Label Text="{Binding Volume}" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                            <Frame BorderColor="Gray" CornerRadius="8" Padding="10">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="Sets" FontSize="16" HorizontalOptions="Center"/>
+                                    <Label Text="{Binding SetCount}" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                            <Frame BorderColor="Gray" CornerRadius="8" Padding="10">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="Reps" FontSize="16" HorizontalOptions="Center"/>
+                                    <Label Text="{Binding RepCount}" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                            <Frame BorderColor="Gray" CornerRadius="8" Padding="10">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="Time" FontSize="16" HorizontalOptions="Center"/>
+                                    <Label Text="{Binding DurationString}" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </HorizontalStackLayout>
+
+                        <Button Margin="0,10,0,0" Text="{Binding SplitsButtonText}"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        BackgroundColor="Black"
+                        BorderColor="Blue"
+                        TextColor="White"
+                        WidthRequest="200"
+                        BorderWidth="1"
+                        HorizontalOptions="Center"
+                        Command="{Binding ToggleSplitsCommand}" />
+                        <VerticalStackLayout Padding="0" Spacing="10" Margin="0,10,0,0" HorizontalOptions="Fill"
+                                       IsVisible="{Binding IsSplitsVisible}">
+                            <Label Text="Split" FontSize="20" HorizontalOptions="Center" TextColor="AliceBlue" FontAttributes="Bold" Margin="0,10,0,0"/>
+                            <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0" HorizontalOptions="FillAndExpand">
+                                <VerticalStackLayout Padding="0" Spacing="20" Margin="0,0,0,0" HorizontalOptions="FillAndExpand">
+                                    <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="15">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                            <Label Text="Push" FontSize="15" HorizontalOptions="Start"/>
+                                            <Label Text="{Binding Push}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                                         </VerticalStackLayout>
-                                    </Frame>
-                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
-                                        <VerticalStackLayout Spacing="5">
-                                            <Label Text="Sets" FontSize="16" HorizontalOptions="Center"/>
-                                            <Label Text="{Binding SetCount}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                                        </VerticalStackLayout>
-                                    </Frame>
-                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
-                                        <VerticalStackLayout Spacing="5">
-                                            <Label Text="Reps" FontSize="16" HorizontalOptions="Center"/>
-                                            <Label Text="{Binding RepCount}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                                        </VerticalStackLayout>
-                                    </Frame>
-                                    <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
-                                        <VerticalStackLayout Spacing="5">
-                                            <Label Text="Duration" FontSize="16" HorizontalOptions="Center"/>
-                                            <Label Text="{Binding DurationString}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                                        </VerticalStackLayout>
-                                    </Frame>
-                                </HorizontalStackLayout>
-                                
-                                
+                                        <ProgressBar Grid.Column="1"
+                                    Progress="{Binding PushPercentage}"
+                                    ProgressColor="Blue"
+                                    BackgroundColor="Black"
+                                    HeightRequest="12"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Center"/>
+                                        <Label Grid.Column="2"
+                                Text="{Binding PushPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                    </Grid>
 
-                                <CollectionView ItemsSource="{Binding Exercises}" ItemsLayout="VerticalList" Margin="10,0,0,0">
+                                    <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                            <Label Text="Pull" FontSize="15" HorizontalOptions="Start"/>
+                                            <Label Text="{Binding Pull}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                        <ProgressBar Grid.Column="1"
+                                    Progress="{Binding PullPercentage}"
+                                    ProgressColor="Blue"
+                                    BackgroundColor="Black"
+                                    HeightRequest="12"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Center"/>
+                                        <Label Grid.Column="2"
+                                Text="{Binding PullPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                    </Grid>
 
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="5">
-                                                <VerticalStackLayout Spacing="5">
 
-                                                    <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,0,0,0"/>
-                                                    <Label Text="{Binding Description}" FontSize="17" HorizontalTextAlignment="Center" Margin="0,0,0,20"/>
-                                                    <CollectionView ItemsSource="{Binding Sets}"
-                                                            ItemsLayout="VerticalList"
-                                                            Margin="10,0,0,0">
-                                                        <CollectionView.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <HorizontalStackLayout Spacing="70" HorizontalOptions="Center">
-                                                                    <VerticalStackLayout Spacing="10">
-                                                                        <Label Text="Set" HorizontalTextAlignment="Center"/>
-                                                                        <Label Text="{Binding ID}" FontAttributes="Bold" HorizontalTextAlignment="Center" FontSize="17"/>
-                                                                    </VerticalStackLayout>
-                                                                    <VerticalStackLayout Spacing="0">
-                                                                        <Label Text="Reps" HorizontalTextAlignment="Center"/>
-                                                                        <Entry Placeholder="0"
-                                                                                Keyboard="Numeric"
-                                                                            WidthRequest="50"
-                                                                            HorizontalTextAlignment="Center"
-                                                                            FontAttributes="Bold"
-                                                                              FontSize="17"
-                                                                            Text="{Binding Reps, Mode=TwoWay}" />
-                                                                    </VerticalStackLayout>
-                                                                    <VerticalStackLayout Spacing="0">
-                                                                        <Label Text="Weight" HorizontalTextAlignment="Center"/>
-                                                                        <Entry Placeholder="0"
-                                                                              Keyboard="Numeric"
-                                                                              WidthRequest="50"
-                                                                              HorizontalTextAlignment="Center"
-                                                                               FontAttributes="Bold"
-                                                                               FontSize="17"
-                                                                              Text="{Binding Weight, Mode=TwoWay}" />
-                                                                    </VerticalStackLayout>
-                                                                </HorizontalStackLayout>
-                                                            </DataTemplate>
-                                                        </CollectionView.ItemTemplate>
-                                                    </CollectionView>
-                                                </VerticalStackLayout>
-                                            </Frame>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                                    <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                            <Label Text="Legs" FontSize="15" HorizontalOptions="Start"/>
+                                            <Label Text="{Binding Legs}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                        <ProgressBar Grid.Column="1"
+                                Progress="{Binding LegsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                        <Label Grid.Column="2"
+                                Text="{Binding LegsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                            <Label Text="Core" FontSize="15" HorizontalOptions="Start"/>
+                                            <Label Text="{Binding Core}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                        <ProgressBar Grid.Column="1"
+                                Progress="{Binding CorePercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                        <Label Grid.Column="2"
+                                Text="{Binding CorePercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                    </Grid>
+
+                                </VerticalStackLayout>
+                            </Frame>
+
+                            <Label Text="Muscle Group" FontSize="20" HorizontalOptions="Center" TextColor="AliceBlue" FontAttributes="Bold"/>
+                            <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0" HorizontalOptions="FillAndExpand">
+                            <VerticalStackLayout Padding="0" Spacing="20" Margin="0,0,0,0" HorizontalOptions="FillAndExpand">
+                                <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                        <Label Text="Arms" FontSize="15" HorizontalOptions="Start"/>
+                                        <Label Text="{Binding Arms}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    <ProgressBar Grid.Column="1"
+                                Progress="{Binding ArmsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                    <Label Grid.Column="2"
+                                Text="{Binding ArmsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                        <Label Text="Chest" FontSize="15" HorizontalOptions="Start"/>
+                                        <Label Text="{Binding Chest}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    <ProgressBar Grid.Column="1"
+                                Progress="{Binding ChestPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                    <Label Grid.Column="2"
+                                Text="{Binding ChestPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                </Grid>
+
+
+                                <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                        <Label Text="Back" FontSize="15" HorizontalOptions="Start"/>
+                                        <Label Text="{Binding Back}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    <ProgressBar Grid.Column="1"
+                                Progress="{Binding BackPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                    <Label Grid.Column="2"
+                                Text="{Binding BackPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                        <Label Text="Shoulders" FontSize="15" HorizontalOptions="Start"/>
+                                        <Label Text="{Binding Shoulders}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    <ProgressBar Grid.Column="1"
+                                Progress="{Binding ShouldersPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                    <Label Grid.Column="2"
+                                Text="{Binding ShouldersPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                </Grid>
 
                             </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </Frame>
+                </VerticalStackLayout>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                        <Button  Text="{Binding ExercisesButtonText}"
+                        FontSize="15"
+                        Margin="0,10,0,10"
+                        FontAttributes="Bold"
+                        BackgroundColor="Black"
+                        BorderColor="Blue"
+                        TextColor="White"
+                        WidthRequest="200"
+                        BorderWidth="1"
+                        HorizontalOptions="Center"
+                        Command="{Binding ToggleExercisesCommand}" />
+
+                        <StackLayout BindableLayout.ItemsSource="{Binding Exercises}" IsVisible="{Binding IsExercisesVisible}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Frame BorderColor="Black" CornerRadius="8" Padding="10">
+                                        <Frame.Triggers>
+                                            <DataTrigger TargetType="Frame" 
+                                                 Binding="{Binding SetCountChecked}" 
+                                                 Value="0">
+                                                <Setter Property="IsVisible" Value="False"/>
+                                            </DataTrigger>
+                                        </Frame.Triggers>
+
+                                        <VerticalStackLayout Spacing="10">
+                                            <Label Text="{Binding Name}" 
+                                                TextColor="DodgerBlue" 
+                                                FontSize="20" 
+                                                FontAttributes="Bold" 
+                                                HorizontalTextAlignment="Center"
+                                                LineBreakMode="WordWrap"
+                                                MaxLines="5"/>
+
+                                            <Label Text="{Binding Description}" 
+                                                FontSize="17" 
+                                                HorizontalTextAlignment="Center"
+                                                MaxLines="5"
+                                                LineBreakMode="WordWrap">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                            Binding="{Binding Description}"
+                                                            Value="">
+                                                        <Setter Property="IsVisible" Value="False"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+
+                                            <StackLayout BindableLayout.ItemsSource="{Binding CheckedSets}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <HorizontalStackLayout Spacing="70" HorizontalOptions="Center">
+                                                            <VerticalStackLayout Spacing="0" HorizontalOptions="Center">
+                                                                <Label Text="Set" HorizontalTextAlignment="Center"/>
+                                                                <Label Text="{Binding ID}" FontSize="17"
+                                                                    HorizontalOptions="Center"
+                                                                    HorizontalTextAlignment="Center"/>
+                                                            </VerticalStackLayout>
+
+                                                            <VerticalStackLayout>
+                                                                <Label Text="Reps" HorizontalTextAlignment="Center"/>
+                                                                <Label Text="{Binding Reps}" 
+                                                                    FontAttributes="Bold" 
+                                                                    FontSize="17"
+                                                                    HorizontalOptions="Center"
+                                                                    HorizontalTextAlignment="Center"/>
+                                                            </VerticalStackLayout>
+
+                                                            <VerticalStackLayout>
+                                                                <Label Text="Weight" HorizontalTextAlignment="Center"/>
+                                                                <Label Text="{Binding Weight}" 
+                                                                    FontAttributes="Bold" 
+                                                                    FontSize="17"
+                                                                    HorizontalOptions="Center"
+                                                                    HorizontalTextAlignment="Center"/>
+                                                            </VerticalStackLayout>
+                                                        </HorizontalStackLayout>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </StackLayout>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
+
+                        <Button Text="Delete"
+                                Margin="0,10,0,0"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                Command="{Binding BindingContext.RemoveWorkoutCommand, Source={x:Reference Name=mainpage}}"
+                                CommandParameter="{Binding .}"
+                                BackgroundColor="Black"
+                                BorderColor="Red"
+                                TextColor="White"
+                                WidthRequest="80"
+                                BorderWidth="1"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Start"/>
+
+                    </VerticalStackLayout>
+                </Frame>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 </ContentPage>

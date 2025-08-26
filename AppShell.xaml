@@ -4,12 +4,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:GymTracker"
     Shell.FlyoutBehavior="Disabled"
-    Title="GymTracker">
+    Title="GymTracker"
+    Shell.TabBarForegroundColor="Blue"
+    Shell.TabBarTitleColor="Blue"
+    Shell.TabBarUnselectedColor="Gray"
+    Shell.TabBarBackgroundColor="Transparent"
+    >
 
     <TabBar>
         <ShellContent Title="Home" Icon="home.png" Route="home"
                       ContentTemplate="{DataTemplate local:MainPage}" />
-        <ShellContent Title="Workout" Icon="settings.png" Route="workout"
+        <ShellContent Title="Workout" Icon="workout.png" Route="workout"
                       ContentTemplate="{DataTemplate local:Workout}" />
         <ShellContent Title="Profile" Icon="profile.png" Route="profile"
                       ContentTemplate="{DataTemplate local:Profile}" />

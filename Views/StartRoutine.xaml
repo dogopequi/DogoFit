@@ -6,7 +6,7 @@
              Title="StartRoutine"
              Shell.NavBarIsVisible="False"
              x:Name="startroutine">
-    <Grid Padding="10" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="0">
+    <Grid Padding="10" RowDefinitions="Auto,Auto,*,Auto, Auto" RowSpacing="0">
 
         <VerticalStackLayout Padding="10" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
             <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="0">
@@ -49,7 +49,23 @@
                     <Frame BorderColor="Blue" CornerRadius="8" Padding="10" Margin="5">
                         <VerticalStackLayout Spacing="5">
 
-                            <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,0,0,20"/>
+                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="0,0,0,20">
+                                <Label Text="{Binding Name}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,20"/>
+                                <Button Grid.Column="1"
+                                Text="X"
+                                FontSize="20"
+                                Padding="0"
+                                Margin="0,-20,0,0"
+                                BackgroundColor="Transparent"
+                                TextColor="Red"
+                                HorizontalOptions="End"
+                                Command="{Binding BindingContext.RemoveExerciseCommand, Source={x:Reference startroutine}}"
+                                CommandParameter="{Binding .}" />
+                            </Grid>
                             <Entry Text="{Binding Description, Mode=TwoWay}"
                                     Placeholder="Enter your exercise description here"
                                     WidthRequest="300"
@@ -78,13 +94,16 @@
                                             <VerticalStackLayout Spacing="0">
                                                 <Label Text="Weight" HorizontalTextAlignment="Center"/>
                                                 <Entry Placeholder="0"
-                                           Keyboard="Numeric"
-                                           WidthRequest="50"
-                                           HorizontalTextAlignment="Center"
-                                            FontAttributes="Bold"
-                                            FontSize="20"
-                                           Text="{Binding Weight, Mode=TwoWay}" />
+                                                    Keyboard="Numeric"
+                                                    WidthRequest="50"
+                                                    HorizontalTextAlignment="Center"
+                                                     FontAttributes="Bold"
+                                                     FontSize="20"
+                                                    Text="{Binding Weight, Mode=TwoWay}" />
                                             </VerticalStackLayout>
+                                            <CheckBox IsChecked="{Binding IsChecked}"
+                                                      Margin="0,15,0,0"
+                                                      Scale="1.2"/>
                                         </HorizontalStackLayout>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
@@ -119,8 +138,18 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-
         <Button Grid.Row="3"  
+        Text="Add Exercise"  
+        Command="{Binding AddExerciseCommand}"
+        HorizontalOptions="Center"
+        BackgroundColor="DarkBlue"
+        BorderColor="White"
+        Background="DarkBlue"
+        TextColor="White"
+        Margin="0,0,0,20"
+        WidthRequest="300"/>
+
+        <Button Grid.Row="4"  
                 Text="Finish"  
                 Command="{Binding FinishRoutineCommand}"
                 HorizontalOptions="Center"

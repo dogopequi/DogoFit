@@ -3,105 +3,505 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GymTracker.Profile"
              x:Name="profilepage"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="True"
+             BackgroundColor="Black"
+             Shell.TitleColor="Transparent"
+             xmlns:local="clr-namespace:GymTracker.Models;assembly=GymTracker"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Settings"
+                     IconImageSource="settings.png"
+                     Order="Default"
+                     Priority="0"
+                     Command="{Binding OpenSettingsCommand}" />
+    </ContentPage.ToolbarItems>
+    <ContentPage.BindingContext>
+        <local:ProfileViewModel/>
+    </ContentPage.BindingContext>
     <Grid HorizontalOptions="Center">
         <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ScrollView>
-            <VerticalStackLayout Padding="10" Spacing="15" Margin="0,10,0,0" HorizontalOptions="Center">
-                <HorizontalStackLayout Padding="0" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Fill">
-                <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Workouts" FontSize="15" HorizontalOptions="Center"/>
-                        <Label Text="{Binding Profile.Workouts}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
+            <VerticalStackLayout Padding="0" Spacing="10" Margin="0,10,0,0" HorizontalOptions="Start">
+                <Label Text="Statistics" FontSize="30" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold" Margin="0,0,0,20"/>
+                <Frame BorderColor="Gray" CornerRadius="8" Padding="0" Margin="0,0,0,20" HorizontalOptions="Center" >
+                    <HorizontalStackLayout Padding="10" Spacing="20" Margin="0,0,0,0" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Workouts" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Workouts}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Volume" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Volume}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Sets" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Sets}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Reps" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.Reps}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Time" FontSize="15" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Profile.DurationString}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
                 </Frame>
-                <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Volume" FontSize="15" HorizontalOptions="Center"/>
-                        <Label Text="{Binding Profile.Volume}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-                <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Sets" FontSize="15" HorizontalOptions="Center"/>
-                        <Label Text="{Binding Profile.Sets}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-                <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Reps" FontSize="15" HorizontalOptions="Center"/>
-                        <Label Text="{Binding Profile.Reps}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-                <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Duration" FontSize="15" HorizontalOptions="Center"/>
-                        <Label Text="{Binding Profile.DurationString}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-            </HorizontalStackLayout>
 
-                <HorizontalStackLayout Padding="0" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Fill">
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Push" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Push}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Pull" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Pull}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Legs" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Legs}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Core" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Core}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </HorizontalStackLayout>
+                <Button  Text="{Binding Profile.SplitButtonText}"
+                        FontSize="15"
+                        Margin="0,10,0,10"
+                        FontAttributes="Bold"
+                        BackgroundColor="Black"
+                        BorderColor="Blue"
+                        TextColor="White"
+                        WidthRequest="200"
+                        BorderWidth="1"
+                        HorizontalOptions="Center"
+                        Command="{Binding Profile.ToggleSplitsCommand}"/>
+                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0" HorizontalOptions="FillAndExpand" IsVisible="{Binding Profile.IsSplitVisible}">
+                    <VerticalStackLayout Padding="0" Spacing="20" Margin="0,0,0,0" HorizontalOptions="FillAndExpand">
+                        <Label Text="Split" FontSize="20" HorizontalOptions="Center" TextColor="AliceBlue" FontAttributes="Bold"/>
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Push" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Push}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                    Progress="{Binding Profile.PushPercentage}"
+                                    ProgressColor="Blue"
+                                    BackgroundColor="Black"
+                                    HeightRequest="12"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.PushPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
 
-                <HorizontalStackLayout Padding="0" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Fill">
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Arms" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Arms}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Chest" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Chest}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Back" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Back}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                    <Frame BorderColor="Blue" CornerRadius="8" Padding="5" Margin="0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="Shoulders" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Shoulders}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Pull" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Pull}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                    Progress="{Binding Profile.PullPercentage}"
+                                    ProgressColor="Blue"
+                                    BackgroundColor="Black"
+                                    HeightRequest="12"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.PullPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Legs" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Legs}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
+                            <ProgressBar  Grid.Column="1" Progress="{Binding Profile.LegsPercentage}"
+                                    ProgressColor="Blue"
+                                    BackgroundColor="Black"
+                                    HeightRequest="12"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="{Binding Profile.LegsPercentage, StringFormat='{0:P0}'}"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Core" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Core}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
+                            <ProgressBar  Grid.Column="1" Progress="{Binding Profile.CorePercentage}"
+                                    ProgressColor="Blue"
+                                    BackgroundColor="Black"
+                                    HeightRequest="12"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="{Binding Profile.CorePercentage, StringFormat='{0:P0}'}"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Frame>
+                <Button  Text="{Binding Profile.MuscleGroupButtonText}"
+                        FontSize="15"
+                        Margin="0,10,0,10"
+                        FontAttributes="Bold"
+                        BackgroundColor="Black"
+                        BorderColor="Blue"
+                        TextColor="White"
+                        WidthRequest="200"
+                        BorderWidth="1"
+                        HorizontalOptions="Center"
+                        Command="{Binding Profile.ToggleMuscleGroupsCommand}"/>
+                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0" HorizontalOptions="FillAndExpand" IsVisible="{Binding Profile.IsMuscleGroupVisible}">
+
+                    <VerticalStackLayout Padding="0" Spacing="20" Margin="0,0,0,0" HorizontalOptions="FillAndExpand">
+                        <Label Text="Muscle Group" FontSize="20" HorizontalOptions="Center" TextColor="AliceBlue" FontAttributes="Bold"/>
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="15">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Arms" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Arms}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.ArmsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.ArmsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Chest" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Chest}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.ChestPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.ChestPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Back" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Back}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.BackPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.BackPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Shoulders" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Shoulders}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.ShouldersPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.ShouldersPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Frame>
+                <Button  Text="{Binding Profile.IndividualMusclesButtonText}"
+                        FontSize="15"
+                        Margin="0,10,0,10"
+                        FontAttributes="Bold"
+                        BackgroundColor="Black"
+                        BorderColor="Blue"
+                        TextColor="White"
+                        WidthRequest="200"
+                        BorderWidth="1"
+                        HorizontalOptions="Center"
+                        Command="{Binding Profile.ToggleIndividualMusclesCommand}"/>
+
+                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0" HorizontalOptions="FillAndExpand" IsVisible="{Binding Profile.IsIndividualMusclesVisible}">
+
+                    <VerticalStackLayout Padding="0" Spacing="20" Margin="0,0,0,0" HorizontalOptions="FillAndExpand">
+                        <Label Text="Individual" FontSize="20" HorizontalOptions="Center" TextColor="AliceBlue" FontAttributes="Bold"/>
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Biceps" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Biceps}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.BicepsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.BicepsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Triceps" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Triceps}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.TricepsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.TricepsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Forearms" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Forearms}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.ForearmsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.ForearmsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Lats" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Lats}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.LatsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.LatsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Traps" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Traps}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.TrapsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.TrapsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Side Delts" FontSize="15" HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Profile.LateralDelts}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.LDPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.LDPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2" >
+                                <Label Text="Front Delts" FontSize="15" HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Profile.FrontDelts}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.FDPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.FDPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Rear Delts" FontSize="15" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Profile.RearDelts}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.RDPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.RDPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Quads" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Quadriceps}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.QuadsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.QuadsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Hams" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Hamstrings}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.HamsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.HamsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Glutes" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Glutes}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.GlutesPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.GlutesPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Calves" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Calves}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.CalvesPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.CalvesPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Abs" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Abdominals}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.AbsPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.AbsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Obliques" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Obliques}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.ObliquesPercentage}"
+                                ProgressColor="Blue"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.ObliquesPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+            <Grid HeightRequest="200">
+                <lvc:CartesianChart
+                Series="{Binding Series}">
+                </lvc:CartesianChart>
+            </Grid>
             </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
     </Grid>
-
 </ContentPage>

@@ -12,6 +12,20 @@ namespace GymTracker.Services
         private int _id;
         private int _reps;
         private int _weight;
+        private bool _isChecked;
+
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    OnPropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public int ID
         {
@@ -58,6 +72,7 @@ namespace GymTracker.Services
             ID = other.ID;
             Reps = other.Reps;
             Weight = other.Weight;
+            IsChecked = other.IsChecked;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

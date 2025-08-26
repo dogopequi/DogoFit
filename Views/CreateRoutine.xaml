@@ -22,8 +22,9 @@
             Command="{Binding AddExerciseCommand}"  
             HorizontalOptions="Center"
             BackgroundColor="Blue"
-            BorderColor="White"
+            BorderColor="Blue"
             Background="Blue"
+            BorderWidth="1"
             TextColor="White"
             WidthRequest="300"/>
     </VerticalStackLayout>  

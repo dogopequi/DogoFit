@@ -1,6 +1,8 @@
 ﻿using GymTracker.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,25 +12,87 @@ namespace GymTracker.Models
 {
     internal class StartRoutineViewModel
     {
-
         public ICommand AddSetToExerciseCommand { get; }
 
         public ICommand RemoveSetFromExerciseCommand { get; }
         public ICommand FinishRoutineCommand { get; }
+        public ICommand AddExerciseCommand { get; }
+
+        public ObservableCollection<Category> Categories { get; set; }
+        public ObservableCollection<Exercise> AllExercises { get; set; }
+        public ObservableCollection<Exercise> FilteredExercises { get; set; }
+        public ICommand SelectExerciseCommand { get; }
+        public ICommand RemoveExerciseCommand { get; }
+        public ICommand SaveExercisesToWorkoutCommand { get; }
+        public ObservableCollection<String> TakenExercises { get; set; } = new ObservableCollection<String>();
+        public ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
+        public ICommand FilterCommand { get; }
+        private Routine? _routine;
+        public Routine? routine
+        {
+            get => _routine;
+            set
+            {
+                if (_routine != value)
+                {
+                    _routine = value;
+                    OnPropertyChanged();
+                    AppState.SaveWorkoutInProgress();
+                }
+            }
+        }
+
+        private string? _enteredexercisename;
+        public string? EnteredExerciseName
+        {
+            get => _enteredexercisename;
+            set
+            {
+                if (_enteredexercisename != value)
+                {
+                    _enteredexercisename = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public StartRoutineViewModel()
         {
-            routine = AppState.CurrentRoutine;
+            routine = AppState.WorkoutInProgress;
+            if(routine == null)
+            {
+                routine = new Routine();
+                AppState.WorkoutInProgress = routine;
+                routine.Start();
+            }
+            else
+            {
+
+                if(AppState.IsNewRoutine)
+                {
+                    routine.Start();
+                }
+                else
+                {
+                    routine.Resume();
+                }
+            }
+            TakenExercises = new ObservableCollection<string>(routine.Exercises.Select(e => e.Name));
+            Categories = AppState.Categories;
+            AllExercises = AppState.AllExercises;
+            FilteredExercises = AppState.FilteredExercises;
+            SelectedExercises = AppState.SelectedExercises;
+            FilterByCategory("All", false);
+            FilterCommand = new Command<Category>(SelectCategory);
             AddSetToExerciseCommand = new Command<Exercise>(OnAddSetToExercise);
             RemoveSetFromExerciseCommand = new Command<Exercise>(OnRemoveSetFromExercise);
             FinishRoutineCommand = new Command(OnFinishRoutine);
-            if (!AppState.WorkoutStarted == true)
-            {
-                routine.Start();
-                AppState.WorkoutStarted = true;
-            }
+            RemoveExerciseCommand = new Command<Exercise>(OnRemoveExercise);
+            SelectExerciseCommand = new Command<Exercise>(SelectExercise);
+            SaveExercisesToWorkoutCommand = new Command(OnSaveExercises);
+            AddExerciseCommand = new Command(OnAddExercise);
+            AppState.IsNewRoutine = false;
         }
-        public Routine routine { get; set; }
 
 
         private void OnAddSetToExercise(Exercise exercise)
@@ -37,6 +101,7 @@ namespace GymTracker.Models
             Set set = new Set();
             set.ID = exercise.SetCount + 1;
             exercise.AddSet(set);
+            AppState.SaveWorkoutInProgress();
         }
 
         private void OnRemoveSetFromExercise(Exercise exercise)
@@ -47,6 +112,7 @@ namespace GymTracker.Models
                 if (setToRemove != null)
                 {
                     exercise.RemoveSet(setToRemove.ID);
+                    AppState.SaveWorkoutInProgress();
                 }
             }
         }
@@ -59,11 +125,138 @@ namespace GymTracker.Models
 
             routine.Finish();
             AppState.AddRoutineToWorkouts(routine);
-            AppState.WorkoutStarted = false;
-
-
+            AppState.IsWorkoutInProgress = false;
+            AppState.WorkoutInProgress = null;
+            AppState.SaveWorkoutInProgress();
 
             await Shell.Current.Navigation.PopToRootAsync();
         }
+
+        private async void OnAddExercise()
+        {
+            await Shell.Current.GoToAsync("startroutine/addexercise");
+        }
+
+        private async void OnRemoveExercise(Exercise exercise)
+        {
+            if (exercise == null) return;
+            var result = await Shell.Current.DisplayAlert("Remove Exercise", $"Are you sure you want to delete this exercise?", "Yes", "No");
+            if (result)
+            {
+                routine.Exercises.Remove(exercise);
+                TakenExercises.Remove(exercise.Name);
+            }
+        }
+        public async void OnSaveExercises()
+        {
+            for (int i = SelectedExercises.Count - 1; i >= 0; i--)
+            {
+                if (TakenExercises.Contains(SelectedExercises[i].Name))
+                {
+                    SelectedExercises[i].IsSelected = false;
+                    SelectedExercises.RemoveAt(i);
+                }
+            }
+            foreach (var exercise in SelectedExercises)
+            {
+                exercise.IsSelected = false;
+                var newexercise = new Exercise(exercise);
+                newexercise.IsSelected = false;
+                routine.AddExercise(newexercise);
+                TakenExercises.Add(newexercise.Name);
+            }
+
+            foreach (var exercise in AllExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            foreach (var exercise in FilteredExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            FilteredExercises.Clear();
+            SelectedExercises.Clear();
+            AppState.SelectedExerciseIds.Clear();
+
+            await Shell.Current.Navigation.PopAsync();
+        }
+        public void SelectExercise(Exercise exercise)
+        {
+            exercise.IsSelected = !exercise.IsSelected;
+
+            if (exercise.IsSelected)
+            {
+                if (!SelectedExercises.Any(e => e.Name == exercise.Name))
+                {
+                    SelectedExercises.Add(new Exercise(exercise));
+                    AppState.SelectedExerciseIds.Add(exercise.Name);
+                }
+            }
+            else
+            {
+                var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
+                if (toRemove != null)
+                    SelectedExercises.Remove(toRemove);
+
+                AppState.SelectedExerciseIds.Remove(exercise.Name);
+            }
+        }
+        private void SelectCategory(Category category)
+        {
+            foreach (var c in Categories)
+                c.IsSelected = false;
+
+            category.IsSelected = true;
+
+            FilterByCategory(category.Name, false);
+        }
+
+        public void FilterByCategory(string category, bool UseName)
+        {
+            FilteredExercises.Clear();
+            IEnumerable<Exercise> filtered;
+            if (!UseName)
+            {
+
+                if (new[] { "Pull", "Push", "Legs", "Core" }.Contains(category, StringComparer.OrdinalIgnoreCase))
+                {
+                    filtered = category == "All"
+                        ? AllExercises
+                        : AllExercises.Where(e => string.Equals(e.Function, category, StringComparison.OrdinalIgnoreCase));
+                }
+                else if (new[] { "Arms", "Shoulders", "Chest", "Back" }.Contains(category, StringComparer.OrdinalIgnoreCase))
+                {
+                    filtered = category == "All"
+                        ? AllExercises
+                        : AllExercises.Where(e => string.Equals(e.MuscleGroup, category, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    filtered = category == "All"
+                        ? AllExercises
+                        : AllExercises.Where(e => string.Equals(e.TargetMuscle, category, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            else
+            {
+                filtered = category == "All"
+                    ? AllExercises
+                    : AllExercises.Where(e => e.Name.Contains(category, StringComparison.OrdinalIgnoreCase));
+            }
+
+
+            foreach (var ex in filtered)
+            {
+                var clone = new Exercise(ex);
+                clone.IsSelected = AppState.SelectedExerciseIds.Contains(clone.Name);
+                FilteredExercises.Add(clone);
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        
     }
 }

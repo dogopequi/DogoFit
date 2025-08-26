@@ -7,6 +7,9 @@ namespace GymTracker.Services
         public DbSet<DbWorkout> Workouts { get; set; }
         public DbSet<DbRoutineTemplate> RoutineTemplates { get; set; }
         public DbSet<DbProfile> Profiles { get; set; }
+
+        public DbSet<DbWorkoutInProgress> WorkoutInProgress { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 

@@ -19,6 +19,7 @@ namespace GymTracker.Models
         public ICommand AddExerciseCommand { get; }
         public ICommand AddSetToExercise { get; }
         public ICommand RemoveSetFromExercise { get; }
+
         public ObservableCollection<GymTracker.Services.Routine> Routines { get; }
         private int _routinesCount;
         public int RoutinesCount
@@ -39,6 +40,35 @@ namespace GymTracker.Models
 
         public ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
 
+        private Routine? _workoutInProgress;
+        public Routine? WorkoutInProgress
+        {
+            get => _workoutInProgress;
+            set
+            {
+                if (_workoutInProgress != value)
+                {
+                    _workoutInProgress = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string? _enteredexercisename;
+        public string? EnteredExerciseName
+        {
+            get => _enteredexercisename;
+            set
+            {
+                if (_enteredexercisename != value)
+                {
+                    _enteredexercisename = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
         public ICommand FilterCommand { get; }
 
         public ICommand SelectExerciseCommand { get; }
@@ -51,8 +81,14 @@ namespace GymTracker.Models
 
         public ICommand EditRoutineCommand { get; }
 
+        public ICommand ResumeWorkoutInProgressCommand { get; }
+        public ICommand DiscardWorkoutInProgressCommand { get; }
+
         public WorkoutViewModel()
         {
+            WorkoutInProgress = AppState.WorkoutInProgress;
+            if (AppState.IsWorkoutInProgress == false)
+                OnDiscard();
             Categories = AppState.Categories;
             Routines = AppState.Routines;
             Routines.CollectionChanged += (s, e) => RoutinesCount = Routines.Count;
@@ -66,13 +102,35 @@ namespace GymTracker.Models
             EditRoutineCommand = new Command<Routine>(OnEditRoutine);
             AllExercises = AppState.AllExercises;
             FilteredExercises = AppState.FilteredExercises;
-            FilterByCategory("All");
+            FilterByCategory("All", false);
             FilterCommand = new Command<Category>(SelectCategory);
             AddSetToExercise = new Command<Exercise>(AddSet);
             RemoveSetFromExercise = new Command<Exercise>(RemoveSet);
             SelectExerciseCommand = new Command<Exercise>(SelectExercise);
             SaveExercisesToWorkoutCommand = new Command(OnSetSelectionForRoutine);
             SaveNewRoutineCommand = new Command(OnSaveNewRoutine);
+            ResumeWorkoutInProgressCommand = new Command(OnResume);
+            DiscardWorkoutInProgressCommand = new Command(OnDiscard);
+        }
+
+        public void OnResume()
+        {
+            if (WorkoutInProgress != null)
+            {
+                AppState.IsNewRoutine = false;
+                Shell.Current.GoToAsync("startroutine");
+            }
+        }
+
+        public void OnDiscard()
+        {
+            if (WorkoutInProgress != null)
+            {
+                AppState.WorkoutInProgress = null;
+                AppState.IsWorkoutInProgress = false;
+                WorkoutInProgress = null;
+                DbHelper.DeleteWorkoutInProgress(App.Db);
+            }
         }
 
         public void AddSet(Exercise exercise)
@@ -104,7 +162,7 @@ namespace GymTracker.Models
 
             category.IsSelected = true;
 
-            FilterByCategory(category.Name);
+            FilterByCategory(category.Name, false);
         }
 
         public void SelectExercise(Exercise exercise)
@@ -130,13 +188,39 @@ namespace GymTracker.Models
         }
 
 
-        private void FilterByCategory(string category)
+        public void FilterByCategory(string category, bool UseName)
         {
             FilteredExercises.Clear();
+            IEnumerable<Exercise> filtered;
+            if (!UseName)
+            {
 
-            var filtered = category == "All"
-                ? AllExercises
-                : AllExercises.Where(e => e.Categories.Contains(category, StringComparer.OrdinalIgnoreCase));
+                if (new[] { "Pull", "Push", "Legs", "Core" }.Contains(category, StringComparer.OrdinalIgnoreCase))
+                {
+                    filtered = category == "All"
+                        ? AllExercises
+                        : AllExercises.Where(e => string.Equals(e.Function, category, StringComparison.OrdinalIgnoreCase));
+                }
+                else if (new[] { "Arms", "Shoulders", "Chest", "Back" }.Contains(category, StringComparer.OrdinalIgnoreCase))
+                {
+                    filtered = category == "All"
+                        ? AllExercises
+                        : AllExercises.Where(e => string.Equals(e.MuscleGroup, category, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    filtered = category == "All"
+                        ? AllExercises
+                        : AllExercises.Where(e => string.Equals(e.TargetMuscle, category, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            else
+            {
+                filtered = category == "All"
+                    ? AllExercises
+                    : AllExercises.Where(e => e.Name.Contains(category, StringComparison.OrdinalIgnoreCase));
+            }
+
 
             foreach (var ex in filtered)
             {
@@ -154,18 +238,26 @@ namespace GymTracker.Models
         private async void OnAddRoutine()
         {
             AppState.FilteredExercises.Clear();
+            AppState.SelectedExercises.Clear();
             await Shell.Current.GoToAsync("createroutine");
         }
 
         private async void OnStartWorkout(Routine routine)
         {
-            AppState.CurrentRoutine = new Routine(routine);
+            AppState.WorkoutInProgress = new Routine(routine);
+            AppState.IsNewRoutine = true;
+            WorkoutInProgress = AppState.WorkoutInProgress;
+            AppState.IsWorkoutInProgress = true;
             await Shell.Current.GoToAsync("startroutine");
         }
 
         private async void OnDeleteRoutine(Routine routine)
         {
-            AppState.RemoveWorkout(routine);
+            var result = await Shell.Current.DisplayAlert("Delete Routine", $"Are you sure you want to delete the routine '{routine.Name}'?", "Yes", "No");
+            if (result)
+            {
+                AppState.RemoveRoutine(routine);
+            }
         }
 
         private async void OnAddExercise()
@@ -188,35 +280,53 @@ namespace GymTracker.Models
             }
         }
 
+
         private async void OnSaveNewRoutine()
         {
             Routine routine = new Routine();
             routine.Name = CurrentRoutineName;
 
-
             foreach (var exercise in SelectedExercises)
             {
+                exercise.IsSelected = false;
                 var newexercise = new Exercise(exercise);
                 newexercise.IsSelected = false;
                 routine.AddExercise(newexercise);
             }
+
             foreach (var exercise in AllExercises)
             {
                 exercise.IsSelected = false;
                 exercise.Description = string.Empty;
             }
+            foreach (var exercise in FilteredExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            FilteredExercises.Clear();
             SelectedExercises.Clear();
+            AppState.SelectedExerciseIds.Clear();
+
             AppState.Routines.Add(routine);
             var template = DbHelper.ToDbRoutineTemplate(routine);
             App.Db.RoutineTemplates.Add(template);
             App.Db.SaveChanges();
+
             AppState.CurrentRoutineName = string.Empty;
+
+            FilterByCategory("All", false);
+
             await Shell.Current.Navigation.PopToRootAsync();
         }
 
+
         public async void OnEditRoutine(Routine routine)
         {
-
+            AppState.CurrentRoutine = routine;
+            AppState.EditedRoutine = new Routine(routine);
+            AppState.IsEditingRoutine = true;
+            await Shell.Current.GoToAsync("editroutine");
         }
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)

@@ -3,8 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GymTracker.Workout"
              x:Name="WorkoutPage"
+             BackgroundColor="Black"
              Shell.NavBarIsVisible="False">
-    <VerticalStackLayout Spacing="39">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="39">
         <Label 
             Text="Routines"
             Style="{StaticResource Headline}"
@@ -18,11 +21,39 @@
             BackgroundColor="Blue"
             BorderColor="White"
             Background="Blue"
-            TextColor="White"
             Padding="20"
             WidthRequest="200"
+            TextColor="LightGray"
+            FontAttributes="Bold"
+            FontSize="17"
             Command="{Binding AddRoutineCommand}" />
-        <Label 
+            <Frame Margin="0" HorizontalOptions="Center" Padding="20" BorderColor="Black" CornerRadius="8">
+                <VerticalStackLayout HorizontalOptions="Center" Spacing="20">
+                    <Label Text="{Binding WorkoutInProgress.Name}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                FontSize="20"
+                IsVisible="{Binding WorkoutInProgress, Converter={StaticResource NullToBoolConverter}}" />
+
+
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="20"
+            IsVisible="{Binding WorkoutInProgress, Converter={StaticResource NullToBoolConverter}}">
+                        <Button Text="Resume"
+            Command="{Binding ResumeWorkoutInProgressCommand}"
+            BackgroundColor="Black" TextColor="White" FontAttributes="Bold"
+            BorderColor="Blue"
+            BorderWidth="1"/>
+
+                        <Button Text="Discard"
+            Command="{Binding DiscardWorkoutInProgressCommand}"
+            BackgroundColor="Black" TextColor="White" FontAttributes="Bold"
+            BorderColor="Red"
+            BorderWidth="1"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label 
             Text="{Binding RoutinesCount, StringFormat='My Routines ({0})'}"
             Style="{StaticResource SubHeadline}"
             VerticalOptions="Center" 
@@ -32,52 +63,62 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <HorizontalStackLayout HorizontalOptions="Center">
-                        <Frame Margin="5" Padding="10" BorderColor="Blue" CornerRadius="8">
-                            <Label Text="{Binding Name}"
+                    <Frame Margin="5" HorizontalOptions="Center" Padding="20" BorderColor="Gray" CornerRadius="8">
+                    <VerticalStackLayout HorizontalOptions="Center">
+                        <Label Text="{Binding Name}"
                                    VerticalOptions="Center"
                                    HorizontalTextAlignment="Center"
-                                   HorizontalOptions="Center"/>
-                        </Frame>
-                        <Frame Margin="5" Padding="10" BorderColor="Blue" CornerRadius="8" BackgroundColor="Blue">
-                            <Button
-                                Text="Start Routine"
+                                   HorizontalOptions="Center"
+                                  MaxLines="5"
+                               LineBreakMode="WordWrap"
+                               Padding="5"
+                               Margin="0,0,0,10"
+                               FontAttributes="Bold"
+                               TextColor="LightGray"
+                               FontSize="17"/>
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                                <Button
+                                Text="Start"
                                 VerticalOptions="Center" 
                                 HorizontalOptions="Center"
-                                BackgroundColor="Blue"
-                                BorderColor="White"
-                                Background="Blue"
+                                BackgroundColor="Black"
+                                BorderColor="Blue"
+                                Background="Black"
                                 TextColor="White"
+                                FontAttributes="Bold"
+                                BorderWidth="1"
                                 Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Name=WorkoutPage}}"
                                 CommandParameter="{Binding .}" />
-                        </Frame>
-                        <Frame Margin="5" Padding="10" BorderColor="Red" CornerRadius="8" BackgroundColor="Red">
-                            <Button
-                                Text="Delete Routine"
+                                <Button
+                                Text="Delete"
                                 VerticalOptions="Center" 
                                 HorizontalOptions="Center"
-                                BackgroundColor="Red"
-                                BorderColor="White"
-                                Background="Red"
+                                BackgroundColor="Black"
+                                BorderColor="Red"
+                                Background="Black"
                                 TextColor="White"
+                                FontAttributes="Bold"
+                                BorderWidth="1"
                                 Command="{Binding BindingContext.DeleteRoutineCommand, Source={x:Reference Name=WorkoutPage}}"
                                 CommandParameter="{Binding .}" />
-                        </Frame>
-                        <Frame Margin="5" Padding="10" BorderColor="Green" CornerRadius="8" BackgroundColor="Green">
-                            <Button
-                                Text="Edit Routine"
+                                <Button
+                                Text="Edit"
                                 VerticalOptions="Center" 
                                 HorizontalOptions="Center"
-                                BackgroundColor="Green"
-                                BorderColor="White"
-                                Background="Green"
+                                BackgroundColor="Black"
+                                BorderColor="Green"
+                                Background="Black"
                                 TextColor="White"
+                                FontAttributes="Bold"
+                                BorderWidth="1"
                                 Command="{Binding BindingContext.EditRoutineCommand, Source={x:Reference Name=WorkoutPage}}"
                                 CommandParameter="{Binding .}" />
-                        </Frame>
-                    </HorizontalStackLayout>
+                                </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
     </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

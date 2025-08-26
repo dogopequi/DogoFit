@@ -12,7 +12,7 @@ namespace GymTracker.Services
     {
         public static async Task ColorTo(this Button button, Color fromColor, Color toColor, uint length = 100)
         {
-            uint steps = 20;
+            uint steps = 100;
             float rStep = ((float)toColor.Red - (float)fromColor.Red) / steps;
             float gStep = ((float)toColor.Green - (float)fromColor.Green) / steps;
             float bStep = ((float)toColor.Blue - (float)fromColor.Blue) / steps;

@@ -9,12 +9,12 @@ namespace GymTracker
         public App()
         {
             InitializeComponent();
-            //DeleteDatabase();
+            //DbHelper.DeleteDatabase("gymtracker.db");
+
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "gymtracker.db");
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite($"Data Source={dbPath}")
                 .Options;
-
             Db = new AppDbContext(options);
             Db.Database.EnsureCreated();
             AppState.Init();
@@ -23,14 +23,9 @@ namespace GymTracker
         }
 
 
-        public static void DeleteDatabase()
+        protected override void OnSleep()
         {
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "gymtracker.db");
-            if (File.Exists(dbPath))
-            {
-                File.Delete(dbPath);
-                Console.WriteLine("Database deleted.");
-            }
+            AppState.SaveWorkoutInProgress();
         }
     }
 }

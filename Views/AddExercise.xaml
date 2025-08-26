@@ -2,17 +2,38 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GymTracker.Views.AddExercise"
+             xmlns:controls="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"  
              x:Name="addexercise"
+             BackgroundColor="Black"
              Shell.NavBarIsVisible="False">
 
-    <Grid Padding="10" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+    <Grid Padding="10" RowDefinitions="Auto, Auto,*,Auto" RowSpacing="10">
 
-        <CollectionView Grid.Row="0" ItemsSource="{Binding Categories}" ItemsLayout="HorizontalList">
+        <controls:Entry Grid.Row="0" x:Name="exercisename"  
+                        Placeholder="Exercise Name"  
+                        WidthRequest="300"  
+                        HorizontalOptions="Center"
+                        Text="{Binding EnteredExerciseName}"
+                        FontSize="30"
+                        Margin="20,20,0,0"
+                        TextChanged="ExerciseName_TextChanged"/>
+
+        <CollectionView Grid.Row="1"
+                ItemsSource="{Binding Categories}"
+                HeightRequest="150">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Horizontal" Span="2"/>
+            </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Button Text="{Binding Name}" 
-                            Command="{Binding BindingContext.FilterCommand, Source={x:Reference addexercise}}" 
-                            CommandParameter="{Binding .}">
+                    <Button Text="{Binding Name}"
+                    Command="{Binding BindingContext.FilterCommand, Source={x:Reference addexercise}}"
+                    CommandParameter="{Binding .}"
+                    Margin="5"
+                    HeightRequest="60"
+                    WidthRequest="120"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Start">
                         <Button.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="BackgroundColor" Value="Blue"/>
@@ -28,7 +49,8 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding FilteredExercises}" ItemsLayout="VerticalList">
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding FilteredExercises}" ItemsLayout="VerticalList">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame BorderColor="MidnightBlue" CornerRadius="8" Padding="0" Margin="5" BackgroundColor="Black">
@@ -58,13 +80,14 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="2"  
+        <Button Grid.Row="3"  
                 Text="Continue"  
                 Command="{Binding SaveExercisesToWorkoutCommand}"  
                 HorizontalOptions="Center"
                 BackgroundColor="Blue"
                 BorderColor="White"
                 Background="Blue"
+                BorderWidth="1"
                 TextColor="White"
                 WidthRequest="300"/>
 
