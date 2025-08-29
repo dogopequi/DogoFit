@@ -39,5 +39,16 @@
         FontAttributes="Bold"
         BorderWidth="1"
         Command="{Binding ImportCommand}"/>
+        <Button
+        Text="{Binding Profile.WeightUnit, StringFormat='Weight Unit: {0}'}"
+        VerticalOptions="Center" 
+        HorizontalOptions="Center"
+        BackgroundColor="Black"
+        BorderColor="Black"
+        Background="Black"
+        TextColor="LightGray"
+        FontAttributes="Bold"
+        BorderWidth="1"
+        Command="{Binding UnitSystemCommand}"/>
     </VerticalStackLayout>
 </ContentPage>

@@ -5,8 +5,8 @@
     xmlns:local="clr-namespace:GymTracker"
     Shell.FlyoutBehavior="Disabled"
     Title="GymTracker"
-    Shell.TabBarForegroundColor="Blue"
-    Shell.TabBarTitleColor="Blue"
+    Shell.TabBarForegroundColor="#008cff"
+    Shell.TabBarTitleColor="#008cff"
     Shell.TabBarUnselectedColor="Gray"
     Shell.TabBarBackgroundColor="Transparent"
     >

@@ -7,23 +7,33 @@
              Shell.NavBarIsVisible="False"
              x:Name="editroutine"
              BackgroundColor="Black">
-    <Grid Padding="10" RowDefinitions="*,Auto" RowSpacing="0">
+    <Grid Padding="10" RowDefinitions="Auto,*,Auto" RowSpacing="0">
 
-        <CollectionView Grid.Row="0"
+        <controls:Entry x:Name="RoutineName"  
+                        Placeholder="{Binding routine.Name}"  
+                        WidthRequest="300"  
+                        HorizontalOptions="Center"
+                        Text="{Binding routine.Name}"
+                        FontSize="20"
+                        
+                        Grid.Row="0"/>
+
+        <CollectionView Grid.Row="1"
                     ItemsSource="{Binding routine.Exercises}"
                     ItemsLayout="VerticalList">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame BorderColor="Gray" CornerRadius="8" Padding="10" Margin="5">
+                    <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="5">
                         <VerticalStackLayout Spacing="5">
                             <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="0,0,0,10">
                                 <Label Text="{Binding Name}"
                                FontSize="20"
                                FontAttributes="Bold"
+                               TextColor="#008cff"
                                HorizontalTextAlignment="Center"
                                Margin="0,0,0,20"/>
-                            <Button Grid.Column="1"
+                                <Button Grid.Column="1"
                                 Text="X"
                                 FontSize="20"
                                 Padding="0"
@@ -31,7 +41,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Red"
                                 HorizontalOptions="End"
-                                Command="{Binding BindingContext.RemoveExerciseCommand, Source={x:Reference editroutine}}"
+                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExerciseCommand}"
                                 CommandParameter="{Binding .}" />
                             </Grid>
                             <Entry Text="{Binding Description, Mode=TwoWay}"
@@ -40,28 +50,88 @@
                                HorizontalOptions="Center"
                                FontSize="15" />
 
-                            <HorizontalStackLayout HorizontalOptions="Center">
-                                <Label Text="Sets:" FontSize="20" Padding="5"/>
-                                <Label Text="{Binding SetCount}" FontSize="20" Padding="5"/>
-                            </HorizontalStackLayout>
+                            <CollectionView ItemsSource="{Binding Sets}"
+                                ItemsLayout="VerticalList"
+                                Margin="10,0,0,0">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                                            <VerticalStackLayout Spacing="10">
+                                                <Label Text="Set" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
+                                                <Button FontAttributes="Bold"
+                                                     FontSize="20"
+                                                     Clicked="SetOptions_Clicked"
+                                                     Margin="0,-9,0,0"
+                                                     BackgroundColor="#0f0f0f"
+                                                     CommandParameter="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type CollectionView}}}">
+                                                    <Button.Triggers>
+                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Normal">
+                                                            <Setter Property="Text" Value="{Binding ID}" />
+                                                            <Setter Property="TextColor" Value="White" />
+                                                        </DataTrigger>
+
+                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Warmup">
+                                                            <Setter Property="Text" Value="W" />
+                                                            <Setter Property="TextColor" Value="Orange" />
+                                                        </DataTrigger>
+
+                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Failure">
+                                                            <Setter Property="Text" Value="F" />
+                                                            <Setter Property="TextColor" Value="Red" />
+                                                        </DataTrigger>
+
+                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Drop">
+                                                            <Setter Property="Text" Value="D" />
+                                                            <Setter Property="TextColor" Value="#008cff" />
+                                                        </DataTrigger>
+                                                    </Button.Triggers>
+                                                </Button>
+
+
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="10">
+                                                <Label Text="Last" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
+                                                <Label Text="{Binding LastSet}" TextColor="Gray" FontAttributes="Bold" HorizontalTextAlignment="Center" FontSize="20"/>
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="0">
+                                                <Label Text="Reps" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
+                                                <Entry Placeholder="0"
+                                                        Keyboard="Numeric"
+                                                    WidthRequest="50"
+                                                    HorizontalTextAlignment="Center"
+                                                      FontSize="20"
+                                                       TextColor="White"
+                                                    Text="{Binding Reps, Mode=TwoWay}" />
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="0">
+                                                <Label Text="Weight" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
+                                                <Entry Placeholder="0"
+                                                    Keyboard="Numeric"
+                                                    WidthRequest="50"
+                                                    HorizontalTextAlignment="Center"
+                                                     FontSize="20"
+                                                       TextColor="White"
+                                                    Text="{Binding Weight, Mode=TwoWay}" />
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
 
                             <Button Text="Add Set"
                                 Command="{Binding BindingContext.AddSetToExerciseCommand, Source={x:Reference editroutine}}"
                                 CommandParameter="{Binding .}"
                                 FontSize="14"
-                                BackgroundColor="Blue"
                                 TextColor="White"
+                                FontAttributes="Bold"
+                                BackgroundColor="#2b2b2b"
                                 WidthRequest="275"
                                 Padding="5" />
 
-                            <Button Text="Remove Set"
-                                Command="{Binding BindingContext.RemoveSetFromExerciseCommand, Source={x:Reference editroutine}}"
-                                CommandParameter="{Binding .}"
-                                FontSize="14"
-                                BackgroundColor="Red"
-                                TextColor="White"
-                                WidthRequest="275"
-                                Padding="5" />
+                            <BoxView HeightRequest="5"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,20,0,0"/>
 
                         </VerticalStackLayout>
                     </Frame>
@@ -69,18 +139,18 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
         
-        <VerticalStackLayout Grid.Row="1" Spacing="10" Margin="0,20,0,0">
+        <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,20,0,0">
             <Button Text="Add Exercise"  
                 Command="{Binding AddExerciseCommand}"
                 HorizontalOptions="Center"
-                BackgroundColor="DarkBlue"
+                BackgroundColor="#2b2b2b"
                 TextColor="White"
                 WidthRequest="300"/>
 
             <Button Text="Save"  
                 Command="{Binding SaveEditedRoutineCommand}"
                 HorizontalOptions="Center"
-                BackgroundColor="Blue"
+                BackgroundColor="#008cff"
                 TextColor="White"
                 WidthRequest="300"/>
         </VerticalStackLayout>

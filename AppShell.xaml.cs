@@ -14,6 +14,7 @@ namespace GymTracker
             Routing.RegisterRoute("startroutine", typeof(StartRoutine));
             Routing.RegisterRoute("editroutine", typeof(EditRoutine));
             Routing.RegisterRoute("settings", typeof(Settings));
+            Routing.RegisterRoute("profileselectexercise", typeof(ProfileSelectExercise));
         }
     }
 }

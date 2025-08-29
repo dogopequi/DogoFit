@@ -17,7 +17,7 @@ namespace GymTracker.Models
         public ICommand RemoveSetFromExerciseCommand { get; }
         public ICommand FinishRoutineCommand { get; }
         public ICommand AddExerciseCommand { get; }
-
+        
         public ObservableCollection<Category> Categories { get; set; }
         public ObservableCollection<Exercise> AllExercises { get; set; }
         public ObservableCollection<Exercise> FilteredExercises { get; set; }
@@ -77,6 +77,19 @@ namespace GymTracker.Models
                     routine.Resume();
                 }
             }
+            if (routine.Exercises != null)
+            {
+                foreach (var exercise in routine.Exercises)
+                {
+                    foreach (var set in exercise.Sets)
+                    {
+                        var lastSet = AppState.GetLastSetForExercise(exercise.Name, set.ID);
+                        set.LastSet = lastSet != null
+                            ? $"{lastSet.ID}x{lastSet.Reps}x{lastSet.Weight}"
+                            : "-";
+                    }
+                }
+            }
             TakenExercises = new ObservableCollection<string>(routine.Exercises.Select(e => e.Name));
             Categories = AppState.Categories;
             AllExercises = AppState.AllExercises;
@@ -92,6 +105,34 @@ namespace GymTracker.Models
             SaveExercisesToWorkoutCommand = new Command(OnSaveExercises);
             AddExerciseCommand = new Command(OnAddExercise);
             AppState.IsNewRoutine = false;
+        }
+        public void OnEditSetWarmup(Set set)
+        {
+            set.Type = SetType.Warmup;
+        }
+        public void OnEditSetDrop(Set set)
+        {
+            set.Type = SetType.Drop;
+        }
+        public void OnEditSetNormal(Set set)
+        {
+            set.Type = SetType.Normal;
+        }
+        public void OnEditSetFailure(Set set)
+        {
+            set.Type = SetType.Failure;
+        }
+
+        public void OnRemoveSet(Exercise exercise, Set set)
+        {
+            if (exercise?.Sets == null) return;
+
+            exercise.RemoveSet(set.ID);
+
+            for (int i = 0; i < exercise.Sets.Count; i++)
+            {
+                exercise.Sets[i].ID = i + 1;
+            }
         }
 
 
@@ -128,6 +169,30 @@ namespace GymTracker.Models
             AppState.IsWorkoutInProgress = false;
             AppState.WorkoutInProgress = null;
             AppState.SaveWorkoutInProgress();
+
+            var template = AppState.Routines
+                .FirstOrDefault(r => r.RoutineID == routine.RoutineID);
+            if (template != null)
+            {
+                foreach (var exercise in routine.Exercises)
+                {
+                    var templateExercise = template.Exercises
+                        .FirstOrDefault(e => e.Name == exercise.Name);
+                    if (templateExercise == null || templateExercise.Sets == null)
+                        continue;
+                    var templateSets = templateExercise.Sets
+                        .ToDictionary(s => s.ID);
+                    foreach (var set in exercise.CheckedSets)
+                    {
+                        if (templateSets.TryGetValue(set.ID, out var s))
+                        {
+                            s.Reps = set.Reps;
+                            s.Weight = set.Weight;
+                        }
+                    }
+                }
+            }
+
 
             await Shell.Current.Navigation.PopToRootAsync();
         }

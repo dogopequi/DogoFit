@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Maui.Controls;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,6 +23,19 @@ namespace GymTracker.Services
                     : DateTime.Now
             };
         }
+        public static void UpdateWorkout(Routine routine, int workoutId)
+        {
+            var db = App.Db;
+            var workout = db.Workouts.FirstOrDefault(w => w.Id == workoutId);
+            if (workout != null)
+            {
+                workout.JsonRoutine = JsonSerializer.Serialize(routine, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.Never
+                });
+            }
+        }
+
 
         public static Routine FromDbWorkout(DbWorkout dbWorkout)
         {
@@ -48,12 +62,11 @@ namespace GymTracker.Services
         }
         public static void UpdateRoutineTemplate(Routine routine, int templateId)
         {
-            using var db = App.Db;
+            var db = App.Db;
             var template = db.RoutineTemplates.FirstOrDefault(t => t.Id == templateId);
             if (template != null)
             {
                 template.JsonRoutine = JsonSerializer.Serialize(routine);
-                db.SaveChanges();
             }
         }
 
@@ -120,9 +133,7 @@ namespace GymTracker.Services
             else
             {
                 dbProfile.JsonProfile = JsonSerializer.Serialize(profile);
-                db.Profiles.Update(dbProfile);
             }
-            db.SaveChanges();
         }
         public static void DeleteDatabase(String path)
         {
@@ -182,7 +193,6 @@ namespace GymTracker.Services
             var dbWorkoutInProgress = db.WorkoutInProgress.FirstOrDefault(w => w.Id == 1);
             return FromDbWorkoutInProgress(dbWorkoutInProgress);
         }
-
 
         public static void DeleteWorkoutInProgress(AppDbContext db)
         {

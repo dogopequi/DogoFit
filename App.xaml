@@ -5,10 +5,21 @@
              x:Class="GymTracker.App">
     <Application.Resources>
         <ResourceDictionary>
+            
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="Label">
+                <Setter Property="FontFamily" Value="Impact"/>
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="Impact"/>
+                <Setter Property="CornerRadius" Value="10"/>
+            </Style>
+            <Style TargetType="Entry">
+                <Setter Property="FontFamily" Value="Impact"/>
+            </Style>
 
             <services:NullToBoolConverter x:Key="NullToBoolConverter"/>
         </ResourceDictionary>

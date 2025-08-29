@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="GymTracker.Popups.OptionsPopup"
+               BackgroundColor="#2b2b2b"
+               
+               CanBeDismissedByTappingOutsideOfPopup="True">
+
+    <VerticalStackLayout Padding="20"
+                         Spacing="10"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         BackgroundColor="#2b2b2b"
+                         WidthRequest="250">
+
+        <Label Text="Options"
+               TextColor="White"
+               FontSize="20"
+               HorizontalOptions="Center"/>
+
+        <Button Text="Edit Routine"
+                BackgroundColor="#2b2b2b"
+                TextColor="White"
+                HorizontalOptions="FillAndExpand"
+                Command="{Binding EditCommand}"/>
+        <BoxView HeightRequest="1"
+                 BackgroundColor="Gray"
+                 HorizontalOptions="FillAndExpand"/>
+
+        <Button Text="Delete Routine"
+                BackgroundColor="#2b2b2b"
+                TextColor="Red"
+                HorizontalOptions="FillAndExpand"
+                Command="{Binding DeleteCommand}"/>
+        <BoxView HeightRequest="1"
+                 BackgroundColor="Gray"
+                 HorizontalOptions="FillAndExpand"/>
+
+        <Button Text="Cancel"
+                BackgroundColor="Transparent"
+                TextColor="Gray"
+                HorizontalOptions="FillAndExpand"
+                Command="{Binding CancelCommand}"/>
+    </VerticalStackLayout>
+</toolkit:Popup>

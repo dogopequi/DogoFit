@@ -8,4 +8,5 @@ namespace GymTracker
     public class MainActivity : MauiAppCompatActivity
     {
     }
+
 }

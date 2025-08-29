@@ -68,6 +68,34 @@ namespace GymTracker.Models
             }
         }
 
+        public void OnEditSetWarmup(Set set)
+        {
+            set.Type = SetType.Warmup;
+        }
+        public void OnEditSetDrop(Set set)
+        {
+            set.Type = SetType.Drop;
+        }
+        public void OnEditSetNormal(Set set)
+        {
+            set.Type = SetType.Normal;
+        }
+        public void OnEditSetFailure(Set set)
+        {
+            set.Type = SetType.Failure;
+        }
+
+        public void OnRemoveSet(Exercise exercise, Set set)
+        {
+            if (exercise?.Sets == null) return;
+
+            exercise.RemoveSet(set.ID);
+
+            for (int i = 0; i < exercise.Sets.Count; i++)
+            {
+                exercise.Sets[i].ID = i + 1;
+            }
+        }
 
         private void OnAddSetToExercise(Exercise exercise)
         {

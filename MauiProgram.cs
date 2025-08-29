@@ -1,11 +1,7 @@
-﻿using GymTracker.Models;
-using GymTracker.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Handlers;
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting;
+﻿using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using LiveChartsCore.SkiaSharpView.Maui;
+using CommunityToolkit.Maui;
 namespace GymTracker
 {
     public static class MauiProgram
@@ -17,6 +13,7 @@ namespace GymTracker
                 .UseSkiaSharp()
                 .UseLiveCharts()
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

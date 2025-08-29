@@ -7,13 +7,48 @@ using System.Threading.Tasks;
 
 namespace GymTracker.Services
 {
+    public enum SetType
+    {
+        Normal,
+        Warmup,
+        Failure,
+        Drop
+    }
     public class Set : INotifyPropertyChanged
     {
         private int _id;
         private int _reps;
-        private int _weight;
+        private double _weight;
         private bool _isChecked;
+        private string _lastSet;
+        private SetType _type;
 
+        public SetType Type
+        {
+            get => _type;
+            set
+            {
+                if (_type != value)
+                {
+                    _type = value;
+                    OnPropertyChanged(nameof(Type));
+                }
+            }
+        }
+
+
+        public string LastSet
+        {
+            get => _lastSet;
+            set
+            {
+                if (_lastSet != value)
+                {
+                    _lastSet = value;
+                    OnPropertyChanged(nameof(LastSet));
+                }
+            }
+        }
         public bool IsChecked
         {
             get => _isChecked;
@@ -53,7 +88,7 @@ namespace GymTracker.Services
             }
         }
 
-        public int Weight
+        public double Weight
         {
             get => _weight;
             set
@@ -73,6 +108,7 @@ namespace GymTracker.Services
             Reps = other.Reps;
             Weight = other.Weight;
             IsChecked = other.IsChecked;
+            Type = other.Type;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

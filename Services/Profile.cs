@@ -32,8 +32,24 @@ namespace GymTracker.Services
         public double CorePercentage => Sets == 0 ? 0 : (double)Core / Sets;
         public double ShouldersPercentage => Sets == 0 ? 0 : (double)Shoulders / Sets;
         public double PullPercentage => Sets == 0 ? 0 : (double)Pull / Sets;
+        [JsonInclude]
+        private bool _useMetric = true;
 
-
+        [JsonInclude]
+        public bool UseMetric
+        {
+            get => _useMetric;
+            set
+            {
+                if (_useMetric != value)
+                {
+                    _useMetric = value;
+                    OnPropertyChanged(nameof(UseMetric));
+                    OnPropertyChanged(nameof(WeightUnit));
+                }
+            }
+        }
+        public string WeightUnit => UseMetric ? "kg" : "lbs";
 
 
         private int workouts;
@@ -67,8 +83,8 @@ namespace GymTracker.Services
             }
         }
 
-        private int volume;
-        public int Volume
+        private double volume;
+        public double Volume
         {
             get => volume;
             set
@@ -131,7 +147,6 @@ namespace GymTracker.Services
             }
         }
 
-        //muscle split
         private int _arms;
         private int _shoulders;
         private int _chest;

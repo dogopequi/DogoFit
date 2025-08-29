@@ -15,11 +15,13 @@ namespace GymTracker.Services
     public class Routine : INotifyPropertyChanged
     {
         private IDispatcherTimer? _timer;
-        private int _volume;
+        private double _volume;
         private int _setCount;
         private int _repCount;
 
-        // muscle split
+        [JsonInclude]
+        public long RoutineID { get; }
+
         private int _arms;
         private int _shoulders;
         private int _chest;
@@ -54,6 +56,8 @@ namespace GymTracker.Services
             set { _exercisesButtonText = value; OnPropertyChanged(nameof(ExercisesButtonText)); }
         }
 
+
+
         [JsonIgnore]
         public ICommand ToggleSplitsCommand { get; }
         [JsonIgnore]
@@ -67,8 +71,8 @@ namespace GymTracker.Services
         }
 
         [JsonIgnore]
-        public int? ID { get; set; }
-
+        public int ID { get; set; }
+        [JsonInclude]
         public int Arms
         {
             get => _arms;
@@ -82,7 +86,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int Shoulders
         {
             get => _shoulders;
@@ -96,7 +100,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int Chest
         {
             get => _chest;
@@ -110,7 +114,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int Back
         {
             get => _back;
@@ -124,7 +128,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int Legs
         {
             get => _legs;
@@ -138,7 +142,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int Core
         {
             get => _core;
@@ -152,11 +156,11 @@ namespace GymTracker.Services
                 }
             }
         }
-
-        public int Volume
+        [JsonInclude]
+        public double Volume
         {
             get => _volume;
-            private set
+            set
             {
                 if (_volume != value)
                 {
@@ -165,7 +169,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int SetCount
         {
             get => _setCount;
@@ -200,7 +204,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int RepCount
         {
             get => _repCount;
@@ -216,7 +220,7 @@ namespace GymTracker.Services
 
         private int _pull;
         private int _push;
-
+        [JsonInclude]
         public int Pull
         {
             get => _pull;
@@ -230,7 +234,7 @@ namespace GymTracker.Services
                 }
             }
         }
-
+        [JsonInclude]
         public int Push
         {
             get => _push;
@@ -246,6 +250,7 @@ namespace GymTracker.Services
         }
 
         private int _triceps;
+        [JsonInclude]
         public int Triceps
         {
             get => _triceps;
@@ -261,6 +266,7 @@ namespace GymTracker.Services
         }
 
         private int _biceps;
+        [JsonInclude]
         public int Biceps
         {
             get => _biceps;
@@ -276,6 +282,7 @@ namespace GymTracker.Services
         }
 
         private int _quadriceps;
+        [JsonInclude]
         public int Quadriceps
         {
             get => _quadriceps;
@@ -291,6 +298,7 @@ namespace GymTracker.Services
         }
 
         private int _hamstrings;
+        [JsonInclude]
         public int Hamstrings
         {
             get => _hamstrings;
@@ -306,6 +314,7 @@ namespace GymTracker.Services
         }
 
         private int _glutes;
+        [JsonInclude]
         public int Glutes
         {
             get => _glutes;
@@ -321,6 +330,7 @@ namespace GymTracker.Services
         }
 
         private int _calves;
+        [JsonInclude]
         public int Calves
         {
             get => _calves;
@@ -336,6 +346,7 @@ namespace GymTracker.Services
         }
 
         private int _abdominals;
+        [JsonInclude]
         public int Abdominals
         {
             get => _abdominals;
@@ -351,6 +362,7 @@ namespace GymTracker.Services
         }
 
         private int _obliques;
+        [JsonInclude]
         public int Obliques
         {
             get => _obliques;
@@ -366,6 +378,7 @@ namespace GymTracker.Services
         }
 
         private int _traps;
+        [JsonInclude]
         public int Traps
         {
             get => _traps;
@@ -381,6 +394,7 @@ namespace GymTracker.Services
         }
 
         private int _lateralDelts;
+        [JsonInclude]
         public int LateralDelts
         {
             get => _lateralDelts;
@@ -396,6 +410,7 @@ namespace GymTracker.Services
         }
 
         private int _frontDelts;
+        [JsonInclude]
         public int FrontDelts
         {
             get => _frontDelts;
@@ -411,6 +426,7 @@ namespace GymTracker.Services
         }
 
         private int _rearDelts;
+        [JsonInclude]
         public int RearDelts
         {
             get => _rearDelts;
@@ -425,6 +441,7 @@ namespace GymTracker.Services
             }
         }
         private int _formarms;
+        [JsonInclude]
         public int Forearms
         {
             get => _formarms;
@@ -440,6 +457,7 @@ namespace GymTracker.Services
         }
 
         private int _lats;
+        [JsonInclude]
         public int Lats
         {
             get => _lats;
@@ -568,12 +586,13 @@ namespace GymTracker.Services
 
         [JsonInclude]
         public DateTime? EndTime { get; set; }
-
+        [JsonInclude]
         public string Name { get; set; }
+        [JsonInclude]
         public string Description { get; set; }
 
         private ObservableCollection<Exercise> _exercises = new ObservableCollection<Exercise>();
-
+        [JsonInclude]
         public ObservableCollection<Exercise> Exercises
         {
             get => _exercises;
@@ -585,6 +604,7 @@ namespace GymTracker.Services
                 _exercises = value;
                 SubscribeExerciseEvents(_exercises);
                 RecalculateSetCountAndVolume();
+
             }
         }
 
@@ -604,7 +624,7 @@ namespace GymTracker.Services
             });
         }
 
-        public Routine(Routine other)
+        public Routine(Routine other, bool copyID)
         {
             Name = other.Name;
             Description = other.Description;
@@ -638,7 +658,10 @@ namespace GymTracker.Services
             Core = other.Core;
             Shoulders = other.Shoulders;
             Pull = other.Pull;
-            
+            if (copyID)
+                RoutineID = other.RoutineID;
+            else
+                RoutineID = Random.Shared.NextInt64(long.MinValue, long.MaxValue);
 
             Exercises = new ObservableCollection<Exercise>(
                 other.Exercises.Select(ex => new Exercise(ex))

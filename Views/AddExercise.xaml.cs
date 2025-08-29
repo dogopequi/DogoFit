@@ -8,10 +8,15 @@ public partial class AddExercise : ContentPage
 	public AddExercise()
 	{
 		InitializeComponent();
-		if (AppState.IsWorkoutInProgress)
-            BindingContext = new StartRoutineViewModel();
-		else if (AppState.IsEditingRoutine)
-			BindingContext = new EditRoutineModel();
+        if (AppState.IsWorkoutInProgress)
+        {
+            if(AppState.IsEmptyWorkout)
+                BindingContext = new WorkoutViewModel();
+            else
+                BindingContext = new StartRoutineViewModel();
+        }
+        else if (AppState.IsEditingRoutine)
+            BindingContext = new EditRoutineModel();
         else
             BindingContext = new WorkoutViewModel();
     }

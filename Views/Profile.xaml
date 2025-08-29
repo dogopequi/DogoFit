@@ -15,6 +15,7 @@
                      Priority="0"
                      Command="{Binding OpenSettingsCommand}" />
     </ContentPage.ToolbarItems>
+
     <ContentPage.BindingContext>
         <local:ProfileViewModel/>
     </ContentPage.BindingContext>
@@ -29,27 +30,34 @@
         <ScrollView>
             <VerticalStackLayout Padding="0" Spacing="10" Margin="0,10,0,0" HorizontalOptions="Start">
                 <Label Text="Statistics" FontSize="30" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold" Margin="0,0,0,20"/>
-                <Frame BorderColor="Gray" CornerRadius="8" Padding="0" Margin="0,0,0,20" HorizontalOptions="Center" >
+                <Frame BorderColor="Black" CornerRadius="8" Padding="0" Margin="0,0,0,20" HorizontalOptions="Center" >
                     <HorizontalStackLayout Padding="10" Spacing="20" Margin="0,0,0,0" HorizontalOptions="Center">
                         <VerticalStackLayout Spacing="5">
-                            <Label Text="Workouts" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Workouts}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                            <Label Text="WORKOUTS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
+                            <Label Text="{Binding Profile.Workouts}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="5">
-                            <Label Text="Volume" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Volume}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                            <Label Text="VOLUME" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
+                            <Label FontSize="16" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0:F2} {1}">
+                                        <Binding Path="Profile.Volume"/>
+                                        <Binding Path="Profile.WeightUnit"/>
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="5">
-                            <Label Text="Sets" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Sets}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                            <Label Text="SETS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
+                            <Label Text="{Binding Profile.Sets}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="5">
-                            <Label Text="Reps" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.Reps}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                            <Label Text="REPS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
+                            <Label Text="{Binding Profile.Reps}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="5">
-                            <Label Text="Time" FontSize="15" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Profile.DurationString}" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                            <Label Text="TIME" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
+                            <Label Text="{Binding Profile.DurationString}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
                 </Frame>
@@ -58,8 +66,8 @@
                         FontSize="15"
                         Margin="0,10,0,10"
                         FontAttributes="Bold"
-                        BackgroundColor="Black"
-                        BorderColor="Blue"
+                        BackgroundColor="#2b2b2b"
+                        BorderColor="#2b2b2b"
                         TextColor="White"
                         WidthRequest="200"
                         BorderWidth="1"
@@ -75,7 +83,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                     Progress="{Binding Profile.PushPercentage}"
-                                    ProgressColor="Blue"
+                                    ProgressColor="#008cff"
                                     BackgroundColor="Black"
                                     HeightRequest="12"
                                     HorizontalOptions="Fill"
@@ -93,7 +101,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                     Progress="{Binding Profile.PullPercentage}"
-                                    ProgressColor="Blue"
+                                    ProgressColor="#008cff"
                                     BackgroundColor="Black"
                                     HeightRequest="12"
                                     HorizontalOptions="Fill"
@@ -111,7 +119,7 @@
                                 <Label Text="{Binding Profile.Legs}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
                             </VerticalStackLayout>
                             <ProgressBar  Grid.Column="1" Progress="{Binding Profile.LegsPercentage}"
-                                    ProgressColor="Blue"
+                                    ProgressColor="#008cff"
                                     BackgroundColor="Black"
                                     HeightRequest="12"
                                     HorizontalOptions="Fill"
@@ -127,7 +135,7 @@
                                 <Label Text="{Binding Profile.Core}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
                             </VerticalStackLayout>
                             <ProgressBar  Grid.Column="1" Progress="{Binding Profile.CorePercentage}"
-                                    ProgressColor="Blue"
+                                    ProgressColor="#008cff"
                                     BackgroundColor="Black"
                                     HeightRequest="12"
                                     HorizontalOptions="Fill"
@@ -143,8 +151,8 @@
                         FontSize="15"
                         Margin="0,10,0,10"
                         FontAttributes="Bold"
-                        BackgroundColor="Black"
-                        BorderColor="Blue"
+                        BackgroundColor="#2b2b2b"
+                        BorderColor="#2b2b2b"
                         TextColor="White"
                         WidthRequest="200"
                         BorderWidth="1"
@@ -161,7 +169,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.ArmsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -179,7 +187,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.ChestPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -198,7 +206,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.BackPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -216,7 +224,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.ShouldersPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -233,8 +241,8 @@
                         FontSize="15"
                         Margin="0,10,0,10"
                         FontAttributes="Bold"
-                        BackgroundColor="Black"
-                        BorderColor="Blue"
+                        BackgroundColor="#2b2b2b"
+                        BorderColor="#2b2b2b"
                         TextColor="White"
                         WidthRequest="200"
                         BorderWidth="1"
@@ -252,7 +260,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.BicepsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -270,7 +278,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.TricepsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -288,7 +296,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.ForearmsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -306,7 +314,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.LatsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -324,7 +332,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.TrapsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -342,7 +350,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.LDPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -360,7 +368,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.FDPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -378,7 +386,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.RDPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -396,7 +404,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.QuadsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -413,7 +421,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.HamsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -431,7 +439,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.GlutesPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -449,7 +457,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.CalvesPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -466,7 +474,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.AbsPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -484,7 +492,7 @@
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
                                 Progress="{Binding Profile.ObliquesPercentage}"
-                                ProgressColor="Blue"
+                                ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
@@ -496,11 +504,26 @@
                         </Grid>
                     </VerticalStackLayout>
                 </Frame>
-            <Grid HeightRequest="200">
-                <lvc:CartesianChart
-                Series="{Binding Series}">
-                </lvc:CartesianChart>
-            </Grid>
+                
+                
+                <Grid RowDefinitions="*,*">
+
+                    <lvc:CartesianChart x:Name="WeeklyChart"
+                    HorizontalOptions="FillAndExpand"
+                    HeightRequest="150"
+                    VerticalOptions="FillAndExpand"/>
+
+                </Grid>
+
+
+                <HorizontalStackLayout
+                    x:Name="WeeklyStatsButtonContainer"
+                    Spacing="20"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Start" />
+                
+                <Button Text="Exercises" TextColor="White" FontSize="15" BackgroundColor="#2b2b2b" Command="{Binding ExercisesCommand}"/>
+                <Button Text="Statistics" TextColor="White" FontSize="15" BackgroundColor="#2b2b2b" Command="{Binding StatisticsCommand}"/>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

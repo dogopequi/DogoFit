@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace GymTracker.Services
 {
@@ -29,13 +30,80 @@ namespace GymTracker.Services
         public static Profile Profile { get; set; }
         public static bool IsNewRoutine { get; set; }
         public static int RoutinesCount{ get; set; }
+        public static bool IsEmptyWorkout { get; set; }
+        public static Set? GetLastSetForExercise(string exerciseName, int setID)
+        {
+            return Workouts
+                .OrderByDescending(w => w.StartTime)
+                .SelectMany(w => w.Exercises)
+                .Where(e => e.Name == exerciseName)
+                .SelectMany(e => e.Sets)
+                .Where(s => s.ID == setID)
+                .Where(s => s.IsChecked)
+                .FirstOrDefault();
+        }
+
+        public static void RecalculateWeights()
+        {
+            double profileVolume = 0;
+
+            foreach (var routine in Workouts)
+            {
+                double routineVolume = 0;
+                foreach (var exercise in routine.Exercises)
+                {
+                    foreach (var set in exercise.Sets)
+                    {
+                        if (set != null && set.IsChecked)
+                        {
+                            set.Weight = AppState.Profile.UseMetric ? LbsToKg(set.Weight) : KgToLbs(set.Weight);
+                            routineVolume += set.Weight;
+                        }
+                    }
+                }
+
+                routine.Volume = routineVolume;
+                profileVolume += routineVolume;
+
+                DbHelper.UpdateWorkout(routine, routine.ID);
+            }
+
+            Profile.Volume = profileVolume;
+
+            foreach (var routine in Routines)
+            {
+                foreach (var exercise in routine.Exercises)
+                {
+                    foreach (var set in exercise.Sets)
+                    {
+                        if (set != null)
+                            set.Weight = AppState.Profile.UseMetric ? LbsToKg(set.Weight) : KgToLbs(set.Weight);
+                    }
+                }
+
+                DbHelper.UpdateRoutineTemplate(routine, routine.ID);
+            }
+
+            App.Db.SaveChanges();
+            DbHelper.SaveProfile(App.Db, Profile);
+            App.Db.SaveChanges();
+        }
 
 
+        public static double LbsToKg(double lbs)
+        {
+            return lbs * 0.45359237;
+        }
+
+        public static double KgToLbs(double kg)
+        {
+            return kg / 0.45359237;
+        }
         public static void AddRoutineToWorkouts(Routine routine)
         {
             if (routine == null) return;
 
-            var newRoutine = new Routine(routine);
+            var newRoutine = new Routine(routine, true);
             Workouts.Insert(0, newRoutine);
             RoutinesCount += 1;
 
@@ -156,7 +224,7 @@ namespace GymTracker.Services
                 return false;
             else if (name.Length > 20)
                 return false;
-            return !Routines.Any(r => r.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return true;
         }
 
         public static void SaveWorkoutInProgress()

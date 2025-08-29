@@ -18,11 +18,11 @@
             SemanticProperties.HeadingLevel="Level2"
             SemanticProperties.Description="Welcome to DogoTracker app" />
         <Button  
-            Text="Add Exercise"  
+            Text="Continue"  
             Command="{Binding AddExerciseCommand}"  
             HorizontalOptions="Center"
-            BackgroundColor="Blue"
-            BorderColor="Blue"
+            BackgroundColor="#008cff"
+            BorderColor="#008cff"
             Background="Blue"
             BorderWidth="1"
             TextColor="White"
