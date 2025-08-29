@@ -1,9 +1,28 @@
 # DogoFit
 
-Making this application to get some depth in C# and .NET.
-I've never developed a mobile app before, so this is great practice.
+Gym Log Workout Tracker
 
-This app uses .NET MAUI. Since it's cross-platform, I'll release it on Android, iOS, and Windows.
+This is a learning project, and it's heavily inspired by [Hevy](https://www.hevyapp.com/). I use [Hevy](https://www.hevyapp.com/) a lot. I like it.
 
-The app stores the data locally in a SQLite database. There's no protocol for cloud storage, and I'm not planning to implement that.
+
+## Details
+
+The application is written in C#, using the MAUI framework.
+
+I am only planning to release on Android, but I might come around to iOS and Windows.
+## Features
+
+- Quick start workout
+- Routine creation
+- Routine edition
+- Tracking of workouts
+- Exercises from workout in progress show the last corresponding set performed
+- Workout in progress save (1 at a time)
+- Set types: Normal, warmup, failure, drop (purely comestic, just to differentiate)
+- Graph and charts to track progress
+- Split information (function, muscle group, invidual msucles)
+- Data stored locally
+- Data can be exported and imported in Settings (JSON file)
+- No Ads
+- No internet connection required
 
