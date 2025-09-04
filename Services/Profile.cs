@@ -25,11 +25,14 @@ namespace GymTracker.Services
         public double TrapsPercentage => Sets == 0 ? 0 : (double)Traps / Sets;
         public double ForearmsPercentage => Sets == 0 ? 0 : (double)Forearms / Sets;
         public double PushPercentage => Sets == 0 ? 0 : (double)Push / Sets;
+        public double ChestGroupPercentage => Sets == 0 ? 0 : (double)ChestGroup / Sets;
         public double ChestPercentage => Sets == 0 ? 0 : (double)Chest / Sets;
         public double BackPercentage => Sets == 0 ? 0 : (double)Back / Sets;
-        public double LegsPercentage => Sets == 0 ? 0 : (double)Legs / Sets;
+        public double LegsFunctionPercentage => Sets == 0 ? 0 : (double)LegsFunction / Sets;
+        public double LegsGroupPercentage => Sets == 0 ? 0 : (double)LegsGroup / Sets;
         public double ArmsPercentage => Sets == 0 ? 0 : (double)Arms / Sets;
-        public double CorePercentage => Sets == 0 ? 0 : (double)Core / Sets;
+        public double CoreFunctionPercentage => Sets == 0 ? 0 : (double)CoreFunction / Sets;
+        public double CoreGroupPercentage => Sets == 0 ? 0 : (double)CoreGroup / Sets;
         public double ShouldersPercentage => Sets == 0 ? 0 : (double)Shoulders / Sets;
         public double PullPercentage => Sets == 0 ? 0 : (double)Pull / Sets;
         [JsonInclude]
@@ -136,11 +139,14 @@ namespace GymTracker.Services
                     OnPropertyChanged(nameof(TrapsPercentage));
                     OnPropertyChanged(nameof(ForearmsPercentage));
                     OnPropertyChanged(nameof(PushPercentage));
+                    OnPropertyChanged(nameof(ChestGroupPercentage));
                     OnPropertyChanged(nameof(ChestPercentage));
                     OnPropertyChanged(nameof(BackPercentage));
-                    OnPropertyChanged(nameof(LegsPercentage));
+                    OnPropertyChanged(nameof(LegsFunctionPercentage));
+                    OnPropertyChanged(nameof(LegsGroupPercentage));
                     OnPropertyChanged(nameof(ArmsPercentage));
-                    OnPropertyChanged(nameof(CorePercentage));
+                    OnPropertyChanged(nameof(CoreFunctionPercentage));
+                    OnPropertyChanged(nameof(CoreGroupPercentage));
                     OnPropertyChanged(nameof(ShouldersPercentage));
                     OnPropertyChanged(nameof(PullPercentage));
                 }
@@ -149,10 +155,13 @@ namespace GymTracker.Services
 
         private int _arms;
         private int _shoulders;
+        private int _chestGroup;
         private int _chest;
         private int _back;
-        private int _legs;
-        private int _core;
+        private int _legsFunction;
+        private int _legsGroup;
+        private int _coreFunction;
+        private int _coreGroup;
 
         private int _pull;
         private int _push;
@@ -183,6 +192,20 @@ namespace GymTracker.Services
                 }
             }
         }
+        public int ChestGroup
+        {
+            get => _chestGroup;
+            set
+            {
+                if (_chestGroup != value)
+                {
+                    _chestGroup = value;
+                    OnPropertyChanged(nameof(ChestGroup));
+                    OnPropertyChanged(nameof(ChestGroupPercentage));
+                }
+            }
+        }
+
         public int Chest
         {
             get => _chest;
@@ -209,29 +232,55 @@ namespace GymTracker.Services
                 }
             }
         }
-        public int Legs
+        public int LegsFunction
         {
-            get => _legs;
+            get => _legsFunction;
             set
             {
-                if (_legs != value)
+                if (_legsFunction != value)
                 {
-                    _legs = value;
-                    OnPropertyChanged(nameof(Legs));
-                    OnPropertyChanged(nameof(LegsPercentage));
+                    _legsFunction = value;
+                    OnPropertyChanged(nameof(LegsFunction));
+                    OnPropertyChanged(nameof(LegsFunctionPercentage));
                 }
             }
         }
-        public int Core
+        public int CoreFunction
         {
-            get => _core;
+            get => _coreFunction;
             set
             {
-                if (_core != value)
+                if (_coreFunction != value)
                 {
-                    _core = value;
-                    OnPropertyChanged(nameof(Core));
-                    OnPropertyChanged(nameof(CorePercentage));
+                    _coreFunction = value;
+                    OnPropertyChanged(nameof(CoreFunction));
+                    OnPropertyChanged(nameof(CoreFunctionPercentage));
+                }
+            }
+        }
+        public int LegsGroup
+        {
+            get => _legsGroup;
+            set
+            {
+                if (_legsGroup != value)
+                {
+                    _legsGroup = value;
+                    OnPropertyChanged(nameof(LegsGroup));
+                    OnPropertyChanged(nameof(LegsGroupPercentage));
+                }
+            }
+        }
+        public int CoreGroup
+        {
+            get => _coreGroup;
+            set
+            {
+                if (_coreGroup != value)
+                {
+                    _coreGroup = value;
+                    OnPropertyChanged(nameof(CoreGroup));
+                    OnPropertyChanged(nameof(CoreGroupPercentage));
                 }
             }
         }
@@ -541,7 +590,21 @@ namespace GymTracker.Services
             });
 
         }
-        public string DurationString => TimeSpan.FromSeconds(Duration).ToString(@"hh\:mm\:ss");
+        public string DurationString
+        {
+            get
+            {
+                var ts = TimeSpan.FromSeconds(Duration);
+
+                if (ts.TotalHours >= 24)
+                {
+                    return $"{ts.Days}d {ts.Hours:00}:{ts.Minutes:00}";
+                }
+
+                return $"{(int)ts.TotalHours:00}:{ts.Minutes:00}";
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 

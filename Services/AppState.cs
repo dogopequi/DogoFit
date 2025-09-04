@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -11,8 +12,14 @@ using System.Xml.Linq;
 
 namespace GymTracker.Services
 {
+
+    public enum ProfileStats
+    {
+        Empty, MuscleGroup, MuscleFunction, IndividualMuscle, MonthlyReport, Exercise, Weekly
+    }
     public static class AppState
     {
+        public static ProfileStats profileStat { get; set; }
         public static string CurrentRoutineName { get; set; } = "";
         public static ObservableCollection<Routine> Workouts { get; set; } = new ObservableCollection<Routine>();
         public static ObservableCollection<Routine> Routines { get; set; } = new ObservableCollection<Routine>();
@@ -25,7 +32,7 @@ namespace GymTracker.Services
         public static ObservableCollection<Category> Categories { get; set; }
         public static ObservableCollection<Exercise> AllExercises { get; set; }
         public static ObservableCollection<Exercise> FilteredExercises { get; set; }
-
+        public static Exercise SelectedExercise { get; set; }
         public static ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
         public static Profile Profile { get; set; }
         public static bool IsNewRoutine { get; set; }
@@ -123,11 +130,14 @@ namespace GymTracker.Services
             Profile.RearDelts += newRoutine.RearDelts;
             Profile.Forearms += newRoutine.Forearms;
             Profile.Push += newRoutine.Push;
+            Profile.ChestGroup += newRoutine.ChestGroup;
             Profile.Chest += newRoutine.Chest;
             Profile.Back += newRoutine.Back;
-            Profile.Legs += newRoutine.Legs;
+            Profile.LegsFunction += newRoutine.LegsFunction;
+            Profile.LegsGroup += newRoutine.LegsGroup;
             Profile.Arms += newRoutine.Arms;
-            Profile.Core += newRoutine.Core;
+            Profile.CoreFunction += newRoutine.CoreFunction;
+            Profile.CoreGroup += newRoutine.CoreGroup;
             Profile.Shoulders += newRoutine.Shoulders;
             Profile.Pull += newRoutine.Pull;
             Profile.Reps += newRoutine.RepCount;
@@ -200,10 +210,13 @@ namespace GymTracker.Services
                 Profile.Forearms -= existingRoutine.Forearms;
                 Profile.Push -= existingRoutine.Push;
                 Profile.Chest -= existingRoutine.Chest;
+                Profile.ChestGroup -= existingRoutine.ChestGroup;
                 Profile.Back -= existingRoutine.Back;
-                Profile.Legs -= existingRoutine.Legs;
+                Profile.LegsGroup -= existingRoutine.LegsGroup;
+                Profile.LegsFunction -= existingRoutine.LegsFunction;
                 Profile.Arms -= existingRoutine.Arms;
-                Profile.Core -= existingRoutine.Core;
+                Profile.CoreGroup -= existingRoutine.CoreGroup;
+                Profile.CoreFunction -= existingRoutine.CoreFunction;
                 Profile.Shoulders -= existingRoutine.Shoulders;
                 Profile.Pull -= existingRoutine.Pull;
                 Profile.Reps -= existingRoutine.RepCount;
@@ -234,6 +247,7 @@ namespace GymTracker.Services
 
         public static void Init()
         {
+            profileStat = ProfileStats.Empty;
             WorkoutInProgress = DbHelper.LoadWorkoutInProgress(App.Db);
             if(WorkoutInProgress != null)
             {
@@ -437,6 +451,80 @@ namespace GymTracker.Services
 
             FilteredExercises = new ObservableCollection<Exercise>(AllExercises.Select(e => new Exercise(e)));
 
+            TestWorkouts();
+
         }
+
+        private static void TestWorkouts()
+        {
+            var rnd = new Random();
+            var now = DateTime.Now;
+
+            for (int i = 0; i < 50; i++)
+            {
+                Routine workout = new Routine();
+                workout.Name = $"Test Workout {i + 1}";
+
+                DateTime start;
+                double roll = rnd.NextDouble();
+
+                if (roll < 0.25)
+                {
+                    int day = rnd.Next(1, DateTime.DaysInMonth(now.Year, now.Month) + 1);
+                    int hour = rnd.Next(0, 24);
+                    int minute = rnd.Next(0, 60);
+
+                    start = new DateTime(now.Year, now.Month, day, hour, minute, 0);
+                }
+                else if (roll < 0.50)
+                {
+                    DateTime lastMonth = now.AddMonths(-1);
+                    int day = rnd.Next(1, DateTime.DaysInMonth(lastMonth.Year, lastMonth.Month) + 1);
+                    int hour = rnd.Next(0, 24);
+                    int minute = rnd.Next(0, 60);
+
+                    start = new DateTime(lastMonth.Year, lastMonth.Month, day, hour, minute, 0);
+                }
+                else
+                {
+                    int daysBack = rnd.Next(0, 3 * 365);
+                    int hours = rnd.Next(0, 24);
+                    int minutes = rnd.Next(0, 60);
+
+                    start = now.AddDays(-daysBack).AddHours(-hours).AddMinutes(-minutes);
+                }
+
+                workout.StartTime = start;
+                workout.Duration = TimeSpan.FromMinutes(rnd.Next(30, 121));
+                workout.EndTime = workout.StartTime + workout.Duration;
+                int exerciseCount = rnd.Next(3, 8);
+                for (int e = 0; e < exerciseCount; e++)
+                {
+                    var exerciseTemplate = AllExercises[rnd.Next(AllExercises.Count)];
+                    Exercise exercise = new Exercise(exerciseTemplate);
+
+                    int setCount = rnd.Next(3, 6);
+                    for (int s = 0; s < setCount; s++)
+                    {
+                        exercise.AddSet(new Set
+                        {
+                            ID = s,
+                            IsChecked = true,
+                            Reps = rnd.Next(5, 16),
+                            Weight = Math.Round(rnd.NextDouble() * 100, 1),
+                            Type = SetType.Normal
+                        });
+                    }
+
+                    workout.AddExercise(exercise);
+                }
+
+                AddRoutineToWorkouts(workout);
+            }
+        }
+
+
+
+
     }
 }

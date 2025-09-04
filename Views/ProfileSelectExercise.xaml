@@ -27,7 +27,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Button Text="{Binding Name}"
-                 Command="{Binding BindingContext.FilterCommand, Source={x:Reference addexercise}}"
+                 Command="{Binding BindingContext.FilterCommand, Source={x:Reference profileselectexercise}}"
                  CommandParameter="{Binding .}"
                  Margin="5"
                  HeightRequest="60"
@@ -55,7 +55,7 @@
                 <DataTemplate>
                     <Frame BorderColor="MidnightBlue" CornerRadius="8" Padding="0" Margin="5" BackgroundColor="Black">
                         <Button Text="{Binding Name}"
-                             Command="{Binding BindingContext.SelectExerciseCommand, Source={x:Reference addexercise}}"
+                             Command="{Binding BindingContext.SelectExerciseCommand, Source={x:Reference profileselectexercise}}"
                              CommandParameter="{Binding .}"
                              FontSize="18"
                              Padding="15">

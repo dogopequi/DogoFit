@@ -361,7 +361,6 @@ namespace GymTracker.Models
                 AppState.WorkoutInProgress = routine;
                 AppState.WorkoutInProgress.Name = CurrentRoutineName;
                 AppState.CurrentRoutineName = string.Empty;
-                AppState.IsEmptyWorkout = false;
                 FilterByCategory("All", false);
 
                 await Shell.Current.Navigation.PopToRootAsync();

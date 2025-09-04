@@ -28,10 +28,10 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ScrollView>
-            <VerticalStackLayout Padding="0" Spacing="10" Margin="0,10,0,0" HorizontalOptions="Start">
+            <VerticalStackLayout Padding="0" Spacing="20" Margin="0,10,0,0" HorizontalOptions="Start">
                 <Label Text="Statistics" FontSize="30" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold" Margin="0,0,0,20"/>
                 <Frame BorderColor="Black" CornerRadius="8" Padding="0" Margin="0,0,0,20" HorizontalOptions="Center" >
-                    <HorizontalStackLayout Padding="10" Spacing="20" Margin="0,0,0,0" HorizontalOptions="Center">
+                    <HorizontalStackLayout Padding="0" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
                         <VerticalStackLayout Spacing="5">
                             <Label Text="WORKOUTS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
                             <Label Text="{Binding Profile.Workouts}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
@@ -40,7 +40,7 @@
                             <Label Text="VOLUME" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
                             <Label FontSize="16" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White">
                                 <Label.Text>
-                                    <MultiBinding StringFormat="{}{0:F2} {1}">
+                                    <MultiBinding StringFormat="{}{0:F0} {1}">
                                         <Binding Path="Profile.Volume"/>
                                         <Binding Path="Profile.WeightUnit"/>
                                     </MultiBinding>
@@ -64,7 +64,7 @@
 
                 <Button  Text="{Binding Profile.SplitButtonText}"
                         FontSize="15"
-                        Margin="0,10,0,10"
+                        Margin="0,0,0,0"
                         FontAttributes="Bold"
                         BackgroundColor="#2b2b2b"
                         BorderColor="#2b2b2b"
@@ -116,15 +116,15 @@
                         <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
                                 <Label Text="Legs" FontSize="15" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Profile.Legs}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Profile.LegsFunction}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
                             </VerticalStackLayout>
-                            <ProgressBar  Grid.Column="1" Progress="{Binding Profile.LegsPercentage}"
+                            <ProgressBar  Grid.Column="1" Progress="{Binding Profile.LegsFunctionPercentage}"
                                     ProgressColor="#008cff"
                                     BackgroundColor="Black"
                                     HeightRequest="12"
                                     HorizontalOptions="Fill"
                                     VerticalOptions="Center"/>
-                            <Label Grid.Column="2" Text="{Binding Profile.LegsPercentage, StringFormat='{0:P0}'}"
+                            <Label Grid.Column="2" Text="{Binding Profile.LegsFunctionPercentage, StringFormat='{0:P0}'}"
                                    HorizontalOptions="Start"
                                    VerticalOptions="Center"/>
                         </Grid>
@@ -132,15 +132,15 @@
                         <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
                                 <Label Text="Core" FontSize="15" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Profile.Core}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Profile.CoreFunction}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
                             </VerticalStackLayout>
-                            <ProgressBar  Grid.Column="1" Progress="{Binding Profile.CorePercentage}"
+                            <ProgressBar  Grid.Column="1" Progress="{Binding Profile.CoreFunctionPercentage}"
                                     ProgressColor="#008cff"
                                     BackgroundColor="Black"
                                     HeightRequest="12"
                                     HorizontalOptions="Fill"
                                     VerticalOptions="Center"/>
-                            <Label Grid.Column="2" Text="{Binding Profile.CorePercentage, StringFormat='{0:P0}'}"
+                            <Label Grid.Column="2" Text="{Binding Profile.CoreFunctionPercentage, StringFormat='{0:P0}'}"
                                    HorizontalOptions="Start"
                                    VerticalOptions="Center"/>
                         </Grid>
@@ -149,7 +149,7 @@
                 </Frame>
                 <Button  Text="{Binding Profile.MuscleGroupButtonText}"
                         FontSize="15"
-                        Margin="0,10,0,10"
+                        Margin="0,0,0,0"
                         FontAttributes="Bold"
                         BackgroundColor="#2b2b2b"
                         BorderColor="#2b2b2b"
@@ -183,17 +183,17 @@
                         <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
                                 <Label Text="Chest" FontSize="15" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Profile.Chest}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                <Label Text="{Binding Profile.ChestGroup}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                             </VerticalStackLayout>
                             <ProgressBar Grid.Column="1"
-                                Progress="{Binding Profile.ChestPercentage}"
+                                Progress="{Binding Profile.ChestGroupPercentage}"
                                 ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
                                 VerticalOptions="Center"/>
                             <Label Grid.Column="2"
-                                Text="{Binding Profile.ChestPercentage, StringFormat='{0:P0}'}"
+                                Text="{Binding Profile.ChestGroupPercentage, StringFormat='{0:P0}'}"
                                 HorizontalOptions="Start"
                                 VerticalOptions="Center"/>
                         </Grid>
@@ -235,11 +235,47 @@
                                 VerticalOptions="Center"/>
                         </Grid>
 
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Legs" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.LegsGroup}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.LegsGroupPercentage}"
+                                ProgressColor="#008cff"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.LegsGroupPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Core" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.CoreGroup}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.CoreGroupPercentage}"
+                                ProgressColor="#008cff"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                Text="{Binding Profile.CoreGroupPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
                     </VerticalStackLayout>
                 </Frame>
                 <Button  Text="{Binding Profile.IndividualMusclesButtonText}"
                         FontSize="15"
-                        Margin="0,10,0,10"
+                        Margin="0,0,0,0"
                         FontAttributes="Bold"
                         BackgroundColor="#2b2b2b"
                         BorderColor="#2b2b2b"
@@ -339,6 +375,24 @@
                                 VerticalOptions="Center"/>
                             <Label Grid.Column="2"
                                 Text="{Binding Profile.TrapsPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                <Label Text="Chest" FontSize="15" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Profile.Chest}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <ProgressBar Grid.Column="1"
+                                Progress="{Binding Profile.ChestPercentage}"
+                                ProgressColor="#008cff"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                             <Label Grid.Column="2"
+                                Text="{Binding Profile.ChestPercentage, StringFormat='{0:P0}'}"
                                 HorizontalOptions="Start"
                                 VerticalOptions="Center"/>
                         </Grid>
@@ -508,9 +562,9 @@
                 
                 <Grid RowDefinitions="*,*">
 
-                    <lvc:CartesianChart x:Name="WeeklyChart"
+                    <lvc:CartesianChart x:Name="WeeklyChart"  Margin="0,0,0,0" ZoomMode="X"
                     HorizontalOptions="FillAndExpand"
-                    HeightRequest="150"
+                    HeightRequest="200"
                     VerticalOptions="FillAndExpand"/>
 
                 </Grid>
@@ -522,8 +576,8 @@
                     HorizontalOptions="Center"
                     VerticalOptions="Start" />
                 
-                <Button Text="Exercises" TextColor="White" FontSize="15" BackgroundColor="#2b2b2b" Command="{Binding ExercisesCommand}"/>
-                <Button Text="Statistics" TextColor="White" FontSize="15" BackgroundColor="#2b2b2b" Command="{Binding StatisticsCommand}"/>
+                <Button Text="Exercises" TextColor="White" FontSize="15" BackgroundColor="#2b2b2b" Margin="40,20,40,0"  FontAttributes="Bold" Command="{Binding ExercisesCommand}"/>
+                <Button Text="More Statistics" TextColor="White" FontSize="15" BackgroundColor="#2b2b2b" Margin="40,0,40,0" FontAttributes="Bold" Command="{Binding StatisticsCommand}"/>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

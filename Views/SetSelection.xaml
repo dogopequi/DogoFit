@@ -4,8 +4,9 @@
              x:Class="GymTracker.Views.SetSelection"
              x:Name="setselection"
              BackgroundColor="Black"
-             Shell.NavBarIsVisible="False">
-
+             Shell.NavBarIsVisible="False"
+             xmlns:services="clr-namespace:GymTracker.Services">
+                
     <Grid Padding="10" RowDefinitions="*,Auto" RowSpacing="0">
         <CollectionView Grid.Row="0"
                         ItemsSource="{Binding SelectedExercises}"
@@ -90,7 +91,11 @@
                                                     HorizontalTextAlignment="Center"
                                                      FontSize="20"
                                                        TextColor="White"
-                                                    Text="{Binding Weight, Mode=TwoWay}" />
+                                                    Text="{Binding Weight, Mode=TwoWay}" >
+                                                    <Entry.Behaviors>
+                                                        <services:WeightInputBehaviour MaxDecimalPlaces="2"/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
                                             </VerticalStackLayout>
                                         </HorizontalStackLayout>
                                     </DataTemplate>

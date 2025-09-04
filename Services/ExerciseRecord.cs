@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 namespace GymTracker.Services
 {
 
-    public class ExerciseRecord
+    public struct ExerciseRecord
     {
         public int WeekNumber { get; set; }
         public int Year { get; set; }
         public DateTime StartDate { get; set; }
-        public int HeaviestWeight { get; set; }
-        public double BestSessionVolume { get; set; }
-        public (double, int) BestSetSession { get; set; }
-        public double BestOneRepMax { get; set; }
-        public int TotalSets { get; set; }
-        public int TotalReps { get; set; }
-        public  double TotalVolume { get; set; }
+        public double HeaviestWeight { get; set; }
+        public double SessionVolume { get; set; }
+        public (double, int) BestSet { get; set; }
+        public double OneRepMax { get; set; }
+        public int Sets { get; set; }
+        public int Reps { get; set; }
     }
 }

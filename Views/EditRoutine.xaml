@@ -6,7 +6,8 @@
              Title="EditRoutine"
              Shell.NavBarIsVisible="False"
              x:Name="editroutine"
-             BackgroundColor="Black">
+             BackgroundColor="Black"
+             xmlns:services="clr-namespace:GymTracker.Services">
     <Grid Padding="10" RowDefinitions="Auto,*,Auto" RowSpacing="0">
 
         <controls:Entry x:Name="RoutineName"  
@@ -111,7 +112,11 @@
                                                     HorizontalTextAlignment="Center"
                                                      FontSize="20"
                                                        TextColor="White"
-                                                    Text="{Binding Weight, Mode=TwoWay}" />
+                                                    Text="{Binding Weight, Mode=TwoWay}" >
+                                                    <Entry.Behaviors>
+                                                        <services:WeightInputBehaviour MaxDecimalPlaces="2"/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
                                             </VerticalStackLayout>
                                         </HorizontalStackLayout>
                                     </DataTemplate>

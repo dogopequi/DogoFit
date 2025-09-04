@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace GymTracker.Services
 {
-    public class WeekStat
+    public struct WeekStat
     {
         public int WeekNumber { get; set; }
         public int Year { get; set; }
         public DateTime StartDate { get; set; }
         public double Volume { get; set; }
-        public double Duration { get; set; }
+        public TimeSpan Duration { get; set; }
         public int Reps { get; set; }
         public int Sets { get; set; }
     }

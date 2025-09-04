@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Views.ProfileExerciseStats"
+             BackgroundColor="Black"
+             Shell.NavBarIsVisible="False"
+             Title="ProfileExerciseStats"
+             x:Name="profileexercisestats"
+             xmlns:local="clr-namespace:GymTracker.Models;assembly=GymTracker"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui">
+    <VerticalStackLayout Spacing="20" HorizontalOptions="Center" Margin="20,20,20,0">
+        <Label Text="{Binding SelectedExerciseName}" TextColor="#008cff" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold"/>
+        <Grid RowDefinitions="*,*">
+
+            <lvc:CartesianChart x:Name="ExerciseChart"  Margin="10,0,10,0"  ZoomMode="X"
+                HorizontalOptions="FillAndExpand"
+                HeightRequest="150"
+                VerticalOptions="FillAndExpand"/>
+
+        </Grid>
+        <ScrollView Orientation="Horizontal">
+            <HorizontalStackLayout x:Name="ExerciseStatsButtonContainer" Spacing="10">
+            </HorizontalStackLayout>
+        </ScrollView>
+        <Label Text="All Time" TextColor="White" BackgroundColor="Black" HorizontalOptions="Center" FontSize="20"/>
+        <VerticalStackLayout Spacing="10">
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_HW">
+                <Label Text="Heaviest Weight" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_ORM">
+                <Label Text="Best One Rep Max" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_SetV">
+                <Label Text="Best Set Volume" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_SessionV">
+                <Label Text="Best Session Volume" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_S">
+                <Label Text="Total Sets" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_R">
+                <Label Text="Total Reps" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+            <Grid ColumnSpacing="60" HorizontalOptions="FillAndExpand" Margin="20,0,20,0" x:Name="Grid_V">
+                <Label Text="Total Volume" TextColor="White" BackgroundColor="Black" HorizontalOptions="Start"/>
+            </Grid>
+            <BoxView HeightRequest="1"
+                    BackgroundColor="#2b2b2b"
+                    HorizontalOptions="FillAndExpand"
+                                 Margin="0,10,0,10"/>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentPage>

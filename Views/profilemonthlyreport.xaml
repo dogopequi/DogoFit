@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Views.profilemonthlyreport"
+             Title="profilemonthlyreport"
+             BackgroundColor="Black"
+             Shell.NavBarIsVisible="False"
+             x:Name="profilemonthreport"
+             xmlns:local="clr-namespace:GymTracker.Models;assembly=GymTracker"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui">
+    <ScrollView Margin="0,0,0,20">
+        <VerticalStackLayout Margin="20,20,20,0" Spacing="20" HorizontalOptions="Start">
+            <Label x:Name="MR_Label" Text="-" TextColor="White" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold"/>
+            <Grid RowDefinitions="*,*">
+
+                <lvc:CartesianChart x:Name="MRChart"  Margin="10,0,10,0"  ZoomMode="X"
+                HorizontalOptions="FillAndExpand"
+                HeightRequest="150"
+                VerticalOptions="FillAndExpand"/>
+
+            </Grid>
+
+            <ScrollView Orientation="Horizontal">
+                <HorizontalStackLayout x:Name="MR_ButtonContainer" Spacing="20" HorizontalOptions="Center" VerticalOptions="Start">
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <Label Text="Current vs Last Month" TextColor="White" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold"/>
+            
+            <Grid ColumnDefinitions="*,*" HorizontalOptions="FillAndExpand" VerticalOptions="Start" ColumnSpacing="20">
+                <Frame Grid.Column="0" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                    <VerticalStackLayout  x:Name="MR_WorkoutContainer" Spacing="5">
+                        <Label Text="Workouts" TextColor="White" HorizontalTextAlignment="Start"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                    <VerticalStackLayout  x:Name="MR_VolumeContainer" Spacing="5">
+                        <Label Text="Volume" TextColor="White" HorizontalTextAlignment="Start"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+            <Grid ColumnDefinitions="*,*" HorizontalOptions="FillAndExpand" VerticalOptions="Start" ColumnSpacing="20">
+                <Frame Grid.Column="0" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                    <VerticalStackLayout  x:Name="MR_IntensityContainer" Spacing="5">
+                        <Label Text="Intensity" TextColor="White" HorizontalTextAlignment="Start"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                    <VerticalStackLayout  x:Name="MR_DurationContainer" Spacing="5">
+                        <Label Text="Duration" TextColor="White" HorizontalTextAlignment="Start"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+            <Grid ColumnDefinitions="*,*" HorizontalOptions="FillAndExpand" VerticalOptions="Start" ColumnSpacing="20">
+                <Frame Grid.Column="0" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                    <VerticalStackLayout  x:Name="MR_SetsContainer" Spacing="5">
+                        <Label Text="Sets" TextColor="White" HorizontalTextAlignment="Start"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                    <VerticalStackLayout  x:Name="MR_RepsContainer" Spacing="5">
+                        <Label Text="Reps" TextColor="White" HorizontalTextAlignment="Start"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

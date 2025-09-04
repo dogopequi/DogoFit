@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -25,9 +26,12 @@ namespace GymTracker.Services
         private int _arms;
         private int _shoulders;
         private int _chest;
+        private int _chestGroup;
         private int _back;
-        private int _legs;
-        private int _core;
+        private int _legsFunction;
+        private int _legsGroup;
+        private int _coreGroup;
+        private int _coreFunction;
 
         private bool _isSplitsVisible;
         public bool IsSplitsVisible
@@ -114,6 +118,21 @@ namespace GymTracker.Services
                 }
             }
         }
+
+        [JsonInclude]
+        public int ChestGroup
+        {
+            get => _chestGroup;
+            private set
+            {
+                if (_chestGroup != value)
+                {
+                    _chestGroup = value;
+                    OnPropertyChanged(nameof(ChestGroup));
+                    OnPropertyChanged(nameof(ChestGroupPercentage));
+                }
+            }
+        }
         [JsonInclude]
         public int Back
         {
@@ -129,30 +148,58 @@ namespace GymTracker.Services
             }
         }
         [JsonInclude]
-        public int Legs
+        public int LegsFunction
         {
-            get => _legs;
+            get => _legsFunction;
             private set
             {
-                if (_legs != value)
+                if (_legsFunction != value)
                 {
-                    _legs = value;
-                    OnPropertyChanged(nameof(Legs));
-                    OnPropertyChanged(nameof(LegsPercentage));
+                    _legsFunction = value;
+                    OnPropertyChanged(nameof(LegsFunction));
+                    OnPropertyChanged(nameof(LegsFunctionPercentage));
                 }
             }
         }
         [JsonInclude]
-        public int Core
+        public int LegsGroup
         {
-            get => _core;
+            get => _legsGroup;
             private set
             {
-                if (_core != value)
+                if (_legsGroup != value)
                 {
-                    _core = value;
-                    OnPropertyChanged(nameof(Core));
-                    OnPropertyChanged(nameof(CorePercentage));
+                    _legsGroup = value;
+                    OnPropertyChanged(nameof(LegsGroup));
+                    OnPropertyChanged(nameof(LegsGroupPercentage));
+                }
+            }
+        }
+        [JsonInclude]
+        public int CoreGroup
+        {
+            get => _coreGroup;
+            private set
+            {
+                if (_coreGroup != value)
+                {
+                    _coreGroup = value;
+                    OnPropertyChanged(nameof(CoreGroup));
+                    OnPropertyChanged(nameof(CoreGroupPercentage));
+                }
+            }
+        }
+        [JsonInclude]
+        public int CoreFunction
+        {
+            get => _coreFunction;
+            private set
+            {
+                if (_coreFunction != value)
+                {
+                    _coreFunction = value;
+                    OnPropertyChanged(nameof(CoreFunction));
+                    OnPropertyChanged(nameof(CoreFunctionPercentage));
                 }
             }
         }
@@ -195,10 +242,13 @@ namespace GymTracker.Services
                     OnPropertyChanged(nameof(ForearmsPercentage));
                     OnPropertyChanged(nameof(PushPercentage));
                     OnPropertyChanged(nameof(ChestPercentage));
+                    OnPropertyChanged(nameof(ChestGroupPercentage));
                     OnPropertyChanged(nameof(BackPercentage));
-                    OnPropertyChanged(nameof(LegsPercentage));
+                    OnPropertyChanged(nameof(LegsGroupPercentage));
+                    OnPropertyChanged(nameof(LegsFunctionPercentage));
                     OnPropertyChanged(nameof(ArmsPercentage));
-                    OnPropertyChanged(nameof(CorePercentage));
+                    OnPropertyChanged(nameof(CoreFunctionPercentage));
+                    OnPropertyChanged(nameof(CoreGroupPercentage));
                     OnPropertyChanged(nameof(ShouldersPercentage));
                     OnPropertyChanged(nameof(PullPercentage));
                 }
@@ -486,10 +536,10 @@ namespace GymTracker.Services
                             Push += exercise.SetCountChecked;
                             break;
                         case "Legs":
-                            Legs += exercise.SetCountChecked;
+                            LegsFunction += exercise.SetCountChecked;
                             break;
                         case "Core":
-                            Core += exercise.SetCountChecked;
+                            CoreFunction += exercise.SetCountChecked;
                             break;
                     }
                 }
@@ -508,7 +558,13 @@ namespace GymTracker.Services
                             Back += exercise.SetCountChecked;
                             break;
                         case "Chest":
-                            Chest += exercise.SetCountChecked;
+                            ChestGroup += exercise.SetCountChecked;
+                            break;
+                        case "Core":
+                            CoreGroup += exercise.SetCountChecked;
+                            break;
+                        case "Legs":
+                            LegsGroup += exercise.SetCountChecked;
                             break;
                     }
                 }
@@ -553,11 +609,14 @@ namespace GymTracker.Services
                         case "Front Delts":
                             FrontDelts += exercise.SetCountChecked;
                             break;
-                        case "Forearm":
+                        case "Forearms":
                             Forearms += exercise.SetCountChecked;
                             break;
                         case "Lats":
-                            Forearms += exercise.SetCountChecked;
+                            Lats += exercise.SetCountChecked;
+                            break;
+                        case "Chest":
+                            Chest += exercise.SetCountChecked;
                             break;
                     }
                 }
@@ -570,10 +629,13 @@ namespace GymTracker.Services
         {
             get
             {
-                if (IsRunning)
-                    return (DateTime.Now - StartTime).ToString(@"hh\:mm\:ss");
-                else
-                    return Duration.ToString(@"hh\:mm\:ss");
+                var ts = IsRunning ? DateTime.Now - StartTime : Duration;
+
+                if (ts.TotalHours >= 24)
+                {
+                    return $"{ts.Days}d {ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
+                }
+                return $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
             }
         }
 
@@ -611,6 +673,7 @@ namespace GymTracker.Services
 
         public Routine()
         {
+            RoutineID = Random.Shared.NextInt64(long.MinValue, long.MaxValue);
             SubscribeExerciseEvents(_exercises);
             ToggleSplitsCommand = new Command(() =>
             {
@@ -652,10 +715,13 @@ namespace GymTracker.Services
             Forearms = other.Forearms;
             Push = other.Push;
             Chest = other.Chest;
+            ChestGroup = other.ChestGroup;
             Back = other.Back;
-            Legs = other.Legs;
+            LegsFunction = other.LegsFunction;
+            LegsGroup = other.LegsGroup;
             Arms = other.Arms;
-            Core = other.Core;
+            CoreFunction = other.CoreFunction;
+            CoreGroup = other.CoreGroup;
             Shoulders = other.Shoulders;
             Pull = other.Pull;
             if (copyID)
@@ -844,10 +910,13 @@ namespace GymTracker.Services
         public double ForearmsPercentage => SetCount == 0 ? 0 : (double)Forearms / SetCount;
         public double PushPercentage => SetCount == 0 ? 0 : (double)Push / SetCount;
         public double ChestPercentage => SetCount == 0 ? 0 : (double)Chest / SetCount;
+        public double ChestGroupPercentage => SetCount == 0 ? 0 : (double)ChestGroup / SetCount;
         public double BackPercentage => SetCount == 0 ? 0 : (double)Back / SetCount;
-        public double LegsPercentage => SetCount == 0 ? 0 : (double)Legs / SetCount;
+        public double LegsGroupPercentage => SetCount == 0 ? 0 : (double)LegsGroup / SetCount;
+        public double LegsFunctionPercentage => SetCount == 0 ? 0 : (double)LegsFunction / SetCount;
         public double ArmsPercentage => SetCount == 0 ? 0 : (double)Arms / SetCount;
-        public double CorePercentage => SetCount == 0 ? 0 : (double)Core / SetCount;
+        public double CoreFunctionPercentage => SetCount == 0 ? 0 : (double)CoreFunction / SetCount;
+        public double CoreGroupPercentage => SetCount == 0 ? 0 : (double)CoreGroup / SetCount;
         public double ShouldersPercentage => SetCount == 0 ? 0 : (double)Shoulders / SetCount;
         public double PullPercentage => SetCount == 0 ? 0 : (double)Pull / SetCount;
 

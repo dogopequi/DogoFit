@@ -9,7 +9,7 @@ namespace GymTracker
         public App()
         {
             InitializeComponent();
-            //DbHelper.DeleteDatabase("gymtracker.db");
+            DbHelper.DeleteDatabase("gymtracker.db");
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "gymtracker.db");
             var options = new DbContextOptionsBuilder<AppDbContext>()

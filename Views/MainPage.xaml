@@ -35,7 +35,7 @@
                                             HorizontalOptions="Center"
                                             HorizontalTextAlignment="Center">
                                         <Label.Text>
-                                            <MultiBinding StringFormat="{}{0:F2} {1}">
+                                            <MultiBinding StringFormat="{}{0:F0} {1}">
                                                 <Binding Path="Volume"/>
                                                 <Binding Path="BindingContext.Profile.WeightUnit" Source="{x:Reference mainpage}"/>
                                             </MultiBinding>
@@ -122,17 +122,17 @@
                                     <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
                                         <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
                                             <Label Text="Legs" FontSize="15" HorizontalOptions="Start"/>
-                                            <Label Text="{Binding Legs}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                            <Label Text="{Binding LegsFunction}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                                         </VerticalStackLayout>
                                         <ProgressBar Grid.Column="1"
-                                Progress="{Binding LegsPercentage}"
+                                Progress="{Binding LegsFunctionPercentage}"
                                 ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
                                 VerticalOptions="Center"/>
                                         <Label Grid.Column="2"
-                                Text="{Binding LegsPercentage, StringFormat='{0:P0}'}"
+                                Text="{Binding LegsFunctionPercentage, StringFormat='{0:P0}'}"
                                 HorizontalOptions="Fill"
                                 HorizontalTextAlignment="Center"
                                 VerticalOptions="Center"/>
@@ -141,17 +141,17 @@
                                     <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
                                         <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
                                             <Label Text="Core" FontSize="15" HorizontalOptions="Start"/>
-                                            <Label Text="{Binding Core}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                            <Label Text="{Binding CoreFunction}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                                         </VerticalStackLayout>
                                         <ProgressBar Grid.Column="1"
-                                Progress="{Binding CorePercentage}"
+                                Progress="{Binding CoreFunctionPercentage}"
                                 ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
                                 VerticalOptions="Center"/>
                                         <Label Grid.Column="2"
-                                Text="{Binding CorePercentage, StringFormat='{0:P0}'}"
+                                Text="{Binding CoreFunctionPercentage, StringFormat='{0:P0}'}"
                                 HorizontalOptions="Fill"
                                 HorizontalTextAlignment="Center"
                                 VerticalOptions="Center"/>
@@ -185,17 +185,17 @@
                                     <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
                                         <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
                                             <Label Text="Chest" FontSize="15" HorizontalOptions="Start"/>
-                                            <Label Text="{Binding Chest}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                            <Label Text="{Binding ChestGroup}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                                         </VerticalStackLayout>
                                         <ProgressBar Grid.Column="1"
-                                Progress="{Binding ChestPercentage}"
+                                Progress="{Binding ChestGroupPercentage}"
                                 ProgressColor="#008cff"
                                 BackgroundColor="Black"
                                 HeightRequest="12"
                                 HorizontalOptions="Fill"
                                 VerticalOptions="Center"/>
                                         <Label Grid.Column="2"
-                                Text="{Binding ChestPercentage, StringFormat='{0:P0}'}"
+                                Text="{Binding ChestGroupPercentage, StringFormat='{0:P0}'}"
                                 HorizontalOptions="Fill"
                                 HorizontalTextAlignment="Center"
                                 VerticalOptions="Center"/>
@@ -235,6 +235,44 @@
                                 VerticalOptions="Center"/>
                                         <Label Grid.Column="2"
                                 Text="{Binding ShouldersPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                            <Label Text="Core" FontSize="15" HorizontalOptions="Start"/>
+                                            <Label Text="{Binding CoreGroup}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                        <ProgressBar Grid.Column="1"
+                                Progress="{Binding CoreGroupPercentage}"
+                                ProgressColor="#008cff"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                        <Label Grid.Column="2"
+                                Text="{Binding CoreGroupPercentage, StringFormat='{0:P0}'}"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Center"
+                                VerticalOptions="Center"/>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="80,*,60" Padding="0" HorizontalOptions="FillAndExpand" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="2">
+                                            <Label Text="Legs" FontSize="15" HorizontalOptions="Start"/>
+                                            <Label Text="{Binding LegsGroup}" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                        <ProgressBar Grid.Column="1"
+                                Progress="{Binding LegsGroupPercentage}"
+                                ProgressColor="#008cff"
+                                BackgroundColor="Black"
+                                HeightRequest="12"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center"/>
+                                        <Label Grid.Column="2"
+                                Text="{Binding LegsGroupPercentage, StringFormat='{0:P0}'}"
                                 HorizontalOptions="Fill"
                                 HorizontalTextAlignment="Center"
                                 VerticalOptions="Center"/>

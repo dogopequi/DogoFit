@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Views.profileindimuscles"
+             Title="profileindimuscles"
+             BackgroundColor="Black"
+             x:Name="profileindimuscle"
+             Shell.NavBarIsVisible="False"
+             xmlns:local="clr-namespace:GymTracker.Models;assembly=GymTracker"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui">
+
+    <ScrollView Margin="0,0,0,20">
+        <VerticalStackLayout Margin="20,20,20,0" Spacing="20" HorizontalOptions="Start">
+        <ScrollView Orientation="Horizontal">
+            <HorizontalStackLayout x:Name="IM_StatsButtonContainer" Spacing="20" HorizontalOptions="Center" VerticalOptions="Start">
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <Grid RowDefinitions="*,*">
+            <lvc:PieChart x:Name="IndividualMuscleChart" Margin="10,0,10,0"
+                HorizontalOptions="FillAndExpand"
+                HeightRequest="500"
+                VerticalOptions="FillAndExpand" LegendPosition="Bottom" LegendTextPaint="{Binding LegendTextPaint}"/>
+        </Grid>
+
+            <ScrollView Orientation="Horizontal" HorizontalOptions="Center">
+            <HorizontalStackLayout x:Name="IM_DisplayButtonContainer" Spacing="20" HorizontalOptions="Center" VerticalOptions="Start">
+            </HorizontalStackLayout>
+        </ScrollView>
+
+            <ScrollView Orientation="Horizontal" HorizontalOptions="Center">
+            <HorizontalStackLayout x:Name="IM_ChoiceButtonContainer" Spacing="20" HorizontalOptions="Center" VerticalOptions="Start">
+            </HorizontalStackLayout>
+        </ScrollView>
+
+
+        <Label x:Name="IM_InfoLabel"/>
+
+        <Grid ColumnDefinitions="*,*" HorizontalOptions="FillAndExpand" VerticalOptions="Start" ColumnSpacing="20" Margin="0,0,0,0">
+            <Frame Grid.Column="0" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                <VerticalStackLayout  x:Name="IM_IntensityContainer" Spacing="5">
+                    <Label Text="Intensity" TextColor="White" HorizontalTextAlignment="Start"/>
+                </VerticalStackLayout>
+            </Frame>
+            <Frame Grid.Column="1" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                <VerticalStackLayout  x:Name="IM_VolumeContainer" Spacing="5">
+                    <Label Text="Volume" TextColor="White" HorizontalTextAlignment="Start"/>
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+        <Grid ColumnDefinitions="*,*" HorizontalOptions="FillAndExpand" VerticalOptions="Start" ColumnSpacing="20">
+            <Frame Grid.Column="0" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                <VerticalStackLayout  x:Name="IM_SetsContainer" Spacing="5">
+                    <Label Text="Sets" TextColor="White" HorizontalTextAlignment="Start"/>
+                </VerticalStackLayout>
+            </Frame>
+            <Frame Grid.Column="1" BorderColor="#2b2b2b" HorizontalOptions="FillAndExpand" Padding="20">
+                <VerticalStackLayout  x:Name="IM_RepsContainer" Spacing="5">
+                    <Label Text="Reps" TextColor="White" HorizontalTextAlignment="Start"/>
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
+    </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GymTracker.Views.ProfileMoreStatistics"
+             Title="ProfileMoreStatistics"
+             x:Name="profilemorestatistics"
+             BackgroundColor="Black"
+             Shell.NavBarIsVisible="False"
+             xmlns:local="clr-namespace:GymTracker.Models;assembly=GymTracker"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui">
+    <VerticalStackLayout Padding="20" Spacing="20" Margin="0,10,0,0" HorizontalOptions="FillAndExpand">
+        <Frame BackgroundColor="#2b2b2b" Padding="20">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding MuscleGroupDistCommand}" />
+            </Frame.GestureRecognizers>
+
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Muscle Group Distribution"
+               TextColor="White"
+               FontSize="17"
+               FontAttributes="Bold"/>
+                <Label Text="View your all-time and monthly muscle group distribution"
+               TextColor="Gray"/>
+            </VerticalStackLayout>
+        </Frame>
+        <Frame BackgroundColor="#2b2b2b">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding MuscleFunctionDistCommand}" />
+            </Frame.GestureRecognizers>
+
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Muscle Function Distribution"
+               TextColor="White"
+               FontSize="17"
+               FontAttributes="Bold"/>
+                <Label Text="View your all-time and monthly muscle distribution by function"
+               TextColor="Gray"/>
+            </VerticalStackLayout>
+        </Frame>
+        <Frame BackgroundColor="#2b2b2b">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding IndividualMuscleDistCommand}" />
+            </Frame.GestureRecognizers>
+
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Individual Muscle Distribution"
+               TextColor="White"
+               FontSize="17"
+               FontAttributes="Bold"/>
+                <Label Text="View your all-time and monthly muscle distribution invididually"
+               TextColor="Gray"/>
+            </VerticalStackLayout>
+        </Frame>
+        <Frame BackgroundColor="#2b2b2b">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding MonthlyReportCommand}" />
+            </Frame.GestureRecognizers>
+
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Monthly Report"
+               TextColor="White"
+               FontSize="17"
+               FontAttributes="Bold"/>
+                <Label Text="Recap your monthly workouts and statistics"
+               TextColor="Gray"/>
+            </VerticalStackLayout>
+        </Frame>
+    </VerticalStackLayout>
+</ContentPage>

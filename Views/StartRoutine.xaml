@@ -6,7 +6,8 @@
              Title="StartRoutine"
              BackgroundColor="Black"
              Shell.NavBarIsVisible="False"
-             x:Name="startroutine">
+             x:Name="startroutine"
+             xmlns:services="clr-namespace:GymTracker.Services">
     <Grid Padding="10" RowDefinitions="Auto,Auto,*,Auto, Auto" RowSpacing="0">
 
         <VerticalStackLayout Padding="10" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
@@ -131,7 +132,11 @@
                                                     HorizontalTextAlignment="Center"
                                                      FontSize="20"
                                                        TextColor="White"
-                                                    Text="{Binding Weight, Mode=TwoWay}" />
+                                                    Text="{Binding Weight, Mode=TwoWay}">
+                                                    <Entry.Behaviors>
+                                                        <services:WeightInputBehaviour MaxDecimalPlaces="2"/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
                                             </VerticalStackLayout>
                                             <CheckBox IsChecked="{Binding IsChecked}"
                                                       Margin="0,15,0,0"
