@@ -1,14 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace GymTracker.Services
 {
@@ -17,17 +8,44 @@ namespace GymTracker.Services
     {
         Empty, MuscleGroup, MuscleFunction, IndividualMuscle, MonthlyReport, Exercise, Weekly
     }
+    public enum ProfileExercise
+    {
+        Empty, Add, Edit
+    }
+    public enum MuscleFunctions
+    {
+        Push, Pull, Legs, Core
+    }
+    public enum WorkoutStates
+    {
+       None, NewRoutine, EditingRoutine, EmptyWorkout, WorkoutInProgress, StartRoutine
+    }
+    public enum MuscleGroups
+    {
+        Legs, Chest, Back, Core, Arms, Shoulders
+    }
+    public enum Muscles
+    {
+        Biceps, Triceps, Quadriceps, Hamstrings, Glutes, Calves, Abdominals, Obliques, Traps, LateralDelts, RearDelts, FrontDelts, Forearms, Lats, Chest, LowerBack
+    }
     public static class AppState
     {
+        public static Muscles[] MusclesList = new Muscles[] { Muscles.Biceps, Muscles.Triceps, Muscles.Quadriceps, Services.Muscles.Hamstrings,
+            Muscles.Glutes, Muscles.Calves, Muscles.Abdominals, Muscles.Obliques, Muscles.Traps, Services.Muscles.RearDelts,
+            Muscles.FrontDelts, Muscles.Forearms, Muscles.Lats, Muscles.Chest,Muscles.LowerBack };
+
+        public static MuscleGroups[] MuscleGroupsList = new MuscleGroups[] { MuscleGroups.Legs, MuscleGroups.Chest, MuscleGroups.Back,
+            MuscleGroups.Core,MuscleGroups.Arms,MuscleGroups.Shoulders};
+        public static MuscleFunctions[] MuscleFunctionsList = new MuscleFunctions[] { MuscleFunctions.Pull, MuscleFunctions.Push, MuscleFunctions.Core, MuscleFunctions.Legs};
         public static ProfileStats profileStat { get; set; }
+        public static WorkoutStates WorkoutState { get; set; }
+        public static ProfileExercise profileExercise { get; set; }
         public static string CurrentRoutineName { get; set; } = "";
         public static ObservableCollection<Routine> Workouts { get; set; } = new ObservableCollection<Routine>();
         public static ObservableCollection<Routine> Routines { get; set; } = new ObservableCollection<Routine>();
         public static HashSet<string> SelectedExerciseIds { get; set; } = new();
         public static Routine? EditedRoutine { get; set; } = new Routine();
-        public static bool IsEditingRoutine { get; set; }
         public static Routine? CurrentRoutine { get; set; }
-        public static bool IsWorkoutInProgress { get; set; } = false;
         public static Routine? WorkoutInProgress { get; set; } = null;
         public static ObservableCollection<Category> Categories { get; set; }
         public static ObservableCollection<Exercise> AllExercises { get; set; }
@@ -35,25 +53,23 @@ namespace GymTracker.Services
         public static Exercise SelectedExercise { get; set; }
         public static ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
         public static Profile Profile { get; set; }
-        public static bool IsNewRoutine { get; set; }
         public static int RoutinesCount{ get; set; }
-        public static bool IsEmptyWorkout { get; set; }
-        public static Set? GetLastSetForExercise(string exerciseName, int setID)
+        public static Exercise EditedExercise { get; set; }
+        public static int MaxExercises { get; set; }
+        public static Set? GetLastSetForExercise(string exerciseName, int setID, SideType setSide)
         {
             return Workouts
                 .OrderByDescending(w => w.StartTime)
                 .SelectMany(w => w.Exercises)
                 .Where(e => e.Name == exerciseName)
                 .SelectMany(e => e.Sets)
-                .Where(s => s.ID == setID)
+                .Where(s => s.ID == setID && s.Side == setSide)
                 .Where(s => s.IsChecked)
                 .FirstOrDefault();
         }
 
         public static void RecalculateWeights()
         {
-            double profileVolume = 0;
-
             foreach (var routine in Workouts)
             {
                 double routineVolume = 0;
@@ -64,18 +80,11 @@ namespace GymTracker.Services
                         if (set != null && set.IsChecked)
                         {
                             set.Weight = AppState.Profile.UseMetric ? LbsToKg(set.Weight) : KgToLbs(set.Weight);
-                            routineVolume += set.Weight;
                         }
                     }
                 }
-
-                routine.Volume = routineVolume;
-                profileVolume += routineVolume;
-
                 DbHelper.UpdateWorkout(routine, routine.ID);
             }
-
-            Profile.Volume = profileVolume;
 
             foreach (var routine in Routines)
             {
@@ -112,39 +121,6 @@ namespace GymTracker.Services
 
             var newRoutine = new Routine(routine, true);
             Workouts.Insert(0, newRoutine);
-            RoutinesCount += 1;
-
-            newRoutine.CalculateSetDistribution();
-            Profile.Lats += newRoutine.Lats;
-            Profile.Triceps += newRoutine.Triceps;
-            Profile.Biceps += newRoutine.Biceps;
-            Profile.Quadriceps += newRoutine.Quadriceps;
-            Profile.Hamstrings += newRoutine.Hamstrings;
-            Profile.Glutes += newRoutine.Glutes;
-            Profile.Calves += newRoutine.Calves;
-            Profile.Abdominals += newRoutine.Abdominals;
-            Profile.Obliques += newRoutine.Obliques;
-            Profile.Traps += newRoutine.Traps;
-            Profile.LateralDelts += newRoutine.LateralDelts;
-            Profile.FrontDelts += newRoutine.FrontDelts;
-            Profile.RearDelts += newRoutine.RearDelts;
-            Profile.Forearms += newRoutine.Forearms;
-            Profile.Push += newRoutine.Push;
-            Profile.ChestGroup += newRoutine.ChestGroup;
-            Profile.Chest += newRoutine.Chest;
-            Profile.Back += newRoutine.Back;
-            Profile.LegsFunction += newRoutine.LegsFunction;
-            Profile.LegsGroup += newRoutine.LegsGroup;
-            Profile.Arms += newRoutine.Arms;
-            Profile.CoreFunction += newRoutine.CoreFunction;
-            Profile.CoreGroup += newRoutine.CoreGroup;
-            Profile.Shoulders += newRoutine.Shoulders;
-            Profile.Pull += newRoutine.Pull;
-            Profile.Reps += newRoutine.RepCount;
-            Profile.Volume += newRoutine.Volume;
-            Profile.Sets += newRoutine.SetCount;
-            Profile.Duration += newRoutine.Duration.TotalSeconds;
-            Profile.Workouts += 1;
 
             var workout = DbHelper.ToDbWorkout(newRoutine);
             App.Db.Workouts.Add(workout);
@@ -194,36 +170,6 @@ namespace GymTracker.Services
             var existingRoutine = AppState.Workouts.FirstOrDefault(r => r.ID == workout.ID);
             if (existingRoutine != null)
             {
-                Profile.Lats -= existingRoutine.Lats;
-                Profile.Triceps -= existingRoutine.Triceps;
-                Profile.Biceps -= existingRoutine.Biceps;
-                Profile.Quadriceps -= existingRoutine.Quadriceps;
-                Profile.Hamstrings -= existingRoutine.Hamstrings;
-                Profile.Glutes -= existingRoutine.Glutes;
-                Profile.Calves -= existingRoutine.Calves;
-                Profile.Abdominals -= existingRoutine.Abdominals;
-                Profile.Obliques -= existingRoutine.Obliques;
-                Profile.Traps -= existingRoutine.Traps;
-                Profile.LateralDelts -= existingRoutine.LateralDelts;
-                Profile.FrontDelts -= existingRoutine.FrontDelts;
-                Profile.RearDelts -= existingRoutine.RearDelts;
-                Profile.Forearms -= existingRoutine.Forearms;
-                Profile.Push -= existingRoutine.Push;
-                Profile.Chest -= existingRoutine.Chest;
-                Profile.ChestGroup -= existingRoutine.ChestGroup;
-                Profile.Back -= existingRoutine.Back;
-                Profile.LegsGroup -= existingRoutine.LegsGroup;
-                Profile.LegsFunction -= existingRoutine.LegsFunction;
-                Profile.Arms -= existingRoutine.Arms;
-                Profile.CoreGroup -= existingRoutine.CoreGroup;
-                Profile.CoreFunction -= existingRoutine.CoreFunction;
-                Profile.Shoulders -= existingRoutine.Shoulders;
-                Profile.Pull -= existingRoutine.Pull;
-                Profile.Reps -= existingRoutine.RepCount;
-                Profile.Volume -= existingRoutine.Volume;
-                Profile.Sets -= existingRoutine.SetCount;
-                Profile.Duration -= existingRoutine.Duration.TotalSeconds;
-                Profile.Workouts -= 1;
                 AppState.Workouts.Remove(existingRoutine);
             }
             DbHelper.SaveProfile(App.Db, Profile);
@@ -247,16 +193,11 @@ namespace GymTracker.Services
 
         public static void Init()
         {
+            WorkoutState = WorkoutStates.None;
             profileStat = ProfileStats.Empty;
+            Profile = DbHelper.LoadProfile(App.Db);
+            profileExercise = ProfileExercise.Empty;
             WorkoutInProgress = DbHelper.LoadWorkoutInProgress(App.Db);
-            if(WorkoutInProgress != null)
-            {
-                IsWorkoutInProgress = true;
-            }
-            else
-            {
-                IsWorkoutInProgress = false;
-            }
             EditedRoutine = null;
             Workouts = new ObservableCollection<Routine>(
                 App.Db.Workouts
@@ -276,182 +217,177 @@ namespace GymTracker.Services
             foreach (var r in Routines) {
                 RoutinesCount += 1;
             }
-            Profile = DbHelper.LoadProfile(App.Db);
 
-            AllExercises = new ObservableCollection<Exercise>
+            AllExercises = new ObservableCollection<Exercise>(
+                App.Db.Exercises
+                    .AsEnumerable()
+                    .Select(t => DbHelper.FromDbExercise(t))
+                    .Where(e => e != null)
+            );
+
+            if(AllExercises.Count <= 0)
             {
-
-            new Exercise{ Name = "Bench Press (Barbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Bench Press (Dumbbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Incline Bench Press (Barbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Incline Bench Press (Dumbbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Decline Bench Press (Barbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Decline Bench Press (Dumbbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Chest Press (Machine)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Chest Press (Cable)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Fly (Cable)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Fly (Dumbbell)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Fly (Machine)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Chest Dip (Machine)", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Chest Dip", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-            new Exercise{ Name = "Push-Up", Function = "Push", MuscleGroup = "Chest", TargetMuscle = "Chest", SecondaryMuscles = new List<string>{"Triceps", "Front Delts" } },
-
-            new Exercise {Name = "Pull-Up", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Chin-Up", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Seated Row (Machine)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Seated Row (Cable)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "T Bar Row", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Bent Over Row", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Dumbbell Roww", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Lat Pulldown (Machine)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Lat Pulldown (Cable)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Close Grip Lat Pulldown (Machine)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Close Grip Lat Pulldown (Cable)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Behind The Neck Lat Pulldown", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Reverse Grip Lat Pulldown", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Lats", SecondaryMuscles = new List<string>{ "Biceps", "Rear Delts" } },
-            new Exercise {Name = "Shrugs (Dumbbell)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise {Name = "Shrugs (Barbell)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise {Name = "Shrugs (Machine)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise {Name = "Shrugs (Cable)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise {Name = "Upright Row (Dumbbell)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Biceps", "Front Delts" } },
-            new Exercise {Name = "Upright Row (Barbell)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Biceps", "Front Delts" } },
-            new Exercise {Name = "Upright Row (Machine)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Biceps", "Front Delts" } },
-            new Exercise {Name = "Upright Row (Cable)", Function = "Pull", MuscleGroup = "Back", TargetMuscle = "Traps", SecondaryMuscles = new List<string>{ "Biceps", "Front Delts" } },
-
-            new Exercise {Name = "Back Extension", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Lower Back", SecondaryMuscles = new List<string>{ "Lower Back" } },
-            new Exercise {Name = "Superman", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Lower Back", SecondaryMuscles = new List<string>{ "Lower Back" } },
-
-            new Exercise { Name = "Bicep Curl (Barbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Bicep Curl (Dumbbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Bicep Curl (Machine)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Bicep Curl (Cable)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Reverse Bicep Curl (Barbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Reverse Bicep Curl (Dumbbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Reverse Bicep Curl (Machine)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Reverse Bicep Curl (Cable)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Hammer Curl (Barbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Hammer Curl (Dumbbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Hammer Curl (Machine)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Hammer Curl (Cable)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "EZ Bar Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Reverse EZ Bar Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Preacher Curl (Barbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Preacher Curl (Dumbbell)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Preacher Curl (Machine)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Preacher Curl (Cable)", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Overhead Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            new Exercise { Name = "Incline Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Biceps", SecondaryMuscles = new List<string>{ "Forearms" } },
-            
-            new Exercise { Name = "Behind the Back Wrist Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Forearms", SecondaryMuscles = new List<string>{ "Biceps" } },
-            new Exercise { Name = "Seated Wrist Extension", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Forearms", SecondaryMuscles = new List<string>{ "Biceps" } },
-            new Exercise { Name = "Seated Palms Up Wrist Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Forearms", SecondaryMuscles = new List<string>{ "Biceps" } },
-            new Exercise { Name = "Wrist Roller", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Forearms", SecondaryMuscles = new List<string>{ "Biceps" } },
-            new Exercise { Name = "Machine Wrist Curl", Function = "Pull", MuscleGroup = "Arms", TargetMuscle = "Forearms", SecondaryMuscles = new List<string>{ "Biceps" } },
-            
-            new Exercise { Name = "Arnold Press (Dumbbell)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Triceps", "Lateral Delts", "Rear Delts" } },
-            new Exercise { Name = "Arnold Press (Barbell)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Triceps", "Lateral Delts", "Rear Delts" } },
-            new Exercise { Name = "Reverse Fly (Machine)", Function = "Pull", MuscleGroup = "Shoulders", TargetMuscle = "Rear Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Reverse Fly (Cable)", Function = "Pull", MuscleGroup = "Shoulders", TargetMuscle = "Rear Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Reverse Fly (Dumbbell)", Function = "Pull", MuscleGroup = "Shoulders", TargetMuscle = "Rear Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Face Pull", Function = "Pull", MuscleGroup = "Shoulders", TargetMuscle = "Rear Delts", SecondaryMuscles = new List<string>{ "Traps", "Biceps" } },
-            new Exercise { Name = "Lateral Raise (Machine)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Lateral Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Lateral Raise (Dumbbell)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Lateral Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Lateral Raise (Cable)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Lateral Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Front Raise (Machine)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Front Raise (Dumbbell)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Front Raise (Cable)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Traps" } },
-            new Exercise { Name = "Shoulder Press (Dumbbell)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Triceps", "Lateral Delts", "Rear Delts" } },
-            new Exercise { Name = "Shoulder Press (Cable)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Triceps", "Lateral Delts", "Rear Delts" } },
-            new Exercise { Name = "Shoulder Press (Machine)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Triceps", "Lateral Delts", "Rear Delts" } },
-            new Exercise { Name = "Shoulder Press (Barbell)", Function = "Push", MuscleGroup = "Shoulders", TargetMuscle = "Front Delts", SecondaryMuscles = new List<string>{ "Triceps", "Lateral Delts", "Rear Delts" } },
-
-            new Exercise { Name = "Plank", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques", "Lower Back" } },
-            new Exercise { Name = "Crunch", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Ab Wheel", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques", "Lower Back" } },
-            new Exercise { Name = "Bicycle Crunch", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Bicycle Crunch (Raised Legs)", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Crunch (Cable)", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Crunch (Machine)", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Decline Crunch", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Elbow to Knee", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Obliques" } },
-            new Exercise { Name = "Hanging Knee Raise", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Hip Flexors" } },
-            new Exercise { Name = "Hanging Leg Raise", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Hip Flexors" } },
-            new Exercise { Name = "Leg Raise", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Hip Flexors" } },
-            new Exercise { Name = "L-Sit", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Abdominals", SecondaryMuscles = new List<string>{ "Hip Flexors", "Shoulders" } },
-            new Exercise { Name = "Russian Twist", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Obliques", SecondaryMuscles = new List<string>{ "Abdominals" } },
-            new Exercise { Name = "Side Plank", Function = "Core", MuscleGroup = "Core", TargetMuscle = "Obliques", SecondaryMuscles = new List<string>{ "Abdominals", "Lower Back" } },
-            
-            new Exercise { Name = "Barbell Squat", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Quadriceps", SecondaryMuscles = new List<string>{ "Glutes", "Hamstrings", "Core" } },
-            new Exercise { Name = "Goblet Squat", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Quadriceps", SecondaryMuscles = new List<string>{ "Glutes", "Hamstrings", "Core" } },
-            new Exercise { Name = "Smith Machine Squat", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Quadriceps", SecondaryMuscles = new List<string>{ "Glutes", "Hamstrings" } },
-            new Exercise { Name = "Leg Press", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Quadriceps", SecondaryMuscles = new List<string>{ "Glutes", "Hamstrings" } },
-            new Exercise { Name = "Leg Extension", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Quadriceps", SecondaryMuscles = new List<string>() },
-            new Exercise { Name = "Lying Leg Curl", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Calves" } },
-            new Exercise { Name = "Seated Leg Curl", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Calves" } },
-            new Exercise { Name = "Calf Press", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string>{ "Hamstrings" } },
-            new Exercise { Name = "Deadlift", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Glutes", "Lower Back", "Core" } },
-            new Exercise { Name = "Romanian Deadlift (Barbell)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Glutes", "Lower Back" } },
-            new Exercise { Name = "Stiff-Legged Deadlift (Barbell)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Glutes", "Lower Back" } },
-            new Exercise { Name = "Stiff-Legged Deadlift (Dumbbell)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Glutes", "Lower Back" } },
-            new Exercise { Name = "Hip Thrust (Barbell)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Glutes", SecondaryMuscles = new List<string>{ "Hamstrings", "Core" } },
-            new Exercise { Name = "Hip Thrust (Machine)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Glutes", SecondaryMuscles = new List<string>{ "Hamstrings", "Core" } },
-            new Exercise { Name = "Romanian Deadlift (Dumbbell)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Hamstrings", SecondaryMuscles = new List<string>{ "Glutes", "Lower Back" } },
-            
-            new Exercise { Name = "Standing Calf Raise", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string> { "" } },
-            new Exercise { Name = "Standing Calf Raise (Machine)", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string> { "" } },
-            new Exercise { Name = "Seated Calf Raise", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string> { "" } },
-            new Exercise { Name = "Donkey Calf Raise", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string> { "" } },
-            new Exercise { Name = "Smith Machine Calf Raise", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string> { "" } },
-            new Exercise { Name = "Leg Press Calf Raise", Function = "Legs", MuscleGroup = "Legs", TargetMuscle = "Calves", SecondaryMuscles = new List<string> { "" } },
-
-
-            new Exercise { Name = "Tricep Pushdown (Cable)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Tricep Pushdown (Machine)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Bench Dip", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Chest", "Front Delts" } },
-            new Exercise { Name = "Skullcrusher (Barbell)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Skullcrusher (Dumbbell)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Overhead Extension (Barbell)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Overhead Extension (Dumbbell)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Overhead Extension (Machine)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Overhead Extension (Cable)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Kickback (Dumbbell)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Kickback (Machine)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Kickback (Cable)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Front Delts" } },
-            new Exercise { Name = "Close Grip Bench Press", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Chest", "Front Delts" } },
-            new Exercise { Name = "Triceps Dip (Machine)", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Chest", "Front Delts" } },
-            new Exercise { Name = "Triceps Dip", Function = "Push", MuscleGroup = "Arms", TargetMuscle = "Triceps", SecondaryMuscles = new List<string>{ "Chest", "Front Delts" } },
-            };
-
-            Categories = new ObservableCollection<Category>
+                AllExercises = new ObservableCollection<Exercise>
             {
-                new Category { Name = "All", IsSelected = true },
-                new Category { Name = "Push" },
-                new Category { Name = "Pull" },
-                new Category { Name = "Biceps" },
-                new Category { Name = "Triceps" },
-                new Category { Name = "Chest" },
-                new Category { Name = "Back" },
-                new Category { Name = "Shoulders" },
-                new Category { Name = "Legs" },
-                new Category { Name = "Core" },
-                new Category { Name = "Arms" },
-                new Category { Name = "Obliques" },
-                new Category { Name = "Front Delts" },
-                new Category { Name = "Rear Delts" },
-                new Category { Name = "Lateral Delts" },
-                new Category { Name = "Quadriceps" },
-                new Category { Name = "Hamstrings" },
-                new Category { Name = "Glutes" },
-                new Category { Name = "Traps" },
-                new Category { Name = "Abdominals" },
-                new Category { Name = "Calves" },
-                new Category { Name = "Lats" },
-                new Category { Name = "Forearms" }
-            };
+                new Exercise{ Name = "Bench Press (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Bench Press (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise{ Name = "Incline Bench Press (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Incline Bench Press (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise{ Name = "Decline Bench Press (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Decline Bench Press (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise{ Name = "Chest Press (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Chest Press (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Fly (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Fly (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise{ Name = "Fly (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Chest Dip (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Chest Dip", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise{ Name = "Push-Up", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Chest, TargetMuscle = Muscles.Chest, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.FrontDelts}, IsUnilateral = false},
 
+                new Exercise {Name = "Pull-Up", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Chin-Up", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Seated Row (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Seated Row (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "T Bar Row", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Bent Over Row", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Dumbbell Roww", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Lat Pulldown (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Lat Pulldown (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Close Grip Lat Pulldown (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Close Grip Lat Pulldown (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Behind The Neck Lat Pulldown", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Reverse Grip Lat Pulldown", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Lats, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise {Name = "Shrugs (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = true},
+                new Exercise {Name = "Shrugs (Barbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise {Name = "Shrugs (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise {Name = "Shrugs (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise {Name = "Upright Row (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise {Name = "Upright Row (Barbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise {Name = "Upright Row (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise {Name = "Upright Row (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Back, TargetMuscle = Muscles.Traps, SecondaryMuscles = new List<Muscles>{Muscles.Biceps, Muscles.FrontDelts}, IsUnilateral = false},
+
+                new Exercise {Name = "Back Extension", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.LowerBack, SecondaryMuscles = new List<Muscles>{Muscles.LowerBack}, IsUnilateral = false},
+                new Exercise {Name = "Superman", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.LowerBack, SecondaryMuscles = new List<Muscles>{Muscles.LowerBack}, IsUnilateral = false},
+
+                new Exercise { Name = "Bicep Curl (Barbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Bicep Curl (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = true},
+                new Exercise { Name = "Bicep Curl (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Bicep Curl (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Reverse Bicep Curl (Barbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Reverse Bicep Curl (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = true},
+                new Exercise { Name = "Reverse Bicep Curl (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Reverse Bicep Curl (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Hammer Curl (Barbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Hammer Curl (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = true},
+                new Exercise { Name = "Hammer Curl (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Hammer Curl (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "EZ Bar Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Reverse EZ Bar Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Preacher Curl (Barbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Preacher Curl (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = true},
+                new Exercise { Name = "Preacher Curl (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Preacher Curl (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Overhead Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+                new Exercise { Name = "Incline Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Biceps, SecondaryMuscles = new List<Muscles>{Muscles.Forearms}, IsUnilateral = false},
+
+                new Exercise { Name = "Behind the Back Wrist Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Forearms, SecondaryMuscles = new List<Muscles>{Muscles.Biceps}, IsUnilateral = false},
+                new Exercise { Name = "Seated Wrist Extension", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Forearms, SecondaryMuscles = new List<Muscles>{Muscles.Biceps}, IsUnilateral = false},
+                new Exercise { Name = "Seated Palms Up Wrist Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Forearms, SecondaryMuscles = new List<Muscles>{Muscles.Biceps}, IsUnilateral = false},
+                new Exercise { Name = "Wrist Roller", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Forearms, SecondaryMuscles = new List<Muscles>{Muscles.Biceps}, IsUnilateral = false},
+                new Exercise { Name = "Machine Wrist Curl", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Forearms, SecondaryMuscles = new List<Muscles>{Muscles.Biceps}, IsUnilateral = false},
+
+                new Exercise { Name = "Arnold Press (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.LateralDelts, Muscles.RearDelts}, IsUnilateral = true},
+                new Exercise { Name = "Arnold Press (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.LateralDelts, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise { Name = "Reverse Fly (Machine)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.RearDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = false},
+                new Exercise { Name = "Reverse Fly (Cable)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.RearDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = false},
+                new Exercise { Name = "Reverse Fly (Dumbbell)", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.RearDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = true},
+                new Exercise { Name = "Face Pull", Function = MuscleFunctions.Pull, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.RearDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps, Muscles.Biceps}, IsUnilateral = false},
+                new Exercise { Name = "Lateral Raise (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.LateralDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = false},
+                new Exercise { Name = "Lateral Raise (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.LateralDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = true},
+                new Exercise { Name = "Lateral Raise (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.LateralDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = false},
+                new Exercise { Name = "Front Raise (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = false},
+                new Exercise { Name = "Front Raise (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = true},
+                new Exercise { Name = "Front Raise (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Traps}, IsUnilateral = false},
+                new Exercise { Name = "Shoulder Press (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.LateralDelts, Muscles.RearDelts}, IsUnilateral = true},
+                new Exercise { Name = "Shoulder Press (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.LateralDelts, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise { Name = "Shoulder Press (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.LateralDelts, Muscles.RearDelts}, IsUnilateral = false},
+                new Exercise { Name = "Shoulder Press (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Shoulders, TargetMuscle = Muscles.FrontDelts, SecondaryMuscles = new List<Muscles>{Muscles.Triceps, Muscles.LateralDelts, Muscles.RearDelts}, IsUnilateral = false},
+
+                new Exercise { Name = "Plank", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques, Muscles.LowerBack}, IsUnilateral = false},
+                new Exercise { Name = "Crunch", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Ab Wheel", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques, Muscles.LowerBack}, IsUnilateral = false},
+                new Exercise { Name = "Bicycle Crunch", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Bicycle Crunch (Raised Legs)", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Crunch (Cable)", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Crunch (Machine)", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Decline Crunch", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Elbow to Knee", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Hanging Knee Raise", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Hanging Leg Raise", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Leg Raise", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "L-Sit", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Abdominals, SecondaryMuscles = new List<Muscles>{Muscles.Obliques}, IsUnilateral = false},
+                new Exercise { Name = "Russian Twist", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Obliques, SecondaryMuscles = new List<Muscles>{Muscles.Abdominals}, IsUnilateral = false},
+                new Exercise { Name = "Side Plank", Function = MuscleFunctions.Core, MuscleGroup = MuscleGroups.Core, TargetMuscle = Muscles.Obliques, SecondaryMuscles = new List<Muscles>{Muscles.Abdominals, Muscles.LowerBack}, IsUnilateral = false},
+
+                new Exercise { Name = "Barbell Squat", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Quadriceps, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.Hamstrings, Muscles.Abdominals}, IsUnilateral = false},
+                new Exercise { Name = "Goblet Squat", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Quadriceps, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.Hamstrings, Muscles.Abdominals}, IsUnilateral = false},
+                new Exercise { Name = "Smith Machine Squat", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Quadriceps, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.Hamstrings}, IsUnilateral = false},
+                new Exercise { Name = "Leg Press", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Quadriceps, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.Hamstrings}, IsUnilateral = false},
+                new Exercise { Name = "Leg Extension", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Quadriceps, SecondaryMuscles =  new List<Muscles>{Muscles.Glutes }, IsUnilateral = false},
+                new Exercise { Name = "Lying Leg Curl", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Calves}, IsUnilateral = false},
+                new Exercise { Name = "Seated Leg Curl", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Calves}, IsUnilateral = false},
+                new Exercise { Name = "Calf Press", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = new List<Muscles>{Muscles.Hamstrings}, IsUnilateral = false},
+                new Exercise { Name = "Deadlift", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.LowerBack, Muscles.Abdominals}, IsUnilateral = false},
+                new Exercise { Name = "Romanian Deadlift (Barbell)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.LowerBack}, IsUnilateral = false},
+                new Exercise { Name = "Stiff-Legged Deadlift (Barbell)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.LowerBack}, IsUnilateral = false},
+                new Exercise { Name = "Stiff-Legged Deadlift (Dumbbell)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.LowerBack}, IsUnilateral = true},
+                new Exercise { Name = "Hip Thrust (Barbell)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Glutes, SecondaryMuscles = new List<Muscles>{Muscles.Hamstrings, Muscles.Abdominals}, IsUnilateral = false},
+                new Exercise { Name = "Hip Thrust (Machine)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Glutes, SecondaryMuscles = new List<Muscles>{Muscles.Hamstrings, Muscles.Abdominals}, IsUnilateral = false},
+                new Exercise { Name = "Romanian Deadlift (Dumbbell)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Hamstrings, SecondaryMuscles = new List<Muscles>{Muscles.Glutes, Muscles.LowerBack}, IsUnilateral = true},
+
+                new Exercise { Name = "Standing Calf Raise", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = null },
+                new Exercise { Name = "Standing Calf Raise (Machine)", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = null },
+                new Exercise { Name = "Seated Calf Raise", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = null },
+                new Exercise { Name = "Donkey Calf Raise", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = null },
+                new Exercise { Name = "Smith Machine Calf Raise", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = null },
+                new Exercise { Name = "Leg Press Calf Raise", Function = MuscleFunctions.Legs, MuscleGroup = MuscleGroups.Legs, TargetMuscle = Muscles.Calves, SecondaryMuscles = null },
+
+
+                new Exercise { Name = "Tricep Pushdown (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Tricep Pushdown (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Bench Dip", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.Chest, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Skullcrusher (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Skullcrusher (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise { Name = "Overhead Extension (Barbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Overhead Extension (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise { Name = "Overhead Extension (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Overhead Extension (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Kickback (Dumbbell)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = true},
+                new Exercise { Name = "Kickback (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Kickback (Cable)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Close Grip Bench Press", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.Chest, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Triceps Dip (Machine)", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.Chest, Muscles.FrontDelts}, IsUnilateral = false},
+                new Exercise { Name = "Triceps Dip", Function = MuscleFunctions.Push, MuscleGroup = MuscleGroups.Arms, TargetMuscle = Muscles.Triceps, SecondaryMuscles = new List<Muscles>{Muscles.Chest, Muscles.FrontDelts}, IsUnilateral = false},
+                };
+                foreach(Exercise e in AllExercises)
+                {
+                    var dbexercise = DbHelper.ToDbExercise(e);
+                    App.Db.Exercises.Add(dbexercise);
+                    App.Db.SaveChanges();
+                }
+            }
+            Categories = new ObservableCollection<Category>();
+            Categories.Add(new Category { Name = "All", IsSelected = true });
+            foreach (var mf in MuscleFunctionsList)
+                Categories.Add(new Category { Name = MuscleFunctionToString(mf), IsSelected = false });
+            foreach (var mg in MuscleGroupsList)
+                Categories.Add(new Category { Name = MuscleGroupToString(mg), IsSelected = false });
+            foreach (var m in MusclesList)
+                Categories.Add(new Category { Name = MuscleToString(m), IsSelected = false });
+            Categories = new ObservableCollection<Category>(Categories.GroupBy(c => c.Name).Select(g => g.First()));
             FilteredExercises = new ObservableCollection<Exercise>(AllExercises.Select(e => new Exercise(e)));
 
-            TestWorkouts();
+           //TestWorkouts();
 
         }
 
@@ -512,7 +448,8 @@ namespace GymTracker.Services
                             IsChecked = true,
                             Reps = rnd.Next(5, 16),
                             Weight = Math.Round(rnd.NextDouble() * 100, 1),
-                            Type = SetType.Normal
+                            Type = SetType.Normal,
+                            Side = SideType.None
                         });
                     }
 
@@ -523,8 +460,189 @@ namespace GymTracker.Services
             }
         }
 
+        public static String MuscleFunctionToString(MuscleFunctions f)
+        {
+            return f.ToString();
+        }
+        public static String MuscleGroupToString(MuscleGroups g)
+        {
+            return g.ToString();
+        }
+        public static String MuscleToString(Muscles m)
+        {
+            switch(m)
+            {
+                case Muscles.RearDelts:
+                    return "Rear Delts";
+                case Muscles.FrontDelts:
+                    return "Front Delts";
+                case Muscles.LateralDelts:
+                    return "Lateral Delts";
+                case Muscles.LowerBack:
+                    return "Lower Back";
+                default:
+                    return m.ToString();
+            }
+        }
+
+        public static string MGMToString(object e)
+        {
+            switch (e)
+            {
+                case MuscleFunctions f:
+                    return MuscleFunctionToString(f);
+                case MuscleGroups g:
+                    return MuscleGroupToString(g);
+                case Muscles m:
+                    return MuscleToString(m);
+                default:
+                    return string.Empty;
+            }
+        }
 
 
+        public static void SelectCategory(Category category)
+        {
+            foreach (var c in Categories)
+                c.IsSelected = false;
 
+            category.IsSelected = true;
+
+            FilterByCategory(category.Name, false);
+        }
+
+        public static void FilterByCategory(String category, bool useName)
+        {
+            FilteredExercises.Clear();
+        
+            IEnumerable<Exercise> filtered;
+        
+            if (!useName)
+            {
+                if (category.Equals("All", StringComparison.OrdinalIgnoreCase))
+                {
+                    filtered = AllExercises;
+                }
+                else if (AppState.MuscleFunctionsList.Any(mf => AppState.MuscleFunctionToString(mf) == category))
+                {
+                    filtered = AllExercises.Where(e => AppState.MuscleFunctionToString(e.Function) == category);
+                }
+                else if (AppState.MuscleGroupsList.Any(mg => AppState.MuscleGroupToString(mg) == category))
+                {
+                    filtered = AllExercises.Where(e => AppState.MuscleGroupToString(e.MuscleGroup) == category);
+                }
+                else if (AppState.MusclesList.Any(m => AppState.MuscleToString(m) == category))
+                {
+                    filtered = AllExercises.Where(e => AppState.MuscleToString(e.TargetMuscle) == category);
+                }
+                else
+                {
+                    filtered = Enumerable.Empty<Exercise>();
+                }
+
+            }
+            else
+            {
+                filtered = category == "All"
+                    ? AllExercises
+                    : AllExercises.Where(e => e.Name.Contains(category, StringComparison.OrdinalIgnoreCase));
+            }
+
+            foreach (var ex in filtered)
+            {
+                var clone = new Exercise(ex);
+                clone.IsSelected = AppState.SelectedExerciseIds.Contains(ex.Name);
+                FilteredExercises.Add(clone);
+            }
+        }
+
+        public static string RemoveExercises(List<Exercise> exercises)
+        {
+            string error = "";
+            if (AllExercises == null)
+            {
+                error += "DogoFit's Exercise List is empty.\n";
+                return error;
+            }
+            if(exercises == null)
+            {
+                error += "No exercises have been selected.\n";
+                return error;
+            }
+            foreach (Exercise exercise in exercises)
+            {
+                Exercise e = AllExercises.FirstOrDefault(x => string.Equals(x.Name, exercise.Name, StringComparison.OrdinalIgnoreCase));
+        
+                if (e == null)
+                {
+                    error += $"Exercise with name: {exercise.Name} doesn't exist in DogoFit's Exercise List.\n";
+                }
+                else
+                {
+                    var exercisedb = DbHelper.ToDbExercise(e);
+                    DbHelper.RemoveExercise(exercisedb.Id);
+                    App.Db.SaveChanges();
+                    AllExercises.Remove(e);
+                    error += $"Removed exercise: {exercise.Name}.\n";
+                }
+            }
+            return error;
+        }
+
+        public static string UpdateExercise(Exercise updated)
+        {
+            string r = "";
+            if (AllExercises == null)
+            {
+                r += "DogoFit's exercise list is empty.\n";
+                return r;
+            }
+            if(EditedExercise == null)
+            {
+                r += "Edited exercise does not exist (null).\n";
+                return r;
+            }
+            Exercise exercise = AllExercises.FirstOrDefault(x => string.Equals(x.Name, EditedExercise.Name, StringComparison.OrdinalIgnoreCase));
+            if (exercise == null)
+            {
+                r += "Can't find the selected exercise in the exercise list.\n";
+                return r;
+            }
+            AllExercises.Remove(exercise);
+            AllExercises.Add(updated);
+            var dbexercise = DbHelper.ToDbExercise(exercise);
+            DbHelper.UpdateExercise(updated, updated.ID);
+            r += "Updated the exercise.\n";
+            return r;
+        }
+        public static (bool, string) AddExercise(Exercise exercise)
+        {
+            bool r = true;
+            string errors = "";
+            if (AppState.AllExercises.Any(e => e.Name.Equals(exercise.Name, StringComparison.OrdinalIgnoreCase)))
+			{
+				errors += "An Exercise with this name already exists.\n";
+                r = false;
+			}
+			if (exercise.Name.Length > 50)
+			{
+				errors += "Exercise Name over 50 characters.\n";
+				r = false;
+			}
+            if (string.IsNullOrEmpty(exercise.Name))
+			{
+				errors += "Exercise Name is empty.\n";
+				r = false;
+			}
+            if (r == true)
+            {
+                AllExercises.Add(exercise);
+                var dbexercise = DbHelper.ToDbExercise(exercise);
+                App.Db.Exercises.Add(dbexercise);
+                App.Db.SaveChanges();
+            }
+
+            return (r, errors);
+        }
     }
 }

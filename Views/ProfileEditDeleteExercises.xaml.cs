@@ -1,17 +1,17 @@
 using GymTracker.Models;
 using GymTracker.Services;
-
 namespace GymTracker.Views;
 
-public partial class ProfileSelectExercise : ContentPage
+public partial class ProfileEditDeleteExercises : ContentPage
 {
-	public ProfileSelectExercise()
+	public ProfileEditDeleteExercises()
 	{
 		InitializeComponent();
         var vm = new ProfileViewModel();
         BindingContext = vm;
-    }
-    private void ExerciseName_TextChanged(object sender, TextChangedEventArgs e)
+	}
+
+	private void ExerciseName_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (BindingContext is ProfileViewModel VM)
         {

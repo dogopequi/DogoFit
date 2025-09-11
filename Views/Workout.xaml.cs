@@ -13,18 +13,24 @@ public partial class Workout : ContentPage
 	{
 		InitializeComponent();
         BindingContext = new WorkoutViewModel();
+
+        UpdateRoutineCountLabel();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        UpdateRoutineCountLabel();
         var vm = BindingContext as WorkoutViewModel;
         if (vm != null)
         {
             vm.WorkoutInProgress = AppState.WorkoutInProgress;
-            if (AppState.IsWorkoutInProgress == false)
-                vm.OnDiscard();
         }
+    }
+
+    private void UpdateRoutineCountLabel()
+    {
+        RoutineCount.Text = "My Routines (" + AppState.Routines.Count().ToString() + ")";
     }
 
     private async void OptionsButton_Clicked(object sender, EventArgs e)
@@ -49,7 +55,8 @@ public partial class Workout : ContentPage
                         break;
 
                     case "Delete":
-                        vm.OnDeleteRoutine(routine);
+                        await vm.OnDeleteRoutine(routine);
+                        UpdateRoutineCountLabel();
                         break;
                 }
             }

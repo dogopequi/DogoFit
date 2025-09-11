@@ -8,7 +8,7 @@
              Shell.NavBarIsVisible="False"
              x:Name="startroutine"
              xmlns:services="clr-namespace:GymTracker.Services">
-    <Grid Padding="10" RowDefinitions="Auto,Auto,*,Auto, Auto" RowSpacing="0">
+    <Grid x:Name="StartRoutineGrid" Padding="10" RowDefinitions="Auto,*,Auto, Auto" RowSpacing="10">
 
         <VerticalStackLayout Padding="10" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
             <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
@@ -18,171 +18,37 @@
                 <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
                     <VerticalStackLayout Spacing="5">
                         <Label Text="VOLUME" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label Text="{Binding routine.Volume}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        <Label x:Name="VolumeLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                     </VerticalStackLayout>
                 </Frame>
                 <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
                     <VerticalStackLayout Spacing="5">
                         <Label Text="SETS" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label Text="{Binding routine.SetCount}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        <Label x:Name="SetsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                     </VerticalStackLayout>
                 </Frame>
                 <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
                     <VerticalStackLayout Spacing="5">
                         <Label Text="REPS" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label Text="{Binding routine.RepCount}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        <Label x:Name="RepsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
                     </VerticalStackLayout>
                 </Frame>
                 <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
-                        <VerticalStackLayout Spacing="5">
+                    <VerticalStackLayout Spacing="5">
                         <Label Text="TIME" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
                         <Label Text="{Binding routine.DurationString}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                    </VerticalStackLayout>
+                </Frame>
             </HorizontalStackLayout>
-
         </VerticalStackLayout>
-        
-        <CollectionView Grid.Row="2"
-                ItemsSource="{Binding routine.Exercises}"
-                ItemsLayout="VerticalList">
+        <ScrollView  Grid.Row="1">
+            <VerticalStackLayout x:Name="eVstack" Spacing="10" Padding="10" Margin="5">
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="5">
-                        <VerticalStackLayout Spacing="10">
-                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="0,0,0,-20">
-                                <Label Text="{Binding Name}" TextColor="#008cff"
-                               FontSize="20"
-                               FontAttributes="Bold"
-                               HorizontalTextAlignment="Center"
-                               Margin="20,0,0,20"/>
-                                <Button Grid.Column="1"
-                                Text="❌"
-                                FontSize="15"
-                                Padding="0"
-                                Margin="0,-20,0,0"
-                                BackgroundColor="Transparent"
-                                TextColor="Red"
-                                HorizontalOptions="End"
-                                Command="{Binding BindingContext.RemoveExerciseCommand, Source={x:Reference startroutine}}"
-                                CommandParameter="{Binding .}" />
-                            </Grid>
-                            <Entry Text="{Binding Description, Mode=TwoWay}"
-                                    Placeholder="Enter your exercise description here"
-                                    WidthRequest="300"
-                                    HorizontalOptions="Center"
-                                    FontSize="15" />
-                            <CollectionView ItemsSource="{Binding Sets}"
-                                    ItemsLayout="VerticalList"
-                                    Margin="10,0,0,0">
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate>
-                                        <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
-                                            <VerticalStackLayout Spacing="10">
-                                                <Label Text="Set" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
-                                                <Button FontAttributes="Bold"
-                                                     FontSize="20"
-                                                     Clicked="SetOptions_Clicked"
-                                                     Margin="0,-9,0,0"
-                                                     BackgroundColor="#0f0f0f"
-                                                     CommandParameter="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type CollectionView}}}">
-                                                    <Button.Triggers>
-                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Normal">
-                                                            <Setter Property="Text" Value="{Binding ID}" />
-                                                            <Setter Property="TextColor" Value="White" />
-                                                        </DataTrigger>
+            </VerticalStackLayout>
+        </ScrollView>
 
-                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Warmup">
-                                                            <Setter Property="Text" Value="W" />
-                                                            <Setter Property="TextColor" Value="Orange" />
-                                                        </DataTrigger>
-
-                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Failure">
-                                                            <Setter Property="Text" Value="F" />
-                                                            <Setter Property="TextColor" Value="Red" />
-                                                        </DataTrigger>
-
-                                                        <DataTrigger TargetType="Button" Binding="{Binding Type}" Value="Drop">
-                                                            <Setter Property="Text" Value="D" />
-                                                            <Setter Property="TextColor" Value="#008cff" />
-                                                        </DataTrigger>
-                                                    </Button.Triggers>
-                                                </Button>
-                                            </VerticalStackLayout>
-                                            <VerticalStackLayout Spacing="10">
-                                                <Label Text="Last" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
-                                                <Label Text="{Binding LastSet}" TextColor="Gray" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,3,0,0" FontSize="15" WidthRequest="50"/>
-                                            </VerticalStackLayout>
-                                            <VerticalStackLayout Spacing="0">
-                                                <Label Text="Reps" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
-                                                <Entry Placeholder="0"
-                                                        Keyboard="Numeric"
-                                                    WidthRequest="50"
-                                                    HorizontalTextAlignment="Center"
-                                                      FontSize="20"
-                                                       TextColor="White"
-                                                    Text="{Binding Reps, Mode=TwoWay}" />
-                                            </VerticalStackLayout>
-                                            <VerticalStackLayout Spacing="0">
-                                                <Label Text="Weight" HorizontalTextAlignment="Center" TextColor="LightGray" FontAttributes="Bold"/>
-                                                <Entry Placeholder="0"
-                                                    Keyboard="Numeric"
-                                                    WidthRequest="50"
-                                                    HorizontalTextAlignment="Center"
-                                                     FontSize="20"
-                                                       TextColor="White"
-                                                    Text="{Binding Weight, Mode=TwoWay}">
-                                                    <Entry.Behaviors>
-                                                        <services:WeightInputBehaviour MaxDecimalPlaces="2"/>
-                                                    </Entry.Behaviors>
-                                                </Entry>
-                                            </VerticalStackLayout>
-                                            <CheckBox IsChecked="{Binding IsChecked}"
-                                                      Margin="0,15,0,0"
-                                                      Scale="1.2"/>
-                                        </HorizontalStackLayout>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-
-                            <Button Text="Add Set"
-                            Command="{Binding BindingContext.AddSetToExerciseCommand,
-                                              Source={x:Reference startroutine}}"
-                            CommandParameter="{Binding .}"
-                            FontSize="14"
-                            BackgroundColor="#2b2b2b"
-                            BorderColor="#2b2b2b"
-                            Background="#2b2b2b"
-                            TextColor="White"
-                            FontAttributes="Bold"
-                            WidthRequest="275"
-                            Padding="5" />
-                            <Button Text="Remove Set"
-                            Command="{Binding BindingContext.RemoveSetFromExerciseCommand,
-                                              Source={x:Reference startroutine}}"
-                            CommandParameter="{Binding .}"
-                            FontSize="14"
-                            BackgroundColor="#2b2b2b"
-                            BorderColor="#2b2b2b"
-                            Background="#2b2b2b"
-                            TextColor="White"
-                            FontAttributes="Bold"
-                            WidthRequest="275"
-                            Padding="5" />
-                            <BoxView HeightRequest="5"
-                    BackgroundColor="#2b2b2b"
-                    HorizontalOptions="FillAndExpand"
-                                 Margin="0,20,0,0"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-
-        <Button Grid.Row="3"  
+        <Button x:Name ="addexercisebutton" Grid.Row="2"  
         Text="Add Exercise"  
-        Command="{Binding AddExerciseCommand}"
         HorizontalOptions="Center"
         BackgroundColor="#2b2b2b"
         BorderColor="#2b2b2b"
@@ -191,7 +57,7 @@
         Margin="0,0,0,20"
         WidthRequest="300"/>
 
-        <Button Grid.Row="4"  
+        <Button Grid.Row="3"  
                 Text="Finish"  
                 Command="{Binding FinishRoutineCommand}"
                 HorizontalOptions="Center"

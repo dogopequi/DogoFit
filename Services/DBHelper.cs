@@ -51,6 +51,53 @@ namespace GymTracker.Services
             return routine;
         }
 
+        public static Exercise FromDbExercise(DbExercise dbExercise)
+        {
+            if (dbExercise == null || string.IsNullOrEmpty(dbExercise.JsonExercise))
+                return null;
+            var exercise = JsonSerializer.Deserialize<Exercise>(dbExercise.JsonExercise);
+            exercise.ID = dbExercise.Id;
+            return exercise;
+        }
+
+        public static void RemoveExercise(int exerciseId)
+        {
+            var db = App.Db;
+            var exercise = db.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        
+            if (exercise != null)
+            {
+                db.Exercises.Remove(exercise);
+                db.SaveChanges();
+            }
+        }
+
+        public static void UpdateExercise(Exercise exercise, int exerciseId)
+        {
+            var db = App.Db;
+            var dbExercise = db.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+            if (dbExercise != null)
+            {
+                dbExercise.JsonExercise = JsonSerializer.Serialize(exercise, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.Never
+                });
+                db.SaveChanges();
+            }
+        }
+
+        public static DbExercise ToDbExercise(Exercise exercise)
+        {
+            return new DbExercise
+            {
+                JsonExercise = JsonSerializer.Serialize(exercise, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.Never
+                })
+            };
+        }
+
+
 
         public static DbRoutineTemplate ToDbRoutineTemplate(Routine routine)
         {

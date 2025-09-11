@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -14,6 +15,10 @@ namespace GymTracker.Services
         Failure,
         Drop
     }
+    public enum SideType
+    {
+        None, Left, Right
+    }
     public class Set : INotifyPropertyChanged
     {
         private int _id;
@@ -22,7 +27,20 @@ namespace GymTracker.Services
         private bool _isChecked;
         private string _lastSet;
         private SetType _type;
+        private SideType _side;
 
+        public SideType Side
+        {
+            get => _side;
+            set
+            {
+                if (_side != value)
+                {
+                    _side = value;
+                    OnPropertyChanged(nameof(Side));
+                }
+            }
+        }
         public SetType Type
         {
             get => _type;
@@ -109,6 +127,7 @@ namespace GymTracker.Services
             Weight = other.Weight;
             IsChecked = other.IsChecked;
             Type = other.Type;
+            Side = other.Side;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

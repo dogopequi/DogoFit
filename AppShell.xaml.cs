@@ -21,6 +21,8 @@ namespace GymTracker
             Routing.RegisterRoute("profilemusclefunction", typeof(ProfileMuscleFunction));
             Routing.RegisterRoute("profileindimuscle", typeof(profileindimuscles));
             Routing.RegisterRoute("profilemonthlyreport", typeof(profilemonthlyreport));
+            Routing.RegisterRoute("profileaddexercise", typeof(ProfileAddExercise));
+            Routing.RegisterRoute("profileeditdeleteexercises", typeof(ProfileEditDeleteExercises));
         }
     }
 }

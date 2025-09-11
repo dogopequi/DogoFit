@@ -10,44 +10,55 @@
         Text="GitHub"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
-        BackgroundColor="Black"
         BorderColor="Black"
-        Background="Black"
+        Background="#2b2b2b"
         TextColor="LightGray"
         FontAttributes="Bold"
+        WidthRequest="200"
         BorderWidth="1"
         Command="{Binding GitHubCommand}"/>
         <Button
         Text="Export"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
-        BackgroundColor="Black"
         BorderColor="Black"
-        Background="Black"
+        Background="#2b2b2b"
         TextColor="LightGray"
         FontAttributes="Bold"
+        WidthRequest="200"
         BorderWidth="1"
-        Command="{Binding ExportCommand}"/>
+        Clicked="Export"/>
         <Button
         Text="Import"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
-        BackgroundColor="Black"
         BorderColor="Black"
-        Background="Black"
+        Background="#2b2b2b"
         TextColor="LightGray"
         FontAttributes="Bold"
+        WidthRequest="200"
         BorderWidth="1"
-        Command="{Binding ImportCommand}"/>
+        Clicked="Import"/>
+        <Button
+        Text="Exercises"
+        VerticalOptions="Center" 
+        HorizontalOptions="Center"
+        BorderColor="Black"
+        Background="#2b2b2b"
+        TextColor="LightGray"
+        FontAttributes="Bold"
+        WidthRequest="200"
+        BorderWidth="1"
+        Clicked="ExercisePopup_Clicked"/>
         <Button
         Text="{Binding Profile.WeightUnit, StringFormat='Weight Unit: {0}'}"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
-        BackgroundColor="Black"
         BorderColor="Black"
-        Background="Black"
+        Background="#2b2b2b"
         TextColor="LightGray"
         FontAttributes="Bold"
+        WidthRequest="200"
         BorderWidth="1"
         Command="{Binding UnitSystemCommand}"/>
     </VerticalStackLayout>

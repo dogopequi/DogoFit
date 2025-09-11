@@ -13,6 +13,15 @@ namespace GymTracker.Services
         public DateTime Date { get; set; } = DateTime.Now;
     }
 
+    public class DbExercise
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string JsonExercise { get; set; }
+
+    }
+
     public class DbRoutineTemplate
     {
         [Key]
@@ -30,7 +39,7 @@ namespace GymTracker.Services
         public string JsonProfile { get; set; }
     }
 
-    public class  DbWorkoutInProgress
+    public class DbWorkoutInProgress
     {
         [Key]
         public int Id { get; set; } = 1;

@@ -22,13 +22,15 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Text="W"
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding WarmupCommand}"/>
+            </Grid.GestureRecognizers>
+            <Label Text="W"
                     BackgroundColor="#2b2b2b"
                     FontAttributes="Bold"
                     FontSize="20"
                     TextColor="Orange"
-                    Grid.Column="0"
-                    Command="{Binding WarmupCommand}"/>
+                    Grid.Column="0"/>
             <Label Text="Warmup Set" 
                    TextColor="LightGray" 
                    FontAttributes="Bold"
@@ -42,13 +44,15 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Text="1"
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding NormalCommand}"/>
+            </Grid.GestureRecognizers>
+            <Label Text="1"
                     BackgroundColor="#2b2b2b"
                     FontAttributes="Bold"
                     FontSize="20"
                     TextColor="White"
-                    Grid.Column="0"
-                    Command="{Binding NormalCommand}"/>
+                    Grid.Column="0"/>
             <Label Text="Normal Set" 
                    TextColor="LightGray" 
                    FontAttributes="Bold"
@@ -62,13 +66,15 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Text="F"
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding FailureCommand}"/>
+            </Grid.GestureRecognizers>
+            <Label Text="F"
                     BackgroundColor="#2b2b2b"
                     FontAttributes="Bold"
                     FontSize="20"
                     TextColor="Red"
-                    Grid.Column="0"
-                    Command="{Binding FailureCommand}"/>
+                    Grid.Column="0"/>
             <Label Text="Failure Set" 
                    TextColor="LightGray" 
                    FontAttributes="Bold"
@@ -82,13 +88,15 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Text="D"
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding DropCommand}"/>
+            </Grid.GestureRecognizers>
+            <Label Text="D"
                     BackgroundColor="#2b2b2b"
                     FontAttributes="Bold"
                     FontSize="20"
                     TextColor="#008cff"
-                    Grid.Column="0"
-                    Command="{Binding DropCommand}"/>
+                    Grid.Column="0"/>
             <Label Text="Drop Set" 
                    TextColor="LightGray" 
                    FontAttributes="Bold"
@@ -102,13 +110,15 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Text="X"
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding RemoveCommand}"/>
+            </Grid.GestureRecognizers>
+            <Label Text="X"
                     BackgroundColor="#2b2b2b"
                     FontAttributes="Bold"
                     FontSize="20"
                     TextColor="Red"
-                    Grid.Column="0"
-                    Command="{Binding RemoveCommand}"/>
+                    Grid.Column="0"/>
             <Label Text="Remove Set" 
                    TextColor="LightGray" 
                    FontAttributes="Bold"

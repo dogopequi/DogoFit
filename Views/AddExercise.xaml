@@ -7,7 +7,7 @@
              BackgroundColor="Black"
              Shell.NavBarIsVisible="False">
 
-    <Grid Padding="10" RowDefinitions="Auto, Auto,*,Auto" RowSpacing="10">
+    <Grid Padding="10" RowDefinitions="Auto, Auto,*,Auto,Auto" RowSpacing="10">
 
         <controls:Entry Grid.Row="0" x:Name="exercisename"  
                         Placeholder="Exercise Name"  
@@ -50,10 +50,10 @@
         </CollectionView>
 
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding FilteredExercises}" ItemsLayout="VerticalList">
+        <CollectionView Grid.Row="2" ItemsSource="{Binding DisplayedExercises}" ItemsLayout="VerticalList" ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame BorderColor="MidnightBlue" CornerRadius="8" Padding="0" Margin="5" BackgroundColor="Black">
+                    <Border  Stroke="MidnightBlue" StrokeShape="RoundRectangle 8" Padding="0" Margin="5" StrokeThickness="1" BackgroundColor="Black">
                         <Button Text="{Binding Name}"
                                 Command="{Binding BindingContext.SelectExerciseCommand, Source={x:Reference addexercise}}"
                                 CommandParameter="{Binding .}"
@@ -75,17 +75,27 @@
                                 </DataTrigger>
                             </Button.Triggers>
                         </Button>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
         <Button Grid.Row="3"  
+        Text="More"  
+        Command="{Binding LoadMoreExercisesCommand}"  
+        HorizontalOptions="Center"
+        BackgroundColor="#2b2b2b"
+        BorderColor="#2b2b2b"
+        Background="#2b2b2b"
+        BorderWidth="1"
+        TextColor="White"
+        WidthRequest="300"/>
+        <Button Grid.Row="4"  
                 Text="Continue"  
                 Command="{Binding SaveExercisesToWorkoutCommand}"  
                 HorizontalOptions="Center"
                 BackgroundColor="#008cff"
-                BorderColor="White"
+                BorderColor="#008cff"
                 Background="#008cff"
                 BorderWidth="1"
                 TextColor="White"

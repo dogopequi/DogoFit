@@ -29,15 +29,15 @@ namespace GymTracker.Models
         }
 
         public Routine routine { get; set; }
-        public ICommand AddSetToExerciseCommand { get; }
         public ICommand SaveRoutineCommand { get; }
         public ICommand AddExerciseCommand { get; }
         public ICommand RemoveSetFromExerciseCommand { get; }
         public ObservableCollection<Category> Categories { get; set; }
         public ObservableCollection<Exercise> AllExercises { get; set; }
         public ObservableCollection<Exercise> FilteredExercises { get; set; }
+        public ObservableCollection<Exercise> DisplayedExercises { get; set; }
+        public ICommand LoadMoreExercisesCommand { get; }
         public ICommand SelectExerciseCommand { get; }
-        public ICommand RemoveExerciseCommand { get; }
         public ICommand SaveEditedRoutineCommand { get; }
         public ICommand SaveExercisesToWorkoutCommand { get; }
         public ObservableCollection<String> TakenExercises { get; set; } = new ObservableCollection<String>();
@@ -46,17 +46,29 @@ namespace GymTracker.Models
         public ICommand FilterCommand { get; }
         public EditRoutineModel()
         {
+            DisplayedExercises = new ObservableCollection<Exercise>();
+            AppState.MaxExercises = 20;
+            LoadMoreExercisesCommand = new Command(() => { 
+                AppState.MaxExercises += 20;
+                DisplayedExercises.Clear();
+                int i = 0;
+                foreach(Exercise e in FilteredExercises)
+                {
+                    if (i >= AppState.MaxExercises)
+                        break;
+                    DisplayedExercises.Add(e);
+                    i++;
+                }
+            });
             routine = AppState.EditedRoutine;
             TakenExercises = new ObservableCollection<string>(routine.Exercises.Select(e => e.Name));
             AllExercises = AppState.AllExercises;
             FilteredExercises = AppState.FilteredExercises;
             SelectedExercises = AppState.SelectedExercises;
             Categories = AppState.Categories;
-            FilterByCategory("All", false);
-            FilterCommand = new Command<Category>(SelectCategory);
-            AddSetToExerciseCommand = new Command<Exercise>(OnAddSetToExercise);
+            AppState.FilterByCategory("All", false);
+            FilterCommand = new Command<Category>(AppState.SelectCategory);
             RemoveSetFromExerciseCommand = new Command<Exercise>(OnRemoveSetFromExercise);
-            RemoveExerciseCommand = new Command<Exercise>(OnRemoveExercise);
             SelectExerciseCommand = new Command<Exercise>(SelectExercise);
             SaveExercisesToWorkoutCommand = new Command(OnSaveExercises);
             SaveEditedRoutineCommand = new Command(OnSaveRoutine);
@@ -89,7 +101,7 @@ namespace GymTracker.Models
         {
             if (exercise?.Sets == null) return;
 
-            exercise.RemoveSet(set.ID);
+            exercise.RemoveSet(set.ID, set.Side);
 
             for (int i = 0; i < exercise.Sets.Count; i++)
             {
@@ -97,12 +109,13 @@ namespace GymTracker.Models
             }
         }
 
-        private void OnAddSetToExercise(Exercise exercise)
+        public void OnAddSetToExercise(Exercise exercise, SideType type)
         {
             if (exercise == null) return;
             Set set = new Set();
-            set.ID = exercise.SetCount + 1;
+            set.Side = type;
             exercise.AddSet(set);
+            exercise.RecalculateSetIndexes();
         }
 
         private void OnRemoveSetFromExercise(Exercise exercise)
@@ -112,7 +125,7 @@ namespace GymTracker.Models
                 var setToRemove = exercise.Sets.LastOrDefault();
                 if (setToRemove != null)
                 {
-                    exercise.RemoveSet(setToRemove.ID);
+                    exercise.RemoveSet(setToRemove.ID, setToRemove.Side);
                 }
             }
         }
@@ -121,7 +134,7 @@ namespace GymTracker.Models
             await Shell.Current.GoToAsync("editroutine/addexercise");
         }
 
-        private async void OnRemoveExercise(Exercise exercise)
+        public async Task OnRemoveExercise(Exercise exercise)
         {
             if (exercise == null) return;
             var result = await Shell.Current.DisplayAlert("Remove Exercise", $"Are you sure you want to delete this exercise?", "Yes", "No");
@@ -209,19 +222,19 @@ namespace GymTracker.Models
                 {
                     filtered = category == "All"
                         ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.Function, category, StringComparison.OrdinalIgnoreCase));
+                        : AllExercises.Where(e => string.Equals(e.Function.ToString(), category, StringComparison.OrdinalIgnoreCase));
                 }
                 else if (new[] { "Arms", "Shoulders", "Chest", "Back" }.Contains(category, StringComparer.OrdinalIgnoreCase))
                 {
                     filtered = category == "All"
                         ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.MuscleGroup, category, StringComparison.OrdinalIgnoreCase));
+                        : AllExercises.Where(e => string.Equals(e.MuscleGroup.ToString(), category, StringComparison.OrdinalIgnoreCase));
                 }
                 else
                 {
                     filtered = category == "All"
                         ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.TargetMuscle, category, StringComparison.OrdinalIgnoreCase));
+                        : AllExercises.Where(e => string.Equals(e.TargetMuscle.ToString(), category, StringComparison.OrdinalIgnoreCase));
                 }
             }
             else
@@ -244,6 +257,18 @@ namespace GymTracker.Models
         {
             if (Shell.Current.CurrentPage is ContentPage page)
                 page.Focus();
+
+            foreach (Exercise exercise in routine.Exercises)
+            {
+                if(exercise.Description != null)
+                {
+                    if (exercise.Description.Length > 200)
+                    {
+                        await Shell.Current.DisplayAlert("Error", "Exercise: " + exercise.Name + " has a description over 200 characters.", "OK");
+                        return;
+                    }
+                }
+            }
 
             AppState.RemoveRoutine(AppState.CurrentRoutine);
 

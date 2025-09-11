@@ -1,4 +1,6 @@
 ﻿using GymTracker.Services;
+using CommunityToolkit.Maui.Extensions;
+using GymTracker.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Maui;
@@ -11,6 +13,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows.Input;
+using GymTracker.Views;
 
 namespace GymTracker.Models
 {
@@ -23,12 +26,7 @@ namespace GymTracker.Models
         MFVolume, MFSets, MFReps, MFIntensityTrend, MFVolumeTrend, MFSetsTrend, MFRepsTrend, MGIntensity,
         MGVolume, MGSets, MGReps, MGIntensityTrend, MGVolumeTrend, MGSetsTrend, MGRepsTrend, 
     }
-    public enum MuscleChoices
-    {
-        Empty, Biceps, Triceps, Forearms, Chest, Lats, Traps, ChestGroup, SideDelts, FrontDelts, 
-        RearDelts, Quads, Hams, Glutes, Calves, Abs, Obliques, Push, Pull, LegsFunction, CoreFunction, 
-        Arms, Back, Shoulders, LegsGroup, CoreGroup
-    }
+
 
     public enum DisplayChoices
     {
@@ -49,17 +47,22 @@ namespace GymTracker.Models
         };
         public ICommand OpenSettingsCommand { get; }
         public ICommand GitHubCommand { get; }
-        public ICommand ExportCommand { get; }
-        public ICommand ImportCommand { get; }
         public ICommand UnitSystemCommand { get; }
         public ICommand SelectExerciseCommand { get; }
         public ICommand ExercisesCommand { get; }
         public ICommand FilterCommand { get; }
+        public ICommand EditSelectedExercise { get; }
+        public ICommand DeleteSelectedExercises { get; }
+        public ICommand SelectExercisesCommand { get; }
+        public ICommand LoadMoreExercisesCommand { get; }
         public String EnteredExerciseName { get; set; }
         public Exercise SelectedExercise => AppState.SelectedExercise;
         public string SelectedExerciseName => SelectedExercise?.Name;
 
-        public List<(Button, MuscleChoices)> MusclesButtons { get; set; } = new List<(Button, MuscleChoices)>();
+        public List<(Button, Muscles)> MusclesButtons { get; set; } = new List<(Button, Muscles)>();
+        public List<(Button, MuscleFunctions)> MuscleFunctionButtons { get; set; } = new List<(Button, MuscleFunctions)>();
+        public List<(Button, MuscleGroups)> MuscleGroupsButtons { get; set; } = new List<(Button, MuscleGroups)>();
+
         public List<(Button, TimeChoices)> TimeButtons { get; set; } = new List<(Button, TimeChoices)>();
         public List<(Button, DisplayChoices)> DisplayButtons { get; set; } = new List<(Button, DisplayChoices)>();
         public Dictionary<E_StatisticsLabels, Label> StatisticsLabels { get; set; } = new Dictionary<E_StatisticsLabels, Label>();
@@ -105,15 +108,14 @@ namespace GymTracker.Models
         public ObservableCollection<Category> Categories { get; set; }
         public ObservableCollection<Exercise> AllExercises { get; set; }
         public ObservableCollection<Exercise> FilteredExercises { get; set; }
-
-
+        public ObservableCollection<Exercise> DisplayedExercises { get; set; }
         public ICommand MuscleGroupDistCommand { get; set; }
         public ICommand MuscleFunctionDistCommand { get; set; }
         public ICommand IndividualMuscleDistCommand { get; set; }
         public ICommand MainExercisesCommand { get; set; }
         public ICommand MonthlyReportCommand { get; set; }
-        private MuscleChoices _mc;
-        public MuscleChoices MC
+        private Muscles _mc;
+        public Muscles MC
         {
             get => _mc;
             set
@@ -122,6 +124,34 @@ namespace GymTracker.Models
                 {
                     _mc = value;
                     OnPropertyChanged(nameof(MC));
+                    OnStatisticsButton();
+                }
+            }
+        }
+        private MuscleFunctions _mf;
+        public MuscleFunctions MF
+        {
+            get => _mf;
+            set
+            {
+                if (_mf != value)
+                {
+                    _mf = value;
+                    OnPropertyChanged(nameof(MF));
+                    OnStatisticsButton();
+                }
+            }
+        }
+        private MuscleGroups _mg;
+        public MuscleGroups MG
+        {
+            get => _mg;
+            set
+            {
+                if (_mg != value)
+                {
+                    _mg = value;
+                    OnPropertyChanged(nameof(MG));
                     OnStatisticsButton();
                 }
             }
@@ -202,17 +232,57 @@ namespace GymTracker.Models
         public ObservableCollection<Routine> Workouts { get; }
         private List<WeekStat> WeeklyStats { get; set; }
         private List<ExerciseRecord> ExerciseRecords { get; set; }
+
+        private List<Exercise> SelectedExercises { get; set; }
         public ProfileViewModel()
         {
+            DisplayedExercises = new ObservableCollection<Exercise>();
+            AppState.MaxExercises = 20;
             Profile = AppState.Profile;
             OpenSettingsCommand = new Command(OpenSettings);
             GitHubCommand = new Command(OpenGitHub);
-            ExportCommand = new Command(ExportData);
-            ImportCommand = new Command(ImportData);
             UnitSystemCommand = new Command(ToggleWeightUnit);
             ExercisesCommand = new Command(OnExercises);
             StatisticsCommand = new Command(OnStatistics);
-            SelectExerciseCommand = new Command<Exercise>(OnSelectExercise);
+            LoadMoreExercisesCommand = new Command(() => { 
+                AppState.MaxExercises += 20;
+                DisplayedExercises.Clear();
+                int i = 0;
+                foreach(Exercise e in FilteredExercises)
+                {
+                    if (i >= AppState.MaxExercises)
+                        break;
+                    DisplayedExercises.Add(e);
+                    i++;
+                }
+            });
+            SelectExerciseCommand = new Command<Exercise>(async (Exercise exercise) => {
+                AppState.SelectedExercise = new Exercise(exercise);
+                OnPropertyChanged(nameof(SelectedExercise));
+                AppState.profileStat = ProfileStats.Exercise;
+                await Shell.Current.GoToAsync("profileexercisestats");
+            });
+            SelectExercisesCommand = new Command<Exercise>((Exercise exercise) => {
+                
+                exercise.IsSelected = !exercise.IsSelected;
+
+                if (exercise.IsSelected)
+                {
+                    if (!SelectedExercises.Any(e => e.Name == exercise.Name))
+                    {
+                        SelectedExercises.Add(new Exercise(exercise));
+                        AppState.SelectedExerciseIds.Add(exercise.Name);
+                    }
+                }
+                else
+                {
+                    var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
+                    if (toRemove != null)
+                        SelectedExercises.Remove(toRemove);
+
+                    AppState.SelectedExerciseIds.Remove(exercise.Name);
+                }
+            });
             MuscleGroupDistCommand = new Command( async() => {
                 AppState.profileStat = ProfileStats.MuscleGroup;
                 await Shell.Current.GoToAsync("profilemusclegroup"); 
@@ -229,23 +299,45 @@ namespace GymTracker.Models
                 AppState.profileStat = ProfileStats.MonthlyReport;
                 await Shell.Current.GoToAsync("profilemonthlyreport");
             });
+
+            EditSelectedExercise = new Command(async () => {
+                if(SelectedExercises?.Count() < 1)
+                {
+                    await Shell.Current.DisplayAlert("Error", "No exercise is selected.", "OK");
+                    return;
+                }
+                else if(SelectedExercises?.Count > 1)
+                {
+                    await Shell.Current.DisplayAlert("Error", "It is only possible to edit 1 exercise at a time.", "OK");
+                    return;
+                }
+                else if(!AppState.AllExercises.Any(e => e.Name.Equals(SelectedExercises.ElementAt(0).Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    await Shell.Current.DisplayAlert("Error", "DogoFit's exercise list does not contain an exercise with the same name.", "OK");
+                    return;
+                }
+                AppState.profileExercise = ProfileExercise.Edit;
+                AppState.EditedExercise = SelectedExercises.ElementAt(0);
+                await Shell.Current.GoToAsync("profileaddexercise");
+            });
+            DeleteSelectedExercises = new Command(async () => {
+                if(SelectedExercises?.Count() < 1)
+                {
+                    await Shell.Current.DisplayAlert("Error", "No exercise is selected.", "OK");
+                    return;
+                }
+                string error = AppState.RemoveExercises(SelectedExercises);
+                await Shell.Current.DisplayAlert("Info", error, "OK");
+                await Shell.Current.Navigation.PopToRootAsync();
+            });
+            SelectedExercises = new List<Exercise>();
             Categories = AppState.Categories;
             AllExercises = AppState.AllExercises;
             FilteredExercises = AppState.FilteredExercises;
-            FilterByCategory("All", false);
-            FilterCommand = new Command<Category>(SelectCategory);
+            AppState.FilterByCategory("All", false);
+            FilterCommand = new Command<Category>(AppState.SelectCategory);
             Workouts = AppState.Workouts;
         }
-
-        public async void OnSelectExercise(Exercise exercise)
-        {
-            AppState.SelectedExercise = new Exercise(exercise);
-            OnPropertyChanged(nameof(SelectedExercise));
-            AppState.profileStat = ProfileStats.Exercise;
-            await Shell.Current.GoToAsync("profileexercisestats");
-        }
-
-
         public ISeries[] TotalVolumeSeries { get; set; }
         public Axis[] TotalVolumeXAxes { get; set; }
         public Axis[] TotalVolumeYAxes { get; set; }
@@ -269,6 +361,20 @@ namespace GymTracker.Models
                 if(s.Item1 != null)
                 {
                     s.Item1.BackgroundColor = MC == s.Item2 ? Color.FromArgb("#008cff") : Color.FromArgb("#2b2b2b");
+                }
+            }
+            foreach(var s in MuscleFunctionButtons)
+            {
+                if(s.Item1 != null)
+                {
+                    s.Item1.BackgroundColor = MF == s.Item2 ? Color.FromArgb("#008cff") : Color.FromArgb("#2b2b2b");
+                }
+            }
+            foreach(var s in MuscleGroupsButtons)
+            {
+                if(s.Item1 != null)
+                {
+                    s.Item1.BackgroundColor = MG == s.Item2 ? Color.FromArgb("#008cff") : Color.FromArgb("#2b2b2b");
                 }
             }
             foreach (var s in TimeButtons)
@@ -305,9 +411,11 @@ namespace GymTracker.Models
             var filteredWorkoutsNow = AppState.Workouts
                 .Where(w => w.StartTime.Month == now.Month && w.StartTime.Year == now.Year)
                 .ToList();
+            var lastMonth = now.AddMonths(-1);
             var filteredWorkoutsLastMonth = AppState.Workouts
-                .Where(w => w.StartTime >= now.AddMonths(-1))
+                .Where(w => w.StartTime.Month == lastMonth.Month && w.StartTime.Year == lastMonth.Year)
                 .ToList();
+
 
             var workoutsCountNow = filteredWorkoutsNow.Count();
             var workoutsCountLastMonth = filteredWorkoutsLastMonth.Count();
@@ -341,60 +449,13 @@ namespace GymTracker.Models
             double volumeDiff = volumeNow - volumeLastMonth;
             int repsDiff = repsNow - repsLastMonth;
             int setsDiff = setsNow - setsLastMonth;
-            if (intensityDiff >= 0)
-            {
-                labels[E_StatisticsLabels.MRIntensityTrend].TextColor = Colors.Green;
-                labels[E_StatisticsLabels.MRIntensityTrend].Text = "\u2191 " + Math.Abs(intensityDiff).ToString("F2");
-            }
-            else
-            {
-                labels[E_StatisticsLabels.MRIntensityTrend].TextColor = Colors.Red;
-                labels[E_StatisticsLabels.MRIntensityTrend].Text = "\u2193 " + Math.Abs(intensityDiff).ToString("F2");
-            }
+            UpdateLabel(intensityDiff, E_StatisticsLabels.MRIntensityTrend, labels);
+            UpdateLabel(volumeDiff, E_StatisticsLabels.MRVolumeTrend, labels);
+            UpdateLabel(repsDiff, E_StatisticsLabels.MRRepsTrend, labels);
+            UpdateLabel(setsDiff, E_StatisticsLabels.MRSetsTrend, labels);
+            UpdateLabel(workoutsDiff, E_StatisticsLabels.MRWorkoutTrend, labels);
 
-            if (volumeDiff >= 0)
-            {
-                labels[E_StatisticsLabels.MRVolumeTrend].TextColor = Colors.Green;
-                labels[E_StatisticsLabels.MRVolumeTrend].Text = "\u2191 " + Math.Abs(volumeDiff).ToString("F2");
-            }
-            else
-            {
-                labels[E_StatisticsLabels.MRVolumeTrend].TextColor = Colors.Red;
-                labels[E_StatisticsLabels.MRVolumeTrend].Text = "\u2193 " + Math.Abs(volumeDiff).ToString("F2");
-            }
-
-            if (repsDiff >= 0)
-            {
-                labels[E_StatisticsLabels.MRRepsTrend].TextColor = Colors.Green;
-                labels[E_StatisticsLabels.MRRepsTrend].Text = "\u2191 " + Math.Abs(repsDiff).ToString();
-            }
-            else
-            {
-                labels[E_StatisticsLabels.MRRepsTrend].TextColor = Colors.Red;
-                labels[E_StatisticsLabels.MRRepsTrend].Text = "\u2193 " + Math.Abs(repsDiff).ToString();
-            }
-
-            if (setsDiff >= 0)
-            {
-                labels[E_StatisticsLabels.MRSetsTrend].TextColor = Colors.Green;
-                labels[E_StatisticsLabels.MRSetsTrend].Text = "\u2191 " + Math.Abs(setsDiff).ToString();
-            }
-            else
-            {
-                labels[E_StatisticsLabels.MRSetsTrend].TextColor = Colors.Red;
-                labels[E_StatisticsLabels.MRSetsTrend].Text = "\u2193 " + Math.Abs(setsDiff).ToString();
-            }
-            if (workoutsDiff >= 0)
-            {
-                labels[E_StatisticsLabels.MRWorkoutTrend].TextColor = Colors.Green;
-                labels[E_StatisticsLabels.MRWorkoutTrend].Text = "\u2191 " + Math.Abs(workoutsDiff).ToString();
-            }
-            else
-            {
-                labels[E_StatisticsLabels.MRWorkoutTrend].TextColor = Colors.Red;
-                labels[E_StatisticsLabels.MRWorkoutTrend].Text = "\u2193 " + Math.Abs(workoutsDiff).ToString();
-            }
-            var ts = TimeSpan.FromSeconds(Math.Abs(durationDiff));
+            var ts = TimeSpan.FromSeconds(durationDiff);
             if (durationDiff >= 0)
             {
                 labels[E_StatisticsLabels.MRDurationTrend].TextColor = Colors.Green;
@@ -407,16 +468,33 @@ namespace GymTracker.Models
             {
                 labels[E_StatisticsLabels.MRDurationTrend].TextColor = Colors.Red;
                 if (ts.Hours >= 24)
-                    labels[E_StatisticsLabels.MRDurationTrend].Text = "\u2191 " + FormatDuration(ts);
+                    labels[E_StatisticsLabels.MRDurationTrend].Text = "\u2193 " + FormatDuration(ts);
                 else
-                    labels[E_StatisticsLabels.MRDurationTrend].Text = "\u2191 " + FormatDuration(ts);
+                    labels[E_StatisticsLabels.MRDurationTrend].Text = "\u2193 " + FormatDuration(ts);
+            }
+        }
+
+        private void UpdateLabel(double diff, E_StatisticsLabels label, Dictionary<E_StatisticsLabels, Label> labels)
+        {
+            if (diff >= 0)
+            {
+                labels[label].TextColor = Colors.Green;
+                labels[label].Text = "\u2191 " + Math.Abs(diff).ToString("N0");
+            }
+            else
+            {
+                labels[label].TextColor = Colors.Red;
+                labels[label].Text = "\u2193 " + Math.Abs(diff).ToString("N0");
             }
         }
 
         private string FormatDuration(TimeSpan ts)
         {
+            if (ts == TimeSpan.Zero)
+                return "00:00:00";
+        
             var parts = new List<string>();
-
+        
             if (ts.TotalDays >= 1)
                 parts.Add($"{(int)ts.TotalDays}d");
             if (ts.Hours > 0)
@@ -425,9 +503,10 @@ namespace GymTracker.Models
                 parts.Add($"{ts.Minutes} min");
             if (ts.TotalDays < 1 && ts.TotalHours < 1 && ts.Seconds > 0)
                 parts.Add($"{ts.Seconds} sec");
-
+        
             return string.Join(" ", parts);
         }
+
 
 
 
@@ -452,9 +531,10 @@ namespace GymTracker.Models
             {
                 DisplayChoices.Workout => w => 1,
                 DisplayChoices.Duration => w => w.Duration.TotalMinutes,
-                DisplayChoices.Volume => w => w.Volume,
+                DisplayChoices.Volume => w => w.Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Reps) * w.Exercises.SelectMany(e => e.CheckedSets).Count(),
                 DisplayChoices.Intensity => w => { var reps = w.Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Reps);
-                    return reps != 0 ? w.Volume / reps : 0;
+                    var volume = w.Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Reps) * w.Exercises.SelectMany(e => e.CheckedSets).Count();
+                    return reps != 0 ? volume / reps : 0;
                     },
                 DisplayChoices.Sets => w => w.Exercises.SelectMany(e => e.CheckedSets).Count(),
                 DisplayChoices.Reps => w => w.Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Reps),
@@ -507,37 +587,9 @@ namespace GymTracker.Models
 
         public void UpdateIndividualMuscleChoices()
         {
-            if (MC != MuscleChoices.Biceps && MC != MuscleChoices.Triceps && MC != MuscleChoices.Forearms && MC != MuscleChoices.Lats &&  MC != MuscleChoices.Traps &&
-                MC != MuscleChoices.Chest && MC != MuscleChoices.SideDelts && MC != MuscleChoices.FrontDelts && MC != MuscleChoices.RearDelts && MC != MuscleChoices.Quads &&
-                MC != MuscleChoices.Hams && MC != MuscleChoices.Glutes && MC != MuscleChoices.Calves && MC != MuscleChoices.Abs && MC != MuscleChoices.Obliques)
-                return;
             if (IMChart == null)
                 return;
-            switch(MC)
-            {
-                case MuscleChoices.Abs:
-                    IM_InfoLabel.Text = "Abdominals Current versus Last Month";
-                    break;
-                case MuscleChoices.SideDelts:
-                    IM_InfoLabel.Text = "Lateral Delts Current versus Last Month";
-                    break;
-                case MuscleChoices.FrontDelts:
-                    IM_InfoLabel.Text = "Front Delts Current versus Last Month";
-                    break;
-                case MuscleChoices.RearDelts:
-                    IM_InfoLabel.Text = "Rear Delts Current versus Last Month";
-                    break;
-                case MuscleChoices.Hams:
-                    IM_InfoLabel.Text = "Hamstrings Current versus Last Month";
-                    break;
-                case MuscleChoices.Quads:
-                    IM_InfoLabel.Text = "Quadriceps Current versus Last Month";
-                    break;
-                default:
-                    IM_InfoLabel.Text = MC.ToString() + " Current versus Last Month";
-                    break;
-            }
-
+            IM_InfoLabel.Text = AppState.MGMToString(MC) + " Current versus Last Month";
             RecalculateIMChart();
             UpdateIndividualMuscleLabels();
         }
@@ -554,34 +606,14 @@ namespace GymTracker.Models
                 .Where(w => w.StartTime >= now.AddMonths(-1))
                 .ToList();
 
-            string individualMuscle = MC switch
-            {
-                MuscleChoices.Biceps => "Biceps",
-                MuscleChoices.Triceps => "Triceps",
-                MuscleChoices.Forearms => "Forearms",
-                MuscleChoices.Lats => "Lats",
-                MuscleChoices.Traps => "Traps",
-                MuscleChoices.SideDelts => "Lateral Delts",
-                MuscleChoices.FrontDelts => "Front Delts",
-                MuscleChoices.RearDelts => "Rear Delts",
-                MuscleChoices.Quads => "Quadriceps",
-                MuscleChoices.Hams => "Hamstrings",
-                MuscleChoices.Glutes => "Glutes",
-                MuscleChoices.Calves => "Calves",
-                MuscleChoices.Abs => "Abdominals",
-                MuscleChoices.Obliques => "Obliques",
-                _ => null
-            };
-
-            if (individualMuscle == null) return;
 
             void UpdateLabelsForIndividualMuscle(string im)
             {
                 var exercisesNow = filteredWorkoutsNow.SelectMany(w => w.Exercises)
-                                                      .Where(e => e.TargetMuscle == im)
+                                                      .Where(e => e.TargetMuscle.ToString() == im)
                                                       .ToList();
                 var exercisesLastMonth = filteredWorkoutsLastMonth.SelectMany(w => w.Exercises)
-                                                                  .Where(e => e.TargetMuscle == im)
+                                                                  .Where(e => e.TargetMuscle.ToString() == im)
                                                                   .ToList();
 
                 int setsNow = exercisesNow.SelectMany(e => e.CheckedSets).Count();
@@ -603,58 +635,18 @@ namespace GymTracker.Models
                 double volumeDiff = volumeNow - volumeLastMonth;
                 int repsDiff = repsNow - repsLastMonth;
                 int setsDiff = setsNow - setsLastMonth;
-
-                if (intensityDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMIntensityTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.IMIntensityTrend].Text = "\u2191 " + Math.Abs(intensityDiff).ToString("F2");
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMIntensityTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.IMIntensityTrend].Text = "\u2193 " + Math.Abs(intensityDiff).ToString("F2");
-                }
-
-                if (volumeDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMVolumeTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.IMVolumeTrend].Text = "\u2191 " + Math.Abs(volumeDiff).ToString("F2");
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMVolumeTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.IMVolumeTrend].Text = "\u2193 " + Math.Abs(volumeDiff).ToString("F2");
-                }
-
-                if (repsDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMRepsTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.IMRepsTrend].Text = "\u2191 " + Math.Abs(repsDiff).ToString();
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMRepsTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.IMRepsTrend].Text = "\u2193 " + Math.Abs(repsDiff).ToString();
-                }
-
-                if (setsDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMSetsTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.IMSetsTrend].Text = "\u2191 " + Math.Abs(setsDiff).ToString();
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.IMSetsTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.IMSetsTrend].Text = "\u2193 " + Math.Abs(setsDiff).ToString();
-                }
+                UpdateLabel(intensityDiff, E_StatisticsLabels.IMIntensityTrend, StatisticsLabels);
+                UpdateLabel(volumeDiff, E_StatisticsLabels.IMVolumeTrend, StatisticsLabels);
+                UpdateLabel(repsDiff, E_StatisticsLabels.IMRepsTrend, StatisticsLabels);
+                UpdateLabel(setsDiff, E_StatisticsLabels.IMSetsTrend, StatisticsLabels);
             }
-            UpdateLabelsForIndividualMuscle(individualMuscle);
+            UpdateLabelsForIndividualMuscle(AppState.MGMToString(MC));
         }
         private void RecalculateIMChart()
         {
             if (AppState.Workouts == null)
                 return;
-            if (MC == MuscleChoices.Empty || DC == DisplayChoices.Empty || TC == TimeChoices.Empty)
+            if (DC == DisplayChoices.Empty || TC == TimeChoices.Empty)
                 return;
             var now = DateTime.Now;
             var filteredWorkouts = AppState.Workouts
@@ -667,191 +659,16 @@ namespace GymTracker.Models
                     _ => false
                 })
                 .ToList();
-
             var allExercises = filteredWorkouts.SelectMany(w => w.Exercises).ToList();
-            var BicepsExercises = allExercises.Where(e => e.TargetMuscle == "Biceps").ToList();
-            var TricepsExercises = allExercises.Where(e => e.TargetMuscle == "Triceps").ToList();
-            var ForearmsExercises = allExercises.Where(e => e.TargetMuscle == "Forearms").ToList();
-            var LatsExercises = allExercises.Where(e => e.TargetMuscle == "Lats").ToList();
-            var TrapsExercises = allExercises.Where(e => e.TargetMuscle == "Traps").ToList();
-            var ChestExercises = allExercises.Where(e => e.TargetMuscle == "Chest").ToList();
-            var SideDeltsExercises = allExercises.Where(e => e.TargetMuscle == "Lateral Delts").ToList();
-            var FrontDeltsExercises = allExercises.Where(e => e.TargetMuscle == "Front Delts").ToList();
-            var RearDeltsExercises = allExercises.Where(e => e.TargetMuscle == "Rear Delts").ToList();
-            var QuadricepsExercises = allExercises.Where(e => e.TargetMuscle == "Quadriceps").ToList();
-            var HamstringsExercises = allExercises.Where(e => e.TargetMuscle == "Hamstrings").ToList();
-            var GlutesExercises = allExercises.Where(e => e.TargetMuscle == "Glutes").ToList();
-            var CalvesExercises = allExercises.Where(e => e.TargetMuscle == "Calves").ToList();
-            var AbsExercises = allExercises.Where(e => e.TargetMuscle == "Abdominals").ToList();
-            var ObliquesExercises = allExercises.Where(e => e.TargetMuscle == "Obliques").ToList();
-
-
-            switch (DC)
-            {
-                case DisplayChoices.Sets:
-                    {           
-                        var muscleSets = new Dictionary<string, double>
-                        {           
-                            { "Biceps", BicepsExercises.SelectMany(s => s.CheckedSets).Count() },
-                            { "Triceps", TricepsExercises.SelectMany(s => s.CheckedSets).Count()},
-                            { "Forearms", ForearmsExercises.SelectMany(s => s.CheckedSets).Count()},
-                            { "Lats", LatsExercises.SelectMany(s => s.CheckedSets).Count() },           
-                            { "Traps", TrapsExercises.SelectMany(s => s.CheckedSets).Count()},
-                            { "Chest", ChestExercises.SelectMany(s => s.CheckedSets).Count() },         
-                            { "Side Delts", SideDeltsExercises.SelectMany(s => s.CheckedSets).Count()},
-                            { "Front Delts", FrontDeltsExercises.SelectMany(s => s.CheckedSets).Count()},
-                            { "Rear Delts", RearDeltsExercises.SelectMany(s => s.CheckedSets).Count() },            
-                            { "Quadriceps", QuadricepsExercises.SelectMany(s => s.CheckedSets).Count() },
-                            { "Hamstrings", HamstringsExercises.SelectMany(s => s.CheckedSets).Count() },           
-                            { "Glutes", GlutesExercises.SelectMany(s => s.CheckedSets).Count() },           
-                            { "Calves", CalvesExercises.SelectMany(s => s.CheckedSets).Count() },           
-                            { "Abs", AbsExercises.SelectMany(s => s.CheckedSets).Count() },         
-                            { "Obliques", ObliquesExercises.SelectMany(s => s.CheckedSets).Count() }
-                        };          
-                                    
-                        var max = muscleSets.Values.Max();
-                        IMChart.Series = muscleSets.Where(kv => kv.Value > 0).Select(kv => new PieSeries<double>
-                        {           
-                            Name = kv.Key,
-                            Values = new[]           { kv.Value },
-                            Pushout = kv.Value == max ? 30 : 0
-                        }).ToArray();           
-                        break;          
-                    }           
-                                
-                    case DisplayChoices.Reps:
-                    {           
-                        var muscleReps = new Dictionary<string, double>
-                        {           
-                            { "Biceps", BicepsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                            { "Triceps", TricepsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps)},
-                            { "Forearms", ForearmsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps)},
-                            { "Lats", LatsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },          
-                            { "Traps", TrapsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps)},
-                            { "Chest", ChestExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },            
-                            { "Side Delts", SideDeltsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                            { "Front Delts", FrontDeltsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps)},
-                            { "Rear Delts", RearDeltsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },           
-                            { "Quadriceps", QuadricepsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                            { "Hamstrings", HamstringsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },          
-                            { "Glutes", GlutesExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },          
-                            { "Calves", CalvesExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },          
-                            { "Abs", AbsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },            
-                            { "Obliques", ObliquesExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) }
-                        };          
-                                    
-                        var max = muscleReps.Values.Max();
-                        IMChart.Series = muscleReps.Where(kv => kv.Value > 0).Select(kv => new PieSeries<double>
-                        {           
-                            Name = kv.Key,
-                            Values = new[] { kv.Value },
-                            Pushout = kv.Value == max ? 30 : 0
-                        }).ToArray();           
-                        break;          
-                    }           
-                                
-                    case DisplayChoices.Volume:
-                    {           
-                        var muscleVolume = new Dictionary<string, double>
-                        {           
-                            { "Biceps", BicepsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Triceps", TricepsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight)},
-                            { "Forearms", ForearmsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight)},
-                            { "Lats", LatsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },           
-                            { "Traps", TrapsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight)},
-                            { "Chest", ChestExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },         
-                            { "Side Delts", SideDeltsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Front Delts", FrontDeltsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight)},
-                            { "Rear Delts", RearDeltsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },            
-                            { "Quadriceps", QuadricepsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Hamstrings", HamstringsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Glutes", GlutesExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },           
-                            { "Calves", CalvesExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },           
-                            { "Abs", AbsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },         
-                            { "Obliques", ObliquesExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) }
-                        };          
-                                    
-                        var max = muscleVolume.Values.Max();
-                        IMChart.Series = muscleVolume.Where(kv => kv.Value > 0).Select (kv => new PieSeries<double>
-                        {           
-                            Name = kv.Key,
-                            Values = new[] { kv.Value },
-                            Pushout = kv.Value == max ? 30 : 0
-                        }).ToArray();           
-                        break;          
-                    }           
-                                
-                    case DisplayChoices.Intensity:
-                    {           
-                                    
-                        var muscleIntensity = new Dictionary<string, double>
-                        {           
-                            { "Biceps", GetIntensity(BicepsExercises)},         
-                                    
-                            { "Triceps", GetIntensity(TricepsExercises) },            
-                            
-                            { "Forearms", GetIntensity(ForearmsExercises) },           
-                            
-                            { "Lats", GetIntensity(LatsExercises) },           
-                            
-                            { "Traps", GetIntensity(TrapsExercises) },          
-                            
-                            { "Chest", GetIntensity(ChestExercises) },          
-                            
-                            { "Side Delts", GetIntensity(SideDeltsExercises) },          
-                            
-                            { "Front Delts", GetIntensity(FrontDeltsExercises)},         
-                            
-                            { "Rear Delts", GetIntensity(RearDeltsExercises) },          
-                            
-                            { "Quadriceps", GetIntensity(QuadricepsExercises)},         
-                            
-                            { "Hamstrings", GetIntensity(HamstringsExercises) },         
-                            
-                            { "Glutes", GetIntensity(GlutesExercises)},         
-                            
-                            { "Calves", GetIntensity(CalvesExercises) },         
-                            
-                            { "Abs", GetIntensity(AbsExercises) },            
-                            
-                            { "Obliques", GetIntensity(ObliquesExercises) }            
-                        };          
-                                    
-                        var max = muscleIntensity.Values.Max();
-                        IMChart.Series = muscleIntensity.Where(kv => kv.Value > 0).Select(kv => new PieSeries<double>
-                        {           
-                            Name = kv.Key,
-                            Values = new[] { kv.Value },
-                            Pushout = kv.Value == max ? 30 : 0
-                        }).ToArray();
-                        break;          
-                    }           
-            }           
-
-
+            UpdatePieChart<Muscles>(AppState.MusclesList, IMChart, allExercises);
         }
-
         
         public void UpdateMuscleFunctionChoices()
         {
-            if (MC != MuscleChoices.LegsFunction && MC != MuscleChoices.CoreFunction && MC != MuscleChoices.Pull && MC != MuscleChoices.Push)
-                return;
 
             if (MFChart == null)
                 return;
-            switch(MC)
-            {
-                case MuscleChoices.CoreFunction:
-                    MF_InfoLabel.Text = "Core Current versus Last Month";
-                    break;
-                case MuscleChoices.LegsFunction:
-                    MF_InfoLabel.Text = "Legs Current versus Last Month";
-                    break;
-                default:
-                    MF_InfoLabel.Text = MC.ToString() + " Current versus Last Month";
-                    break;
-            }
-
+            MF_InfoLabel.Text = AppState.MuscleFunctionToString(MF) + " Current versus Last Month";
             RecalculateMFChart();
             UpdateMuscleFunctionLabels();
         }
@@ -868,24 +685,14 @@ namespace GymTracker.Models
                 .Where(w => w.StartTime >= now.AddMonths(-1))
                 .ToList();
 
-            string muscleFunction = MC switch
-            {
-                MuscleChoices.Push => "Push",
-                MuscleChoices.Pull => "Pull",
-                MuscleChoices.CoreFunction => "Core",
-                MuscleChoices.LegsFunction => "Legs",
-                _ => null
-            };
-
-            if (muscleFunction == null) return;
 
             void UpdateLabelsForMuscleFunction(string mf)
             {
                 var exercisesNow = filteredWorkoutsNow.SelectMany(w => w.Exercises)
-                                                      .Where(e => e.Function == mf)
+                                                      .Where(e => e.Function.ToString() == mf)
                                                       .ToList();
                 var exercisesLastMonth = filteredWorkoutsLastMonth.SelectMany(w => w.Exercises)
-                                                                  .Where(e => e.Function == mf)
+                                                                  .Where(e => e.Function.ToString() == mf)
                                                                   .ToList();
 
                 int setsNow = exercisesNow.SelectMany(e => e.CheckedSets).Count();
@@ -907,58 +714,19 @@ namespace GymTracker.Models
                 double volumeDiff = volumeNow - volumeLastMonth;
                 int repsDiff = repsNow - repsLastMonth;
                 int setsDiff = setsNow - setsLastMonth;
-                if (intensityDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFIntensityTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MFIntensityTrend].Text = "\u2191 " + Math.Abs(intensityDiff).ToString("F2");
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFIntensityTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MFIntensityTrend].Text = "\u2193 " + Math.Abs(intensityDiff).ToString("F2");
-                }
-
-                if (volumeDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFVolumeTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MFVolumeTrend].Text = "\u2191 " + Math.Abs(volumeDiff).ToString("F2");
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFVolumeTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MFVolumeTrend].Text = "\u2193 " + Math.Abs(volumeDiff).ToString("F2");
-                }
-
-                if (repsDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFRepsTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MFRepsTrend].Text = "\u2191 " + Math.Abs(repsDiff).ToString();
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFRepsTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MFRepsTrend].Text = "\u2193 " + Math.Abs(repsDiff).ToString();
-                }
-
-                if (setsDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFSetsTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MFSetsTrend].Text = "\u2191 " + Math.Abs(setsDiff).ToString();
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MFSetsTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MFSetsTrend].Text = "\u2193 " + Math.Abs(setsDiff).ToString();
-                }
+                UpdateLabel(intensityDiff, E_StatisticsLabels.MFIntensityTrend, StatisticsLabels);
+                UpdateLabel(volumeDiff, E_StatisticsLabels.MFVolumeTrend, StatisticsLabels);
+                UpdateLabel(repsDiff, E_StatisticsLabels.MFRepsTrend, StatisticsLabels);
+                UpdateLabel(setsDiff, E_StatisticsLabels.MFSetsTrend, StatisticsLabels);
             }
 
-            UpdateLabelsForMuscleFunction(muscleFunction);
+            UpdateLabelsForMuscleFunction(AppState.MuscleFunctionToString(MF));
         }
         private void RecalculateMFChart()
         {
             if (AppState.Workouts == null)
                 return;
-            if (TC == TimeChoices.Empty || MC == MuscleChoices.Empty || DC == DisplayChoices.Empty)
+            if (TC == TimeChoices.Empty || DC == DisplayChoices.Empty)
                 return;
             var now = DateTime.Now;
             var filteredWorkouts = AppState.Workouts
@@ -973,137 +741,96 @@ namespace GymTracker.Models
                 .ToList();
 
             var allExercises = filteredWorkouts.SelectMany(w => w.Exercises).ToList();
-            var PushExercises = allExercises.Where(e => e.Function == "Push").ToList();
-            var PullExercises = allExercises.Where(e => e.Function == "Pull").ToList();
-            var LegsExercises = allExercises.Where(e => e.Function == "Legs").ToList();
-            var CoreExercises = allExercises.Where(e => e.Function == "Core").ToList();
+            UpdatePieChart<MuscleFunctions>(AppState.MuscleFunctionsList, MFChart, allExercises);
+        }
 
+        private void UpdatePieChart<T>(IEnumerable<T> Muscles, PieChart chart, List<Exercise> exercises)
+        {
+            chart.HeightRequest = 500;
+            if(exercises.Count <= 0)
+            {
+                chart.HeightRequest = 0;
+                return;
+            }
+            Dictionary<String, double> muscleSets = new Dictionary<String, double>();
+            Dictionary<String, double> muscleReps = new Dictionary<String, double>();
+            Dictionary<String, double> muscleVolume = new Dictionary<String, double>();
+            Dictionary<String, double> muscleIntensity = new Dictionary<String, double>();
+            foreach(var e in Muscles)
+            {
+                List<Exercise> mExercises = new List<Exercise>();
+                switch(e)
+                {
+                    case Muscles m:
+                        mExercises = exercises.Where(e => AppState.MGMToString(e.TargetMuscle) == AppState.MGMToString(m)).ToList();
+                        break;
+                    case MuscleFunctions f:
+                        mExercises = exercises.Where(e => AppState.MGMToString(e.Function) == AppState.MGMToString(f)).ToList();
+                        break;
+                    case MuscleGroups g:
+                        mExercises = exercises.Where(e => AppState.MGMToString(e.MuscleGroup) == AppState.MGMToString(g)).ToList();
+                        break;
+                    default:
+                        return;
+
+                }
+                muscleSets.Add(AppState.MGMToString(e), mExercises.SelectMany(s => s.CheckedSets).Count());
+                muscleReps.Add(AppState.MGMToString(e), mExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps));
+                muscleVolume.Add(AppState.MGMToString(e), mExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight));
+                muscleIntensity.Add(AppState.MGMToString(e), GetIntensity(mExercises));
+            }
             switch (DC)
             {
                 case DisplayChoices.Sets:
                     {
-                        var setsDict = new Dictionary<string, double>
-                        {
-                            { "Push", PushExercises.SelectMany(s => s.CheckedSets).Count() },
-                            { "Pull", PullExercises.SelectMany(s => s.CheckedSets).Count() },
-                            { "Legs", LegsExercises.SelectMany(s => s.CheckedSets).Count() },
-                            { "Core", CoreExercises.SelectMany(s => s.CheckedSets).Count() }
-                        };
-
-                        var max = setsDict.Values.Max();
-                        MFChart.Series = setsDict
-                            .Where(kv => kv.Value > 0)
-                            .Select(kv => new PieSeries<double>
-                            {
-                                Name = kv.Key,
-                                Values = new[] { kv.Value },
-                                Pushout = kv.Value == max ? 30 : 0
-                            })
-                            .ToArray();
+                        UpdateValuePieChart(chart, muscleSets);
                         break;
                     }
 
                 case DisplayChoices.Reps:
                     {
-                        var repsDict = new Dictionary<string, double>
-                        {
-                            { "Push", PushExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                            { "Pull", PullExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                            { "Legs", LegsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                            { "Core", CoreExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) }
-                        };
-
-                        var max = repsDict.Values.Max();
-                        MFChart.Series = repsDict
-                            .Where(kv => kv.Value > 0)
-                            .Select(kv => new PieSeries<double>
-                            {
-                                Name = kv.Key,
-                                Values = new[] { kv.Value },
-                                Pushout = kv.Value == max ? 30 : 0
-                            })
-                            .ToArray();
+                        UpdateValuePieChart(chart, muscleReps);
                         break;
                     }
 
                 case DisplayChoices.Volume:
                     {
-                        var volumeDict = new Dictionary<string, double>
-                        {
-                            { "Push", PushExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Pull", PullExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Legs", LegsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                            { "Core", CoreExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) }
-                        };
-
-                        var max = volumeDict.Values.Max();
-                        MFChart.Series = volumeDict
-                            .Where(kv => kv.Value > 0)
-                            .Select(kv => new PieSeries<double>
-                            {
-                                Name = kv.Key,
-                                Values = new[] { kv.Value },
-                                Pushout = kv.Value == max ? 30 : 0
-                            })
-                            .ToArray();
+                        UpdateValuePieChart(chart, muscleVolume);
                         break;
                     }
 
                 case DisplayChoices.Intensity:
                     {
-
-                        var intensityDict = new Dictionary<string, double>
-                        {
-                            { "Push", GetIntensity(PushExercises) },
-
-                            { "Pull", GetIntensity(PullExercises) },
-
-                            { "Legs", GetIntensity(LegsExercises) },
-
-                            { "Core", GetIntensity(CoreExercises) }
-                        };
-
-                        var max = intensityDict.Values.Max();
-                        MFChart.Series = intensityDict
-                            .Where(kv => kv.Value > 0)
-                            .Select(kv => new PieSeries<double>
-                            {
-                                Name = kv.Key,
-                                Values = new[] { kv.Value },
-                                Pushout = kv.Value == max ? 30 : 0
-                            })
-                            .ToArray();
+                        UpdateValuePieChart(chart, muscleIntensity);
                         break;
                     }
             }
-
         }
+
+        private void UpdateValuePieChart(PieChart chart, Dictionary<String, double> stats)
+        {
+            var max = stats.Values.Max();
+            if(max <= 0)
+            {
+                chart.HeightRequest = 0;
+                return;
+            }
+            chart.Series = stats.Where(kv => kv.Value > 0).Select(kv => new PieSeries<double>
+            {           
+                Name = kv.Key,
+                Values = new[] { kv.Value },
+                Pushout = kv.Value == max ? 30 : 0
+            }).ToArray();
+        }
+
 
         public void UpdateMuscleGroupChoices()
         {
-            if (MC != MuscleChoices.Arms && MC != MuscleChoices.LegsGroup && MC != MuscleChoices.ChestGroup
-                && MC != MuscleChoices.Back && MC != MuscleChoices.Shoulders && MC != MuscleChoices.CoreGroup)
-                return;
 
             if (MGChart == null)
                 return;
 
-            switch(MC)
-            {
-                case MuscleChoices.CoreGroup:
-                    MG_InfoLabel.Text = "Core Current versus Last Month";
-                    break;
-                case MuscleChoices.LegsGroup:
-                    MG_InfoLabel.Text = "Legs Current versus Last Month";
-                    break;
-                case MuscleChoices.ChestGroup:
-                    MG_InfoLabel.Text = "Chest Current versus Last Month";
-                    break;
-                default:
-                    MG_InfoLabel.Text = MC.ToString() + " Current versus Last Month";
-                    break;
-            }
-
+            MG_InfoLabel.Text = AppState.MuscleGroupToString(MG) + " Current versus Last Month";
             RecalculateMGChart();
             UpdateMuscleGroupLabels();
         }
@@ -1120,26 +847,13 @@ namespace GymTracker.Models
                 .Where(w => w.StartTime >= now.AddMonths(-1))
                 .ToList();
 
-            string muscleGroup = MC switch
-            {
-                MuscleChoices.Arms => "Arms",
-                MuscleChoices.LegsGroup => "Legs",
-                MuscleChoices.CoreGroup => "Core",
-                MuscleChoices.ChestGroup => "Chest",
-                MuscleChoices.Back => "Back",
-                MuscleChoices.Shoulders => "Shoulders",
-                _ => null
-            };
-
-            if (muscleGroup == null) return;
-
             void UpdateLabelsForMuscleGroup(string mg)
             {
                 var exercisesNow = filteredWorkoutsNow.SelectMany(w => w.Exercises)
-                                                      .Where(e => e.MuscleGroup == mg)
+                                                      .Where(e => e.MuscleGroup.ToString() == mg)
                                                       .ToList();
                 var exercisesLastMonth = filteredWorkoutsLastMonth.SelectMany(w => w.Exercises)
-                                                                  .Where(e => e.MuscleGroup == mg)
+                                                                  .Where(e => e.MuscleGroup.ToString() == mg)
                                                                   .ToList();
 
                 int setsNow = exercisesNow.SelectMany(e => e.CheckedSets).Count();
@@ -1161,59 +875,20 @@ namespace GymTracker.Models
                 double volumeDiff = volumeNow - volumeLastMonth;
                 int repsDiff = repsNow - repsLastMonth;
                 int setsDiff = setsNow - setsLastMonth;
-                if (intensityDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGIntensityTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MGIntensityTrend].Text = "\u2191 " + Math.Abs(intensityDiff).ToString("F2");
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGIntensityTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MGIntensityTrend].Text = "\u2193 " + Math.Abs(intensityDiff).ToString("F2");
-                }
-
-                if (volumeDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGVolumeTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MGVolumeTrend].Text = "\u2191 " + Math.Abs(volumeDiff).ToString("F2");
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGVolumeTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MGVolumeTrend].Text = "\u2193 " + Math.Abs(volumeDiff).ToString("F2");
-                }
-
-                if (repsDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGRepsTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MGRepsTrend].Text = "\u2191 " + Math.Abs(repsDiff).ToString();
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGRepsTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MGRepsTrend].Text = "\u2193 " + Math.Abs(repsDiff).ToString();
-                }
-
-                if (setsDiff >= 0)
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGSetsTrend].TextColor = Colors.Green;
-                    StatisticsLabels[E_StatisticsLabels.MGSetsTrend].Text = "\u2191 " + Math.Abs(setsDiff).ToString();
-                }
-                else
-                {
-                    StatisticsLabels[E_StatisticsLabels.MGSetsTrend].TextColor = Colors.Red;
-                    StatisticsLabels[E_StatisticsLabels.MGSetsTrend].Text = "\u2193 " + Math.Abs(setsDiff).ToString();
-                }
+                UpdateLabel(intensityDiff, E_StatisticsLabels.MGIntensityTrend, StatisticsLabels);
+                UpdateLabel(volumeDiff, E_StatisticsLabels.MGVolumeTrend, StatisticsLabels);
+                UpdateLabel(repsDiff, E_StatisticsLabels.MGRepsTrend, StatisticsLabels);
+                UpdateLabel(setsDiff, E_StatisticsLabels.MGSetsTrend, StatisticsLabels);
             }
 
-            UpdateLabelsForMuscleGroup(muscleGroup);
+            UpdateLabelsForMuscleGroup(AppState.MuscleGroupToString(MG));
         }
 
         private void RecalculateMGChart()
         {
             if (AppState.Workouts == null)
                 return;
-            if (TC == TimeChoices.Empty || MC == MuscleChoices.Empty || DC == DisplayChoices.Empty)
+            if (TC == TimeChoices.Empty || DC == DisplayChoices.Empty)
                 return;
             var now = DateTime.Now;
             var filteredWorkouts = AppState.Workouts
@@ -1228,109 +903,7 @@ namespace GymTracker.Models
                 .ToList();
 
             var allExercises = filteredWorkouts.SelectMany(w => w.Exercises).ToList();
-            var ArmsExercises = allExercises.Where(e => e.MuscleGroup == "Arms").ToList();
-            var LegsExercises = allExercises.Where(e => e.MuscleGroup == "Legs").ToList();
-            var CoreExercises = allExercises.Where(e => e.MuscleGroup == "Core").ToList();
-            var ChestExercises = allExercises.Where(e => e.MuscleGroup == "Chest").ToList();
-            var BackExercises = allExercises.Where(e => e.MuscleGroup == "Back").ToList();
-            var ShouldersExercises = allExercises.Where(e => e.MuscleGroup == "Shoulders").ToList();
-
-            switch (DC)
-            {
-                case DisplayChoices.Sets:
-                    var muscleSets = new Dictionary<string, int>
-                    {
-                        { "Arms", ArmsExercises.SelectMany(s => s.CheckedSets).Count() },
-                        { "Legs", LegsExercises.SelectMany(s => s.CheckedSets).Count() },
-                        { "Core", CoreExercises.SelectMany(s => s.CheckedSets).Count() },
-                        { "Chest", ChestExercises.SelectMany(s => s.CheckedSets).Count() },
-                        { "Back", BackExercises.SelectMany(s => s.CheckedSets).Count() },
-                        { "Shoulders", ShouldersExercises.SelectMany(s => s.CheckedSets).Count() }
-                    };
-
-                    var maxSets = muscleSets.Values.Max();
-                    MGChart.Series = muscleSets
-                        .Where(kv => kv.Value > 0)
-                        .Select(kv => new PieSeries<double>
-                        {
-                            Name = kv.Key,
-                            Values = new[] { (double)kv.Value },
-                            Pushout = kv.Value == maxSets ? 30 : 0
-                        })
-                        .ToArray();
-                    break;
-
-                case DisplayChoices.Reps:
-                    var muscleReps = new Dictionary<string, int>
-                    {
-                        { "Arms", ArmsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                        { "Legs", LegsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                        { "Core", CoreExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                        { "Chest", ChestExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                        { "Back", BackExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) },
-                        { "Shoulders", ShouldersExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps) }
-                    };
-
-                    var maxReps = muscleReps.Values.Max();
-                    MGChart.Series = muscleReps
-                        .Where(kv => kv.Value > 0)
-                        .Select(kv => new PieSeries<double>
-                        {
-                            Name = kv.Key,
-                            Values = new[] { (double)kv.Value },
-                            Pushout = kv.Value == maxReps ? 30 : 0
-                        })
-                        .ToArray();
-                    break;
-
-                case DisplayChoices.Volume:
-                    var muscleVolume = new Dictionary<string, double>
-                    {
-                        { "Arms", ArmsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                        { "Legs", LegsExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                        { "Core", CoreExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                        { "Chest", ChestExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                        { "Back", BackExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) },
-                        { "Shoulders", ShouldersExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight) }
-                    };
-
-                    var maxVolume = muscleVolume.Values.Max();
-                    MGChart.Series = muscleVolume
-                        .Where(kv => kv.Value > 0)
-                        .Select(kv => new PieSeries<double>
-                        {
-                            Name = kv.Key,
-                            Values = new[] { (double)kv.Value },
-                            Pushout = kv.Value == maxVolume ? 30 : 0
-                        })
-                        .ToArray();
-                    break;
-
-                case DisplayChoices.Intensity:
-                    var muscleIntensity = new Dictionary<string, double>
-                    {
-                        { "Arms", GetIntensity(ArmsExercises) },
-                        { "Legs", GetIntensity(LegsExercises) },
-                        { "Core", GetIntensity(CoreExercises) },
-                        { "Chest", GetIntensity(ChestExercises) },
-                        { "Back", GetIntensity(BackExercises) },
-                        { "Shoulders", GetIntensity(ShouldersExercises) }
-                    };
-
-                    var maxIntensity = muscleIntensity.Values.Max();
-                    MGChart.Series = muscleIntensity
-                        .Where(kv => kv.Value > 0)
-                        .Select(kv => new PieSeries<double>
-                        {
-                            Name = kv.Key,
-                            Values = new[] { kv.Value },
-                            Pushout = kv.Value == maxIntensity ? 30 : 0
-                        })
-                        .ToArray();
-                    break;
-            }
-
-
+            UpdatePieChart<MuscleGroups>(AppState.MuscleGroupsList, MGChart, allExercises);
         }
         private double GetIntensity(IEnumerable<Exercise> exercises)
         {
@@ -1830,7 +1403,7 @@ namespace GymTracker.Models
                     WeekNumber = g.Key.Week,
                     Year = g.Key.Year,
                     StartDate = FirstDateOfWeekIso8601(g.Key.Year, g.Key.Week),
-                    Volume = g.Sum(w => w.Volume),
+                    Volume = g.Sum(w => w.Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Reps) * w.Exercises.SelectMany(e => e.CheckedSets).Count()),
                     Duration = TimeSpan.FromTicks(g.Sum(w => w.Duration.Ticks)),
                     Reps = g.Sum(w => w.Exercises.Sum(e => e.CheckedSets.Sum(s => s.Reps))),
                     Sets = g.Sum(w => w.Exercises.Sum(e => e.Sets.Count(s => s.IsChecked)))
@@ -1845,6 +1418,18 @@ namespace GymTracker.Models
 
         private async void OnExercises()
         {
+            foreach (var exercise in AllExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            foreach (var exercise in FilteredExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            FilteredExercises.Clear();
+            AppState.SelectedExerciseIds.Clear();
             await Shell.Current.GoToAsync("profileselectexercise");
         }
 
@@ -1872,35 +1457,7 @@ namespace GymTracker.Models
         {
             public ObservableCollection<Routine> Routines { get; set; }
             public ObservableCollection<Routine> Workouts { get; set; }
-            public Services.Profile Profile { get; set; }
-        }
-
-        private async void ExportData()
-        {
-            var exportData = new
-            {
-                Routines = AppState.Routines,
-                Workouts = AppState.Workouts,
-                Profile = AppState.Profile
-            };
-
-            try
-            {
-                string json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions { WriteIndented = true });
-
-                string filePath = Path.Combine(FileSystem.AppDataDirectory, "exported_data.json");
-                await File.WriteAllTextAsync(filePath, json);
-
-                await Share.Default.RequestAsync(new ShareFileRequest
-                {
-                    Title = "Export JSON Data",
-                    File = new ShareFile(filePath)
-                });
-            }
-            catch (Exception ex)
-            {
-                await Shell.Current.DisplayAlert("Error", $"Export failed: {ex.Message}", "OK");
-            }
+            public ObservableCollection<Exercise> Exercises { get; set; }
         }
         public static DateTime FirstDateOfWeekIso8601(int year, int weekOfYear)
         {
@@ -1910,7 +1467,183 @@ namespace GymTracker.Models
             DateTime firstMonday = jan4.AddDays(1 - dayOfWeek);
             return firstMonday.AddDays((weekOfYear - 1) * 7);
         }
-        private async void ImportData()
+
+        public void AddTimeButton(TimeChoices tc, String text, HorizontalStackLayout container)
+        {
+            Button button = new Button { Text = text, TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
+            button.Clicked += (s, e) => TC = tc;
+            container.Children.Add(button);
+            TimeButtons.Add((button, tc));
+        }
+        public void AddDisplayButton(DisplayChoices dc, String text, HorizontalStackLayout container)
+        {
+            Button button = new Button { Text = text, TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
+            button.Clicked += (s, e) => DC = dc;
+            container.Children.Add(button);
+            DisplayButtons.Add((button, dc));
+        }
+
+        public void AddLabel(E_StatisticsLabels e, VerticalStackLayout container)
+        {
+            Label label = new Label { Text = "-", TextColor = Colors.Gray, HorizontalTextAlignment = TextAlignment.Start, FontAttributes = FontAttributes.Bold };
+            container.Children.Add(label);
+            StatisticsLabels.Add(e, label);
+        }
+
+        public void AddLabel(E_StatisticsLabels e, Grid container)
+        {
+            Label label = new Label { Text = "", TextColor = Color.FromRgba("#008cff"), BackgroundColor = Colors.Black, HorizontalOptions = LayoutOptions.End };
+            container.Children.Add(label);
+            StatisticsLabels.Add(e, label);
+        }
+
+        public async void OnAddExerciseToList()
+        {
+            await Shell.Current.GoToAsync("profileaddexercise");
+        }
+        public async void OnEditDeleteExercises()
+        {
+            foreach (var exercise in AllExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            foreach (var exercise in FilteredExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            FilteredExercises.Clear();
+            AppState.SelectedExerciseIds.Clear();
+            await Shell.Current.GoToAsync("profileeditdeleteexercises");
+        }
+        public async void OnImportExportWorkouts()
+        {
+            if (Views.Settings.IsExport)
+            {
+                Helper_ExportData(AppState.Workouts, "DogoFit_workouts");
+            }
+            else
+            {
+                Helper_ImportWorkouts();
+            }
+        }
+        public async void OnImportExportRoutines()
+        {
+            if (Views.Settings.IsExport)
+            {
+                Helper_ExportData(AppState.Routines, "DogoFit_routines");
+            }
+            else
+            {
+                Helper_ImportRoutines();
+            }
+        }
+        public async void OnImportExportExercises()
+        {
+            if (Views.Settings.IsExport)
+            {
+                Helper_ExportData(AppState.AllExercises, "DogoFit_exercises");
+            }
+            else
+            {
+                Helper_ImportExercises();
+            }
+        }
+        public async void OnImportExportAll()
+        {
+            if(Views.Settings.IsExport)
+            {
+                var exportData = new
+                {
+                    Routines = AppState.Routines,
+                    Workouts = AppState.Workouts,
+                    Exercises = AppState.AllExercises
+                };
+
+                try
+                {
+                    string json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions { WriteIndented = true });
+
+                    string filePath = Path.Combine(FileSystem.AppDataDirectory, "DogoFit_all_data.json");
+                    await File.WriteAllTextAsync(filePath, json);
+
+                    await Share.Default.RequestAsync(new ShareFileRequest
+                    {
+                        Title = "Export JSON Data",
+                        File = new ShareFile(filePath)
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await Shell.Current.DisplayAlert("Error", $"Export failed: {ex.Message}", "OK");
+                }
+            }
+            else
+            {
+                try
+                {
+                    var result = await FilePicker.Default.PickAsync(new PickOptions
+                    {
+                        PickerTitle = "Select exported JSON file",
+                        FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                        {
+                            { DevicePlatform.iOS, new[] { "public.json" } },
+                            { DevicePlatform.Android, new[] { "application/json" } },
+                            { DevicePlatform.WinUI, new[] { ".json" } },
+                            { DevicePlatform.MacCatalyst, new[] { "json" } }
+                        })
+                    });
+
+                    if (result != null)
+                    {
+                        using var stream = await result.OpenReadAsync();
+
+                        var importedData = await JsonSerializer.DeserializeAsync<ExportDataType>(
+                            stream,
+                            new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true,
+                                IgnoreReadOnlyProperties = true,
+                                IncludeFields = true,
+                            });
+
+                        Helper_ImportRoutines(importedData);
+                        Helper_ImportWorkouts(importedData);
+                        Helper_ImportExercises(importedData);
+
+                        await Shell.Current.DisplayAlert("Success", "Data imported successfully!", "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await Shell.Current.DisplayAlert("Error", $"Import failed: {ex.Message}", "OK");
+                }
+            }
+        }
+
+        private async void Helper_ExportData<T>(ObservableCollection<T> collection, string filename)
+        {
+                try
+                {
+                    string json = JsonSerializer.Serialize(collection, new JsonSerializerOptions { WriteIndented = true });
+
+                    string filePath = Path.Combine(FileSystem.AppDataDirectory, filename + ".json");
+                    await File.WriteAllTextAsync(filePath, json);
+
+                    await Share.Default.RequestAsync(new ShareFileRequest
+                    {
+                        Title = "Export JSON Data",
+                        File = new ShareFile(filePath)
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await Shell.Current.DisplayAlert("Error", $"Export failed: {ex.Message}", "OK");
+                }
+        }
+
+        private async void Helper_ImportRoutines()
         {
             try
             {
@@ -1918,19 +1651,19 @@ namespace GymTracker.Models
                 {
                     PickerTitle = "Select exported JSON file",
                     FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.iOS, new[] { "public.json" } },
-                { DevicePlatform.Android, new[] { "application/json" } },
-                { DevicePlatform.WinUI, new[] { ".json" } },
-                { DevicePlatform.MacCatalyst, new[] { "json" } }
-            })
+                    {
+                        { DevicePlatform.iOS, new[] { "public.json" } },
+                        { DevicePlatform.Android, new[] { "application/json" } },
+                        { DevicePlatform.WinUI, new[] { ".json" } },
+                        { DevicePlatform.MacCatalyst, new[] { "json" } }
+                    })
                 });
-
+            
                 if (result != null)
                 {
                     using var stream = await result.OpenReadAsync();
-
-                    var importedData = await JsonSerializer.DeserializeAsync<ExportDataType>(
+            
+                    var importedData = await JsonSerializer.DeserializeAsync<IEnumerable<Routine>>(
                         stream,
                         new JsonSerializerOptions
                         {
@@ -1938,66 +1671,14 @@ namespace GymTracker.Models
                             IgnoreReadOnlyProperties = true,
                             IncludeFields = true,
                         });
-
-                    if (importedData != null)
-                    {
-                        foreach (var r in importedData.Routines ?? Enumerable.Empty<Routine>())
+                        foreach (var r in importedData ?? Enumerable.Empty<Routine>())
                         {
                             AppState.Routines.Add(r);
                             var template = DbHelper.ToDbRoutineTemplate(r);
                             App.Db.RoutineTemplates.Add(template);
                             App.Db.SaveChanges();
                         }
-
-                        foreach (var w in importedData.Workouts ?? Enumerable.Empty<Routine>())
-                        {
-                            AppState.Workouts.Insert(0, w);
-                            w.CalculateSetDistribution();
-                            AppState.RoutinesCount += 1;
-                            var workout = DbHelper.ToDbWorkout(w);
-                            App.Db.Workouts.Add(workout);
-                            App.Db.SaveChanges();
-
-                            w.ID = workout.Id;
-                        }
-
-                        if (importedData.Profile != null)
-                        {
-                            AppState.Profile.Lats += importedData.Profile.Lats;
-                            AppState.Profile.Triceps += importedData.Profile.Triceps;
-                            AppState.Profile.Biceps += importedData.Profile.Biceps;
-                            AppState.Profile.Quadriceps += importedData.Profile.Quadriceps;
-                            AppState.Profile.Hamstrings += importedData.Profile.Hamstrings;
-                            AppState.Profile.Glutes += importedData.Profile.Glutes;
-                            AppState.Profile.Calves += importedData.Profile.Calves;
-                            AppState.Profile.Abdominals += importedData.Profile.Abdominals;
-                            AppState.Profile.Obliques += importedData.Profile.Obliques;
-                            AppState.Profile.Traps += importedData.Profile.Traps;
-                            AppState.Profile.LateralDelts += importedData.Profile.LateralDelts;
-                            AppState.Profile.FrontDelts += importedData.Profile.FrontDelts;
-                            AppState.Profile.RearDelts += importedData.Profile.RearDelts;
-                            AppState.Profile.Forearms += importedData.Profile.Forearms;
-                            AppState.Profile.Push += importedData.Profile.Push;
-                            AppState.Profile.Chest += importedData.Profile.Chest;
-                            AppState.Profile.ChestGroup += importedData.Profile.ChestGroup;
-                            AppState.Profile.Back += importedData.Profile.Back;
-                            AppState.Profile.LegsFunction += importedData.Profile.LegsFunction;
-                            AppState.Profile.LegsGroup += importedData.Profile.LegsGroup;
-                            AppState.Profile.Arms += importedData.Profile.Arms;
-                            AppState.Profile.CoreFunction += importedData.Profile.CoreFunction;
-                            AppState.Profile.CoreGroup += importedData.Profile.CoreGroup;
-                            AppState.Profile.Shoulders += importedData.Profile.Shoulders;
-                            AppState.Profile.Pull += importedData.Profile.Pull;
-                            AppState.Profile.Reps += importedData.Profile.Reps;
-                            AppState.Profile.Volume += importedData.Profile.Volume;
-                            AppState.Profile.Sets += importedData.Profile.Sets;
-                            AppState.Profile.Duration += importedData.Profile.Duration;
-                            AppState.Profile.Workouts += 1;
-                            DbHelper.SaveProfile(App.Db, Profile);
-                        }
-
-                    }
-
+            
                     await Shell.Current.DisplayAlert("Success", "Data imported successfully!", "OK");
                 }
             }
@@ -2007,59 +1688,146 @@ namespace GymTracker.Models
             }
         }
 
-        private void SelectCategory(Category category)
+        private void Helper_ImportRoutines(ExportDataType data)
         {
-            foreach (var c in Categories)
-                c.IsSelected = false;
-
-            category.IsSelected = true;
-
-            FilterByCategory(category.Name, false);
-        }
-        public void FilterByCategory(string category, bool UseName)
-        {
-            FilteredExercises.Clear();
-            IEnumerable<Exercise> filtered;
-            if (!UseName)
+            if(data != null)
             {
-
-                if (new[] { "Pull", "Push", "Legs", "Core" }.Contains(category, StringComparer.OrdinalIgnoreCase))
+                foreach (var r in data.Routines ?? Enumerable.Empty<Routine>())
                 {
-                    filtered = category == "All"
-                        ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.Function, category, StringComparison.OrdinalIgnoreCase));
+                    AppState.Routines.Add(r);
+                    var template = DbHelper.ToDbRoutineTemplate(r);
+                    App.Db.RoutineTemplates.Add(template);
+                    App.Db.SaveChanges();
                 }
-                else if (new[] { "Arms", "Shoulders", "Chest", "Back" }.Contains(category, StringComparer.OrdinalIgnoreCase))
-                {
-                    filtered = category == "All"
-                        ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.MuscleGroup, category, StringComparison.OrdinalIgnoreCase));
-                }
-                else
-                {
-                    filtered = category == "All"
-                        ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.TargetMuscle, category, StringComparison.OrdinalIgnoreCase));
-                }
-            }
-            else
-            {
-                filtered = category == "All"
-                    ? AllExercises
-                    : AllExercises.Where(e => e.Name.Contains(category, StringComparison.OrdinalIgnoreCase));
-            }
-
-
-            foreach (var ex in filtered)
-            {
-                var clone = new Exercise(ex);
-                clone.IsSelected = AppState.SelectedExerciseIds.Contains(clone.Name);
-                FilteredExercises.Add(clone);
             }
         }
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+
+        private void Helper_ImportWorkouts(ExportDataType data)
+        {
+            if(data != null)
+            {
+                foreach (var w in data.Workouts ?? Enumerable.Empty<Routine>())
+                {
+                    AppState.Workouts.Insert(0, w);
+                    var workout = DbHelper.ToDbWorkout(w);
+                    App.Db.Workouts.Add(workout);
+                    App.Db.SaveChanges();
+                
+                    w.ID = workout.Id;
+                }
+            }
+        }
+        private async void Helper_ImportWorkouts()
+        {
+            try
+            {
+                var result = await FilePicker.Default.PickAsync(new PickOptions
+                {
+                    PickerTitle = "Select exported JSON file",
+                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.iOS, new[] { "public.json" } },
+                        { DevicePlatform.Android, new[] { "application/json" } },
+                        { DevicePlatform.WinUI, new[] { ".json" } },
+                        { DevicePlatform.MacCatalyst, new[] { "json" } }
+                    })
+                });
+            
+                if (result != null)
+                {
+                    using var stream = await result.OpenReadAsync();
+            
+                    var importedData = await JsonSerializer.DeserializeAsync<IEnumerable<Routine>>(
+                        stream,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                            IgnoreReadOnlyProperties = true,
+                            IncludeFields = true,
+                        });
+                    foreach (var w in importedData ?? Enumerable.Empty<Routine>())
+                    {
+                        AppState.Workouts.Insert(0, w);
+                        var workout = DbHelper.ToDbWorkout(w);
+                        App.Db.Workouts.Add(workout);
+                        App.Db.SaveChanges();
+                    
+                        w.ID = workout.Id;
+                    }
+            
+                    await Shell.Current.DisplayAlert("Success", "Data imported successfully!", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error", $"Import failed: {ex.Message}", "OK");
+            }
+        }
+
+        private void Helper_ImportExercises(ExportDataType data)
+        {
+            if(data != null)
+            {
+                foreach (var e in data.Exercises ?? Enumerable.Empty<Exercise>())
+                {
+                    AppState.AllExercises.Add(e);
+                    var exercise = DbHelper.ToDbExercise(e);
+                    App.Db.Exercises.Add(exercise);
+                    App.Db.SaveChanges();
+                } 
+            }
+        }
+        private async void Helper_ImportExercises()
+        {
+            try
+            {
+                var result = await FilePicker.Default.PickAsync(new PickOptions
+                {
+                    PickerTitle = "Select exported JSON file",
+                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.iOS, new[] { "public.json" } },
+                        { DevicePlatform.Android, new[] { "application/json" } },
+                        { DevicePlatform.WinUI, new[] { ".json" } },
+                        { DevicePlatform.MacCatalyst, new[] { "json" } }
+                    })
+                });
+            
+                if (result != null)
+                {
+                    using var stream = await result.OpenReadAsync();
+            
+                    var importedData = await JsonSerializer.DeserializeAsync<IEnumerable<Exercise>>(
+                        stream,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                            IgnoreReadOnlyProperties = true,
+                            IncludeFields = true,
+                        });
+                    if(importedData != null)
+                    {
+                        foreach (var e in importedData ?? Enumerable.Empty<Exercise>())
+                        {
+                            AppState.AllExercises.Add(e);
+                            var exercise = DbHelper.ToDbExercise(e);
+                            App.Db.Exercises.Add(exercise);
+                            App.Db.SaveChanges();
+                        } 
+                    }
+            
+                    await Shell.Current.DisplayAlert("Success", "Data imported successfully!", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error", $"Import failed: {ex.Message}", "OK");
+            }
+        }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+                => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
 }

@@ -8,33 +8,29 @@ public partial class AddExercise : ContentPage
 	public AddExercise()
 	{
 		InitializeComponent();
-        if (AppState.IsWorkoutInProgress)
+        switch(AppState.WorkoutState)
         {
-            if(AppState.IsEmptyWorkout)
+            case WorkoutStates.EmptyWorkout:
                 BindingContext = new WorkoutViewModel();
-            else
+                break;
+            case WorkoutStates.WorkoutInProgress:
                 BindingContext = new StartRoutineViewModel();
+                break;
+            case WorkoutStates.EditingRoutine:
+                BindingContext = new EditRoutineModel();
+                break;
+            case WorkoutStates.NewRoutine:
+                BindingContext = new WorkoutViewModel();
+                break;
+            default:
+                BindingContext = new WorkoutViewModel();
+                break;
         }
-        else if (AppState.IsEditingRoutine)
-            BindingContext = new EditRoutineModel();
-        else
-            BindingContext = new WorkoutViewModel();
     }
 
     private void ExerciseName_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (BindingContext is StartRoutineViewModel startVM)
-        {
-            startVM.FilterByCategory(e.NewTextValue, true);
-        }
-        else if (BindingContext is EditRoutineModel editVM)
-        {
-            editVM.FilterByCategory(e.NewTextValue, true);
-        }
-        else if (BindingContext is WorkoutViewModel workoutVM)
-        {
-            workoutVM.FilterByCategory(e.NewTextValue, true);
-        }
+        AppState.FilterByCategory(e.NewTextValue, true);
     }
 
 }

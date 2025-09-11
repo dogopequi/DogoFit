@@ -70,8 +70,8 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Label 
-            Text="{Binding RoutinesCount, StringFormat='My Routines ({0})'}"
+            <Label x:Name="RoutineCount"
+            Text=""
             Style="{StaticResource SubHeadline}"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
