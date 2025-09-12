@@ -50,7 +50,7 @@ public partial class Profile : ContentPage
         WorkoutsLabel.Text = workouts.ToString();
         SetsLabel.Text = sets.ToString();
         RepsLabel.Text = reps.ToString();
-        VolumeLabel.Text = volume.ToString("N0");
+        VolumeLabel.Text = volume.ToString("N0") + AppState.Profile.WeightUnit;
         if (time >= 0)
         {
             var ts = TimeSpan.FromSeconds(time);
@@ -80,7 +80,7 @@ public partial class Profile : ContentPage
                 Padding = 0,HorizontalOptions = LayoutOptions.FillAndExpand, ColumnSpacing = 10
             };
 
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(60) });
 

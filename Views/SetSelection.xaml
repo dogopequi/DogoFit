@@ -8,9 +8,10 @@
              xmlns:services="clr-namespace:GymTracker.Services">
                 
     <Grid Padding="10" RowDefinitions="*,Auto" RowSpacing="0">
-        <VerticalStackLayout x:Name="vstack" Grid.Row="0" Padding="10" Margin="5">
+        <ScrollView Grid.Row="0">
+        <VerticalStackLayout x:Name="vstack" Padding="10" Margin="5">
         </VerticalStackLayout>
-
+        </ScrollView>
         <Button Grid.Row="1"
                 Text="Continue"
                 Command="{Binding BindingContext.SaveNewRoutineCommand, Source={x:Reference setselection}}"

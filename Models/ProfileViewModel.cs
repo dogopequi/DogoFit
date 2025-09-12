@@ -59,6 +59,8 @@ namespace GymTracker.Models
         public Exercise SelectedExercise => AppState.SelectedExercise;
         public string SelectedExerciseName => SelectedExercise?.Name;
 
+        public Label PieChartLabel = new Label();
+
         public List<(Button, Muscles)> MusclesButtons { get; set; } = new List<(Button, Muscles)>();
         public List<(Button, MuscleFunctions)> MuscleFunctionButtons { get; set; } = new List<(Button, MuscleFunctions)>();
         public List<(Button, MuscleGroups)> MuscleGroupsButtons { get; set; } = new List<(Button, MuscleGroups)>();
@@ -106,8 +108,6 @@ namespace GymTracker.Models
         public Axis[] ER_XAxes { get; set; }
         public Axis[] ER_YAxes { get; set; }
         public ObservableCollection<Category> Categories { get; set; }
-        public ObservableCollection<Exercise> AllExercises { get; set; }
-        public ObservableCollection<Exercise> FilteredExercises { get; set; }
         public ObservableCollection<Exercise> DisplayedExercises { get; set; }
         public ICommand MuscleGroupDistCommand { get; set; }
         public ICommand MuscleFunctionDistCommand { get; set; }
@@ -233,11 +233,11 @@ namespace GymTracker.Models
         private List<WeekStat> WeeklyStats { get; set; }
         private List<ExerciseRecord> ExerciseRecords { get; set; }
 
-        private List<Exercise> SelectedExercises { get; set; }
         public ProfileViewModel()
         {
             DisplayedExercises = new ObservableCollection<Exercise>();
             AppState.MaxExercises = 20;
+            AppState.FillDisplayedExercises(DisplayedExercises);
             Profile = AppState.Profile;
             OpenSettingsCommand = new Command(OpenSettings);
             GitHubCommand = new Command(OpenGitHub);
@@ -246,15 +246,7 @@ namespace GymTracker.Models
             StatisticsCommand = new Command(OnStatistics);
             LoadMoreExercisesCommand = new Command(() => { 
                 AppState.MaxExercises += 20;
-                DisplayedExercises.Clear();
-                int i = 0;
-                foreach(Exercise e in FilteredExercises)
-                {
-                    if (i >= AppState.MaxExercises)
-                        break;
-                    DisplayedExercises.Add(e);
-                    i++;
-                }
+                AppState.FillDisplayedExercises(DisplayedExercises);
             });
             SelectExerciseCommand = new Command<Exercise>(async (Exercise exercise) => {
                 AppState.SelectedExercise = new Exercise(exercise);
@@ -268,17 +260,17 @@ namespace GymTracker.Models
 
                 if (exercise.IsSelected)
                 {
-                    if (!SelectedExercises.Any(e => e.Name == exercise.Name))
+                    if (!AppState.SelectedExercises.Any(e => e.Name == exercise.Name))
                     {
-                        SelectedExercises.Add(new Exercise(exercise));
+                        AppState.SelectedExercises.Add(new Exercise(exercise));
                         AppState.SelectedExerciseIds.Add(exercise.Name);
                     }
                 }
                 else
                 {
-                    var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
+                    var toRemove = AppState.SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
                     if (toRemove != null)
-                        SelectedExercises.Remove(toRemove);
+                        AppState.SelectedExercises.Remove(toRemove);
 
                     AppState.SelectedExerciseIds.Remove(exercise.Name);
                 }
@@ -301,41 +293,38 @@ namespace GymTracker.Models
             });
 
             EditSelectedExercise = new Command(async () => {
-                if(SelectedExercises?.Count() < 1)
+                if(AppState.SelectedExercises?.Count() < 1)
                 {
                     await Shell.Current.DisplayAlert("Error", "No exercise is selected.", "OK");
                     return;
                 }
-                else if(SelectedExercises?.Count > 1)
+                else if(AppState.SelectedExercises?.Count > 1)
                 {
                     await Shell.Current.DisplayAlert("Error", "It is only possible to edit 1 exercise at a time.", "OK");
                     return;
                 }
-                else if(!AppState.AllExercises.Any(e => e.Name.Equals(SelectedExercises.ElementAt(0).Name, StringComparison.OrdinalIgnoreCase)))
+                else if(!AppState.AllExercises.Any(e => e.Name.Equals(AppState.SelectedExercises.ElementAt(0).Name, StringComparison.OrdinalIgnoreCase)))
                 {
                     await Shell.Current.DisplayAlert("Error", "DogoFit's exercise list does not contain an exercise with the same name.", "OK");
                     return;
                 }
                 AppState.profileExercise = ProfileExercise.Edit;
-                AppState.EditedExercise = SelectedExercises.ElementAt(0);
+                AppState.EditedExercise = AppState.SelectedExercises.ElementAt(0);
                 await Shell.Current.GoToAsync("profileaddexercise");
             });
             DeleteSelectedExercises = new Command(async () => {
-                if(SelectedExercises?.Count() < 1)
+                if(AppState.SelectedExercises?.Count() < 1)
                 {
                     await Shell.Current.DisplayAlert("Error", "No exercise is selected.", "OK");
                     return;
                 }
-                string error = AppState.RemoveExercises(SelectedExercises);
+                string error = AppState.RemoveExercises(AppState.SelectedExercises);
                 await Shell.Current.DisplayAlert("Info", error, "OK");
                 await Shell.Current.Navigation.PopToRootAsync();
             });
-            SelectedExercises = new List<Exercise>();
             Categories = AppState.Categories;
-            AllExercises = AppState.AllExercises;
-            FilteredExercises = AppState.FilteredExercises;
             AppState.FilterByCategory("All", false);
-            FilterCommand = new Command<Category>(AppState.SelectCategory);
+            FilterCommand = new Command<Category>((Category cat) => { AppState.SelectCategory(cat); AppState.FillDisplayedExercises(DisplayedExercises); });
             Workouts = AppState.Workouts;
         }
         public ISeries[] TotalVolumeSeries { get; set; }
@@ -746,10 +735,12 @@ namespace GymTracker.Models
 
         private void UpdatePieChart<T>(IEnumerable<T> Muscles, PieChart chart, List<Exercise> exercises)
         {
+            PieChartLabel.IsVisible = false;
             chart.HeightRequest = 500;
             if(exercises.Count <= 0)
             {
                 chart.HeightRequest = 0;
+                PieChartLabel.IsVisible = true;
                 return;
             }
             Dictionary<String, double> muscleSets = new Dictionary<String, double>();
@@ -813,6 +804,7 @@ namespace GymTracker.Models
             if(max <= 0)
             {
                 chart.HeightRequest = 0;
+                PieChartLabel.IsVisible = true;
                 return;
             }
             chart.Series = stats.Where(kv => kv.Value > 0).Select(kv => new PieSeries<double>
@@ -1418,18 +1410,6 @@ namespace GymTracker.Models
 
         private async void OnExercises()
         {
-            foreach (var exercise in AllExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            foreach (var exercise in FilteredExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            FilteredExercises.Clear();
-            AppState.SelectedExerciseIds.Clear();
             await Shell.Current.GoToAsync("profileselectexercise");
         }
 
@@ -1503,18 +1483,6 @@ namespace GymTracker.Models
         }
         public async void OnEditDeleteExercises()
         {
-            foreach (var exercise in AllExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            foreach (var exercise in FilteredExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            FilteredExercises.Clear();
-            AppState.SelectedExerciseIds.Clear();
             await Shell.Current.GoToAsync("profileeditdeleteexercises");
         }
         public async void OnImportExportWorkouts()
@@ -1770,10 +1738,13 @@ namespace GymTracker.Models
             {
                 foreach (var e in data.Exercises ?? Enumerable.Empty<Exercise>())
                 {
-                    AppState.AllExercises.Add(e);
-                    var exercise = DbHelper.ToDbExercise(e);
-                    App.Db.Exercises.Add(exercise);
-                    App.Db.SaveChanges();
+                    if (!AppState.AllExercises.Any(i => i.Name.Equals(e.Name, StringComparison.Ordinal)))
+                    {
+                        AppState.AllExercises.Add(e);
+                        var exercise = DbHelper.ToDbExercise(e);
+                        App.Db.Exercises.Add(exercise);
+                        App.Db.SaveChanges();
+                    }
                 } 
             }
         }
@@ -1809,10 +1780,13 @@ namespace GymTracker.Models
                     {
                         foreach (var e in importedData ?? Enumerable.Empty<Exercise>())
                         {
-                            AppState.AllExercises.Add(e);
-                            var exercise = DbHelper.ToDbExercise(e);
-                            App.Db.Exercises.Add(exercise);
-                            App.Db.SaveChanges();
+                            if (!AppState.AllExercises.Any(i => i.Name.Equals(e.Name, StringComparison.Ordinal)))
+                            {
+                                AppState.AllExercises.Add(e);
+                                var exercise = DbHelper.ToDbExercise(e);
+                                App.Db.Exercises.Add(exercise);
+                                App.Db.SaveChanges();
+                            }
                         } 
                     }
             

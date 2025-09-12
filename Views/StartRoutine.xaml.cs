@@ -86,7 +86,7 @@ public partial class StartRoutine : ContentPage
             Button remove = new Button { Text = "❌", FontSize = 15, Margin = new Thickness(0,-20,0,0), BackgroundColor = Colors.Transparent,
                     TextColor = Colors.Red, HorizontalOptions = LayoutOptions.End};
             remove.Clicked += (s, e) => {
-                vm.OnRemoveExercise(exercise);
+                vm.OnRemoveExercise(exercise); Refresh();
             };
             Grid.SetColumn(name, 0);
             Grid.SetColumn(remove, 1);
@@ -110,7 +110,7 @@ public partial class StartRoutine : ContentPage
                 Button addsetbuttonLeft = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                     WidthRequest = 275, FontAttributes = FontAttributes.Bold};
                 addsetbuttonLeft.BindingContext = exercise;
-                addsetbuttonLeft.Clicked += (s, e) => { vm.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
+                addsetbuttonLeft.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
                 eVstack.Children.Add(addsetbuttonLeft);
 
                 Label rightHeader = new Label { Text = "Right Side", TextColor = Colors.White, FontSize = 18, HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center };
@@ -121,7 +121,7 @@ public partial class StartRoutine : ContentPage
                 Button addsetbuttonRight = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                     WidthRequest = 275, FontAttributes = FontAttributes.Bold};
                 addsetbuttonRight.BindingContext = exercise;
-                addsetbuttonRight.Clicked += (s, e) => { vm.OnAddSetToExercise(exercise, SideType.Right); Refresh(); };
+                addsetbuttonRight.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Right); Refresh(); };
                 eVstack.Children.Add(addsetbuttonRight);
             }
             else
@@ -133,7 +133,7 @@ public partial class StartRoutine : ContentPage
                 Button addsetbutton = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                         WidthRequest = 275, FontAttributes = FontAttributes.Bold};
                 addsetbutton.BindingContext = exercise;
-                addsetbutton.Clicked += (s, e) => { vm.OnAddSetToExercise(exercise, SideType.None); Refresh(); };
+                addsetbutton.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.None); Refresh(); };
                 eVstack.Children.Add(addsetbutton);
             }
 

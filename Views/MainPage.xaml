@@ -8,8 +8,8 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="10" Spacing="20" Margin="0,0,0,40">
-            <Image Source="logo.png" HeightRequest="185" Aspect="AspectFit" />
-
+            <Image x:Name="logo" Source="logo.png" HeightRequest="185" Aspect="AspectFit" />
+            <Label x:Name="DataLabel" Text="No workouts have been recorded." HorizontalTextAlignment="Center" HorizontalOptions="Center" FontSize="20" TextColor="White"/>
             <Frame BorderColor="Black" CornerRadius="10" Padding="10" Margin="5">
                 <VerticalStackLayout x:Name="vstack" Spacing="20">
 

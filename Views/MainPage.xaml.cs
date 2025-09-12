@@ -1,9 +1,5 @@
 ﻿using GymTracker.Models;
 using GymTracker.Services;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.Shapes;
-using System.Collections.ObjectModel;
 namespace GymTracker
 {
     public partial class MainPage : ContentPage
@@ -15,19 +11,32 @@ namespace GymTracker
             InitializeComponent();
             vm = new WorkoutHistoryModel();
             BindingContext = vm;
-            CreateLayout();
+            Draw();
         }
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            Draw();
+        }
+        private void Draw()
+        {
             vstack.Clear();
-            CreateLayout();
+            if (vm.routines.Count() > 0)
+            {
+                CreateLayout();
+                DataLabel.IsVisible = false;
+                logo.IsVisible = false;
+            }
+            else
+            {
+                DataLabel.IsVisible = true;
+                logo.IsVisible = true;
+            }
         }
         private void LoadMore(object sender, EventArgs e)
         {
             maxWorkouts += 20;
-            vstack.Clear();
-            CreateLayout();
+            Draw();
         }
         private void CreateLayout()
         {
@@ -40,12 +49,14 @@ namespace GymTracker
                 Label name = new Label { Text = r.Name, TextColor = Colors.White, FontSize = 20, FontAttributes = FontAttributes.Bold,
                         HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center};
                 vstack.Children.Add(name);
-                int sets = r.Exercises.SelectMany(w => w.CheckedSets).Count();
-                int reps = r.Exercises.SelectMany(w => w.CheckedSets).Sum(s => s.Reps);
-                double volume = r.Exercises.SelectMany(w => w.CheckedSets).Sum(s => s.Weight * s.Reps);
+                var allSets = r.Exercises.SelectMany(w => w.CheckedSets);
+                int sets = allSets.Count();
+                int reps = allSets.Sum(s => s.Reps);
+                double volume = allSets.Sum(s => s.Weight * s.Reps);
+
                 HorizontalStackLayout statsHStack = new HorizontalStackLayout { Spacing = 30, HorizontalOptions = LayoutOptions.Center };
 
-                CreateHeader("VOLUME", volume.ToString("N0"), statsHStack);
+                CreateHeader("VOLUME", volume.ToString("N0") + AppState.Profile.WeightUnit, statsHStack);
                 CreateHeader("SETS", sets.ToString(), statsHStack);
                 CreateHeader("REPS", reps.ToString(), statsHStack);
                 CreateHeader("TIME", r.DurationString, statsHStack);
@@ -112,8 +123,6 @@ namespace GymTracker
                     }
                 };
 
-                deleteButton.Clicked += (s, e) => AppState.RemoveWorkout(r);
-
                 vstack.Children.Add(deleteButton);
 
                 BoxView box = new BoxView { HeightRequest = 5, BackgroundColor = Color.FromArgb("#2b2b2b"), HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -136,12 +145,13 @@ namespace GymTracker
             Label name = new Label { Text = exercise.Name, FontSize = 20, TextColor = Colors.DodgerBlue, FontAttributes = FontAttributes.Bold,
                     HorizontalTextAlignment = TextAlignment.Center, LineBreakMode = LineBreakMode.WordWrap, MaxLines = 5};
             exercisesStack.Children.Add(name);
-            if (exercise.Description != String.Empty || exercise.Description != "")
-            {
-                Label desc = new Label{ Text = exercise.Description,FontSize = 17,
-                    HorizontalTextAlignment = TextAlignment.Center,MaxLines = 5, LineBreakMode = LineBreakMode.WordWrap};
-                exercisesStack.Children.Add(desc);
-            }
+            if(exercise.Description != null)
+                if (exercise.Description != String.Empty || exercise.Description != "")
+                {
+                    Label desc = new Label{ Text = exercise.Description,FontSize = 17,
+                        HorizontalTextAlignment = TextAlignment.Center,MaxLines = 5, LineBreakMode = LineBreakMode.WordWrap};
+                    exercisesStack.Children.Add(desc);
+                }
             if (exercise.IsUnilateral)
             {
                 Label leftHeader = new Label { Text = "Left Side", TextColor = Colors.White, FontSize = 18, HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center};
@@ -162,7 +172,7 @@ namespace GymTracker
             }
             else
             {
-                var setVStack = new VerticalStackLayout { Spacing = 20 };
+                var setVStack = new VerticalStackLayout { Spacing = 20, Margin = new Thickness(0,10,0,0) };
                 foreach (Set set in exercise.CheckedSets)
                 {
                     SetLayout(set, exercise, setVStack);
@@ -296,7 +306,7 @@ namespace GymTracker
                     Padding = 0,HorizontalOptions = LayoutOptions.FillAndExpand, ColumnSpacing = 10
                 };
 
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(60) });
 

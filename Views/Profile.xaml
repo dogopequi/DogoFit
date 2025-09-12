@@ -30,7 +30,7 @@
         <ScrollView>
             <VerticalStackLayout Padding="0" Spacing="20" Margin="0,10,0,0" HorizontalOptions="Start">
                 <Label Text="Statistics" FontSize="30" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold" Margin="0,0,0,20"/>
-                <Frame BorderColor="Black" CornerRadius="8" Padding="0" Margin="0,0,0,20" HorizontalOptions="Center" >
+                <Frame BorderColor="Black" CornerRadius="8" Padding="0" Margin="10,0,10,20" HorizontalOptions="Center" >
                     <HorizontalStackLayout Padding="0" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
                         <VerticalStackLayout Spacing="5">
                             <Label Text="WORKOUTS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>

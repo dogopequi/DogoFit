@@ -22,10 +22,7 @@ namespace GymTracker.Models
         public ICommand StartEmptyCommand { get; }
         public ICommand LoadMoreExercisesCommand { get; }
         public ObservableCollection<GymTracker.Services.Routine> Routines { get; }
-        public ObservableCollection<Exercise> AllExercises { get; set; }
-        public ObservableCollection<Exercise> FilteredExercises { get; set; }
         public ObservableCollection<Exercise> DisplayedExercises { get; set; }
-        public ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
 
         private Routine? _workoutInProgress;
         public Routine? WorkoutInProgress
@@ -104,34 +101,24 @@ namespace GymTracker.Models
         {
             DisplayedExercises = new ObservableCollection<Exercise>();
             AppState.MaxExercises = 20;
+            AppState.FillDisplayedExercises(DisplayedExercises);
             WorkoutInProgress = AppState.WorkoutInProgress;
             if (AppState.WorkoutInProgress == null)
                 OnDiscard();
             LoadMoreExercisesCommand = new Command(() => { 
                 AppState.MaxExercises += 20;
-                DisplayedExercises.Clear();
-                int i = 0;
-                foreach(Exercise e in FilteredExercises)
-                {
-                    if (i >= AppState.MaxExercises)
-                        break;
-                    DisplayedExercises.Add(e);
-                    i++;
-                }
-            });
+                AppState.FillDisplayedExercises(DisplayedExercises);
+            });;
             Categories = AppState.Categories;
             Routines = AppState.Routines;
             CurrentRoutineName = AppState.CurrentRoutineName;
-            SelectedExercises = AppState.SelectedExercises;
             AddRoutineCommand = new Command(OnAddRoutine);
             StartWorkoutCommand = new Command<Routine>(OnStartWorkout);
             AddExerciseCommand = new Command(OnAddExercise);
             EditRoutineCommand = new Command<Routine>(OnEditRoutine);
-            AllExercises = AppState.AllExercises;
-            FilteredExercises = AppState.FilteredExercises;
             AppState.FilterByCategory("All", false);
-            FilterCommand = new Command<Category>(AppState.SelectCategory);
-            SelectExerciseCommand = new Command<Exercise>(SelectExercise);
+            FilterCommand = new Command<Category>((Category cat) => { AppState.SelectCategory(cat); AppState.FillDisplayedExercises(DisplayedExercises); });
+            SelectExerciseCommand = new Command<Exercise>(AppState.SelectExercise);
             SaveExercisesToWorkoutCommand = new Command(OnSetSelectionForRoutine);
             SaveNewRoutineCommand = new Command(OnSaveNewRoutine);
             ResumeWorkoutInProgressCommand = new Command(OnResume);
@@ -152,7 +139,7 @@ namespace GymTracker.Models
             var result = await Shell.Current.DisplayAlert("Remove Exercise", $"Are you sure you want to delete this exercise?", "Yes", "No");
             if (result)
             {
-                SelectedExercises.Remove(exercise);
+                AppState.SelectedExercises.Remove(exercise);
             }
         }
         public void OnResume()
@@ -182,29 +169,6 @@ namespace GymTracker.Models
             set.Side = type;
             exercise.AddSet(set);
             exercise.RecalculateSetIndexes();
-        }
-
-
-        public void SelectExercise(Exercise exercise)
-        {
-            exercise.IsSelected = !exercise.IsSelected;
-
-            if (exercise.IsSelected)
-            {
-                if (!SelectedExercises.Any(e => e.Name == exercise.Name))
-                {
-                    SelectedExercises.Add(new Exercise(exercise));
-                    AppState.SelectedExerciseIds.Add(exercise.Name);
-                }
-            }
-            else
-            {
-                var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
-                if (toRemove != null)
-                    SelectedExercises.Remove(toRemove);
-
-                AppState.SelectedExerciseIds.Remove(exercise.Name);
-            }
         }
 
 
@@ -273,7 +237,6 @@ namespace GymTracker.Models
                     Routine routine = new Routine();
                     routine.Name = CurrentRoutineName;
                     AppState.WorkoutInProgress = routine;
-                    AppState.WorkoutInProgress.Name = CurrentRoutineName;
                     AppState.CurrentRoutineName = string.Empty;
                     AppState.FilterByCategory("All", false);
 
@@ -292,7 +255,7 @@ namespace GymTracker.Models
             Routine routine = new Routine();
             routine.Name = CurrentRoutineName;
 
-            foreach (var exercise in SelectedExercises)
+            foreach (var exercise in AppState.SelectedExercises)
             {
                 if(exercise.Description != null)
                 {
@@ -308,19 +271,7 @@ namespace GymTracker.Models
                 routine.AddExercise(newexercise);
             }
 
-            foreach (var exercise in AllExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            foreach (var exercise in FilteredExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            FilteredExercises.Clear();
-            SelectedExercises.Clear();
-            AppState.SelectedExerciseIds.Clear();
+            AppState.ClearExerciseFilters();
 
             if (AppState.WorkoutState == WorkoutStates.WorkoutInProgress)
             {

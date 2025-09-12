@@ -33,43 +33,30 @@ namespace GymTracker.Models
         public ICommand AddExerciseCommand { get; }
         public ICommand RemoveSetFromExerciseCommand { get; }
         public ObservableCollection<Category> Categories { get; set; }
-        public ObservableCollection<Exercise> AllExercises { get; set; }
-        public ObservableCollection<Exercise> FilteredExercises { get; set; }
         public ObservableCollection<Exercise> DisplayedExercises { get; set; }
         public ICommand LoadMoreExercisesCommand { get; }
         public ICommand SelectExerciseCommand { get; }
         public ICommand SaveEditedRoutineCommand { get; }
         public ICommand SaveExercisesToWorkoutCommand { get; }
         public ObservableCollection<String> TakenExercises { get; set; } = new ObservableCollection<String>();
-        public ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
 
         public ICommand FilterCommand { get; }
         public EditRoutineModel()
         {
             DisplayedExercises = new ObservableCollection<Exercise>();
             AppState.MaxExercises = 20;
+            AppState.FillDisplayedExercises(DisplayedExercises);
             LoadMoreExercisesCommand = new Command(() => { 
                 AppState.MaxExercises += 20;
-                DisplayedExercises.Clear();
-                int i = 0;
-                foreach(Exercise e in FilteredExercises)
-                {
-                    if (i >= AppState.MaxExercises)
-                        break;
-                    DisplayedExercises.Add(e);
-                    i++;
-                }
+                AppState.FillDisplayedExercises(DisplayedExercises);
             });
             routine = AppState.EditedRoutine;
             TakenExercises = new ObservableCollection<string>(routine.Exercises.Select(e => e.Name));
-            AllExercises = AppState.AllExercises;
-            FilteredExercises = AppState.FilteredExercises;
-            SelectedExercises = AppState.SelectedExercises;
             Categories = AppState.Categories;
             AppState.FilterByCategory("All", false);
-            FilterCommand = new Command<Category>(AppState.SelectCategory);
+            FilterCommand = new Command<Category>((Category cat) => { AppState.SelectCategory(cat); AppState.FillDisplayedExercises(DisplayedExercises); });
             RemoveSetFromExerciseCommand = new Command<Exercise>(OnRemoveSetFromExercise);
-            SelectExerciseCommand = new Command<Exercise>(SelectExercise);
+            SelectExerciseCommand = new Command<Exercise>(AppState.SelectExercise);
             SaveExercisesToWorkoutCommand = new Command(OnSaveExercises);
             SaveEditedRoutineCommand = new Command(OnSaveRoutine);
             AddExerciseCommand = new Command(OnAddExercise);
@@ -109,15 +96,6 @@ namespace GymTracker.Models
             }
         }
 
-        public void OnAddSetToExercise(Exercise exercise, SideType type)
-        {
-            if (exercise == null) return;
-            Set set = new Set();
-            set.Side = type;
-            exercise.AddSet(set);
-            exercise.RecalculateSetIndexes();
-        }
-
         private void OnRemoveSetFromExercise(Exercise exercise)
         {
             if (exercise.Sets.Count > 0)
@@ -147,15 +125,15 @@ namespace GymTracker.Models
 
         public async void OnSaveExercises()
         {
-            for (int i = SelectedExercises.Count - 1; i >= 0; i--)
+            for (int i = AppState.SelectedExercises.Count - 1; i >= 0; i--)
             {
-                if (TakenExercises.Contains(SelectedExercises[i].Name))
+                if (TakenExercises.Contains(AppState.SelectedExercises[i].Name))
                 {
-                    SelectedExercises[i].IsSelected = false;
-                    SelectedExercises.RemoveAt(i);
+                    AppState.SelectedExercises[i].IsSelected = false;
+                    AppState.SelectedExercises.RemoveAt(i);
                 }
             }
-            foreach (var exercise in SelectedExercises)
+            foreach (var exercise in AppState.SelectedExercises)
             {
                 exercise.IsSelected = false;
                 var newexercise = new Exercise(exercise);
@@ -163,94 +141,9 @@ namespace GymTracker.Models
                 routine.AddExercise(newexercise);
                 TakenExercises.Add(newexercise.Name);
             }
-
-            foreach (var exercise in AllExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            foreach (var exercise in FilteredExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            FilteredExercises.Clear();
-            SelectedExercises.Clear();
-            AppState.SelectedExerciseIds.Clear();
+            AppState.ClearExerciseFilters();
 
             await Shell.Current.Navigation.PopAsync();
-        }
-        public void SelectExercise(Exercise exercise)
-        {
-            exercise.IsSelected = !exercise.IsSelected;
-
-            if (exercise.IsSelected)
-            {
-                if (!SelectedExercises.Any(e => e.Name == exercise.Name))
-                {
-                    SelectedExercises.Add(new Exercise(exercise));
-                    AppState.SelectedExerciseIds.Add(exercise.Name);
-                }
-            }
-            else
-            {
-                var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
-                if (toRemove != null)
-                    SelectedExercises.Remove(toRemove);
-
-                AppState.SelectedExerciseIds.Remove(exercise.Name);
-            }
-        }
-        private void SelectCategory(Category category)
-        {
-            foreach (var c in Categories)
-                c.IsSelected = false;
-
-            category.IsSelected = true;
-
-            FilterByCategory(category.Name, false);
-        }
-
-        public void FilterByCategory(string category, bool UseName)
-        {
-            FilteredExercises.Clear();
-            IEnumerable<Exercise> filtered;
-            if (!UseName)
-            {
-
-                if (new[] { "Pull", "Push", "Legs", "Core" }.Contains(category, StringComparer.OrdinalIgnoreCase))
-                {
-                    filtered = category == "All"
-                        ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.Function.ToString(), category, StringComparison.OrdinalIgnoreCase));
-                }
-                else if (new[] { "Arms", "Shoulders", "Chest", "Back" }.Contains(category, StringComparer.OrdinalIgnoreCase))
-                {
-                    filtered = category == "All"
-                        ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.MuscleGroup.ToString(), category, StringComparison.OrdinalIgnoreCase));
-                }
-                else
-                {
-                    filtered = category == "All"
-                        ? AllExercises
-                        : AllExercises.Where(e => string.Equals(e.TargetMuscle.ToString(), category, StringComparison.OrdinalIgnoreCase));
-                }
-            }
-            else
-            {
-                filtered = category == "All"
-                    ? AllExercises
-                    : AllExercises.Where(e => e.Name.Contains(category, StringComparison.OrdinalIgnoreCase));
-            }
-
-
-            foreach (var ex in filtered)
-            {
-                var clone = new Exercise(ex);
-                clone.IsSelected = AppState.SelectedExerciseIds.Contains(clone.Name);
-                FilteredExercises.Add(clone);
-            }
         }
 
         private async void OnSaveRoutine()
@@ -280,7 +173,7 @@ namespace GymTracker.Models
             AppState.CurrentRoutineName = string.Empty;
             AppState.CurrentRoutine = null;
 
-            FilterByCategory("All", false);
+            AppState.FilterByCategory("All", false);
 
             await Shell.Current.Navigation.PopToRootAsync();
         }

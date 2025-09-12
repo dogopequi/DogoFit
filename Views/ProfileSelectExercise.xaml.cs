@@ -16,6 +16,7 @@ public partial class ProfileSelectExercise : ContentPage
         if (BindingContext is ProfileViewModel VM)
         {
             AppState.FilterByCategory(e.NewTextValue, true);
+            AppState.FillDisplayedExercises(VM.DisplayedExercises);
         }
     }
 }

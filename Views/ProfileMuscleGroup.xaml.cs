@@ -38,6 +38,7 @@ public partial class ProfileMuscleGroup : ContentPage
         vm.AddLabel(E_StatisticsLabels.MGReps, MG_RepsContainer);
         vm.AddLabel(E_StatisticsLabels.MGRepsTrend, MG_RepsContainer);
 
+        vm.PieChartLabel = PieChartLabel;
         vm.MG_InfoLabel = MG_InfoLabel;
         vm.MG_InfoLabel.TextColor = Colors.White;
         vm.MG_InfoLabel.HorizontalTextAlignment = TextAlignment.Center;

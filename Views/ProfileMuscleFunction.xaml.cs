@@ -38,6 +38,7 @@ public partial class ProfileMuscleFunction : ContentPage
         vm.AddLabel(E_StatisticsLabels.MFReps, MF_RepsContainer);
         vm.AddLabel(E_StatisticsLabels.MFRepsTrend, MF_RepsContainer);
 
+        vm.PieChartLabel = PieChartLabel;
         vm.MF_InfoLabel = MF_InfoLabel;
         vm.MF_InfoLabel.TextColor = Colors.White;
         vm.MF_InfoLabel.HorizontalTextAlignment = TextAlignment.Center;

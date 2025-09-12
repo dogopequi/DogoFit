@@ -40,6 +40,7 @@ public partial class profileindimuscles : ContentPage
         vm.AddLabel(E_StatisticsLabels.IMReps, IM_RepsContainer);
         vm.AddLabel(E_StatisticsLabels.IMRepsTrend, IM_RepsContainer);
 
+        vm.PieChartLabel = PieChartLabel;
         vm.IM_InfoLabel = IM_InfoLabel;
         vm.IM_InfoLabel.TextColor = Colors.White;
         vm.IM_InfoLabel.HorizontalTextAlignment = TextAlignment.Center;

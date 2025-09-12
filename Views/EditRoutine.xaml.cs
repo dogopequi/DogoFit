@@ -50,7 +50,7 @@ public partial class EditRoutine : ContentPage
                     SetLayout(set, exercise);
                 Button addSetLeft = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold};
-                addSetLeft.Clicked += (s, e) => { vm.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
+                addSetLeft.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
                 vstack.Children.Add(addSetLeft);
 
 
@@ -60,7 +60,7 @@ public partial class EditRoutine : ContentPage
                     SetLayout(set, exercise);
                 Button addSetRight = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold};
-                addSetRight.Clicked += (s, e) => { vm.OnAddSetToExercise(exercise, SideType.Right); Refresh(); };
+                addSetRight.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Right); Refresh(); };
                 vstack.Children.Add(addSetRight);
             }
             else
@@ -71,7 +71,7 @@ public partial class EditRoutine : ContentPage
                 }
                 Button addSet = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold};
-                addSet.Clicked += (s, e) => { vm.OnAddSetToExercise(exercise, SideType.None); Refresh(); };
+                addSet.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.None); Refresh(); };
                 vstack.Children.Add(addSet);
             }
 

@@ -17,15 +17,12 @@ namespace GymTracker.Models
         public ICommand AddExerciseCommand { get; }
         
         public ObservableCollection<Category> Categories { get; set; }
-        public ObservableCollection<Exercise> AllExercises { get; set; }
-        public ObservableCollection<Exercise> FilteredExercises { get; set; }
         public ObservableCollection<Exercise> DisplayedExercises { get; set; }
         public ICommand LoadMoreExercisesCommand { get; }
         public ICommand SelectExerciseCommand { get; }
         public ICommand RemoveExerciseCommand { get; }
         public ICommand SaveExercisesToWorkoutCommand { get; }
         public ObservableCollection<String> TakenExercises { get; set; } = new ObservableCollection<String>();
-        public ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
 
         public ICommand FilterCommand { get; }
         private Routine? _routine;
@@ -61,17 +58,10 @@ namespace GymTracker.Models
         {
             DisplayedExercises = new ObservableCollection<Exercise>();
             AppState.MaxExercises = 20;
+            AppState.FillDisplayedExercises(DisplayedExercises);
             LoadMoreExercisesCommand = new Command(() => { 
                 AppState.MaxExercises += 20;
-                DisplayedExercises.Clear();
-                int i = 0;
-                foreach(Exercise e in FilteredExercises)
-                {
-                    if (i >= AppState.MaxExercises)
-                        break;
-                    DisplayedExercises.Add(e);
-                    i++;
-                }
+                AppState.FillDisplayedExercises(DisplayedExercises);
             });
             routine = AppState.WorkoutInProgress;
             if (routine != null)
@@ -105,15 +95,12 @@ namespace GymTracker.Models
             }
             TakenExercises = new ObservableCollection<string>(routine.Exercises.Select(e => e.Name));
             Categories = AppState.Categories;
-            AllExercises = AppState.AllExercises;
-            FilteredExercises = AppState.FilteredExercises;
-            SelectedExercises = AppState.SelectedExercises;
             AppState.FilterByCategory("All", false);
-            FilterCommand = new Command<Category>(AppState.SelectCategory);
+            FilterCommand = new Command<Category>((Category cat) => { AppState.SelectCategory(cat); AppState.FillDisplayedExercises(DisplayedExercises); });
             RemoveSetFromExerciseCommand = new Command<Exercise>(OnRemoveSetFromExercise);
             FinishRoutineCommand = new Command(OnFinishRoutine);
             RemoveExerciseCommand = new Command<Exercise>(OnRemoveExercise);
-            SelectExerciseCommand = new Command<Exercise>(SelectExercise);
+            SelectExerciseCommand = new Command<Exercise>(AppState.SelectExercise);
             SaveExercisesToWorkoutCommand = new Command(OnSaveExercises);
             AddExerciseCommand = new Command(OnAddExercise);
             AppState.WorkoutState = WorkoutStates.WorkoutInProgress;
@@ -145,17 +132,6 @@ namespace GymTracker.Models
             {
                 exercise.Sets[i].ID = i + 1;
             }
-        }
-
-
-        public void OnAddSetToExercise(Exercise exercise, SideType type)
-        {
-            if (exercise == null) return;
-            Set set = new Set();
-            set.Side = type;
-            exercise.AddSet(set);
-            exercise.RecalculateSetIndexes();
-            AppState.SaveWorkoutInProgress();
         }
 
         private void OnRemoveSetFromExercise(Exercise exercise)
@@ -237,15 +213,15 @@ namespace GymTracker.Models
         }
         public async void OnSaveExercises()
         {
-            for (int i = SelectedExercises.Count - 1; i >= 0; i--)
+            for (int i = AppState.SelectedExercises.Count - 1; i >= 0; i--)
             {
-                if (TakenExercises.Contains(SelectedExercises[i].Name))
+                if (TakenExercises.Contains(AppState.SelectedExercises[i].Name))
                 {
-                    SelectedExercises[i].IsSelected = false;
-                    SelectedExercises.RemoveAt(i);
+                    AppState.SelectedExercises[i].IsSelected = false;
+                    AppState.SelectedExercises.RemoveAt(i);
                 }
             }
-            foreach (var exercise in SelectedExercises)
+            foreach (var exercise in AppState.SelectedExercises)
             {
                 exercise.IsSelected = false;
                 var newexercise = new Exercise(exercise);
@@ -254,42 +230,9 @@ namespace GymTracker.Models
                 TakenExercises.Add(newexercise.Name);
             }
 
-            foreach (var exercise in AllExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            foreach (var exercise in FilteredExercises)
-            {
-                exercise.IsSelected = false;
-                exercise.Description = string.Empty;
-            }
-            FilteredExercises.Clear();
-            SelectedExercises.Clear();
-            AppState.SelectedExerciseIds.Clear();
+            AppState.ClearExerciseFilters();
 
             await Shell.Current.Navigation.PopAsync();
-        }
-        public void SelectExercise(Exercise exercise)
-        {
-            exercise.IsSelected = !exercise.IsSelected;
-
-            if (exercise.IsSelected)
-            {
-                if (!SelectedExercises.Any(e => e.Name == exercise.Name))
-                {
-                    SelectedExercises.Add(new Exercise(exercise));
-                    AppState.SelectedExerciseIds.Add(exercise.Name);
-                }
-            }
-            else
-            {
-                var toRemove = SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
-                if (toRemove != null)
-                    SelectedExercises.Remove(toRemove);
-
-                AppState.SelectedExerciseIds.Remove(exercise.Name);
-            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

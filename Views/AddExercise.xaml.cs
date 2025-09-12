@@ -30,7 +30,23 @@ public partial class AddExercise : ContentPage
 
     private void ExerciseName_TextChanged(object sender, TextChangedEventArgs e)
     {
-        AppState.FilterByCategory(e.NewTextValue, true);
+        switch (BindingContext)
+        {
+            case WorkoutViewModel workoutVM:
+                AppState.FilterByCategory(e.NewTextValue, true);
+                AppState.FillDisplayedExercises(workoutVM.DisplayedExercises);
+                break;
+
+            case StartRoutineViewModel startVM:
+                AppState.FilterByCategory(e.NewTextValue, true);
+                AppState.FillDisplayedExercises(startVM.DisplayedExercises);
+                break;
+
+            case EditRoutineModel editVM:
+                AppState.FilterByCategory(e.NewTextValue, true);
+                AppState.FillDisplayedExercises(editVM.DisplayedExercises);
+                break;
+        }
     }
 
 }

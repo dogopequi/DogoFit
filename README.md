@@ -9,20 +9,24 @@ This is a learning project, and it's heavily inspired by [Hevy](https://www.hevy
 
 The application is written in C#, using the MAUI framework.
 
-I am only planning to release on Android, but I might come around to iOS and Windows.
+I am only planning to release on Android.
 ## Features
 
-- Quick start workout
+- Quick start Workout
 - Routine creation
 - Routine edition
-- Tracking of workouts
-- Exercises from workout in progress show the last corresponding set performed
+- Tracking of Workouts
+- Last set fetch (Workout in progress)
+- Unilateral exercises
+- Custom exercises
 - Workout in progress save (1 at a time)
-- Set types: Normal, warmup, failure, drop (purely comestic, just to differentiate)
-- Graph and charts to track progress
-- Split information (function, muscle group, invidual msucles)
+- Set types: Normal, warmup, failure, drop (purely comestic)
+- Charts to track progress
+- Split information (Function, Muscle Group, Individual muscles)
+- Statistics (Intensity, Volume, Sets, Reps, Duration, Workouts) sorted by date
 - Data stored locally
-- Data can be exported and imported in Settings (JSON file)
+- Data can be exported and imported in Settings (JSON file), individually or all at the same time
 - No Ads
 - No internet connection required
+- No paywall or subscription
 

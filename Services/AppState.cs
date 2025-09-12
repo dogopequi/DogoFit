@@ -47,9 +47,9 @@ namespace GymTracker.Services
         public static Routine? EditedRoutine { get; set; } = new Routine();
         public static Routine? CurrentRoutine { get; set; }
         public static Routine? WorkoutInProgress { get; set; } = null;
-        public static ObservableCollection<Category> Categories { get; set; }
-        public static ObservableCollection<Exercise> AllExercises { get; set; }
-        public static ObservableCollection<Exercise> FilteredExercises { get; set; }
+        public static ObservableCollection<Category> Categories { get; set; } = new ObservableCollection<Category>();
+        public static ObservableCollection<Exercise> AllExercises { get; set; } = new ObservableCollection<Exercise>();
+        public static ObservableCollection<Exercise> FilteredExercises { get; set; } = new ObservableCollection<Exercise>();
         public static Exercise SelectedExercise { get; set; }
         public static ObservableCollection<Exercise> SelectedExercises { get; set; } = new ObservableCollection<Exercise>();
         public static Profile Profile { get; set; }
@@ -387,7 +387,7 @@ namespace GymTracker.Services
             Categories = new ObservableCollection<Category>(Categories.GroupBy(c => c.Name).Select(g => g.First()));
             FilteredExercises = new ObservableCollection<Exercise>(AllExercises.Select(e => new Exercise(e)));
 
-           //TestWorkouts();
+           TestWorkouts();
 
         }
 
@@ -511,6 +511,23 @@ namespace GymTracker.Services
             FilterByCategory(category.Name, false);
         }
 
+        public static void ClearExerciseFilters()
+        {
+            foreach (var exercise in AppState.AllExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            foreach (var exercise in AppState.FilteredExercises)
+            {
+                exercise.IsSelected = false;
+                exercise.Description = string.Empty;
+            }
+            AppState.FilteredExercises.Clear();
+            AppState.SelectedExercises.Clear();
+            AppState.SelectedExerciseIds.Clear();
+        }
+
         public static void FilterByCategory(String category, bool useName)
         {
             FilteredExercises.Clear();
@@ -556,7 +573,38 @@ namespace GymTracker.Services
             }
         }
 
-        public static string RemoveExercises(List<Exercise> exercises)
+        public static void OnAddSetToExercise(Exercise exercise, SideType type)
+        {
+            if (exercise == null) return;
+            Set set = new Set();
+            set.Side = type;
+            exercise.AddSet(set);
+            exercise.RecalculateSetIndexes();
+            if(WorkoutState == WorkoutStates.WorkoutInProgress)
+                AppState.SaveWorkoutInProgress();
+        }
+        public static void SelectExercise(Exercise exercise)
+        {
+            exercise.IsSelected = !exercise.IsSelected;
+
+            if (exercise.IsSelected)
+            {
+                if (!AppState.SelectedExercises.Any(e => e.Name == exercise.Name))
+                {
+                    AppState.SelectedExercises.Add(new Exercise(exercise));
+                    AppState.SelectedExerciseIds.Add(exercise.Name);
+                }
+            }
+            else
+            {
+                var toRemove = AppState.SelectedExercises.FirstOrDefault(e => e.Name == exercise.Name);
+                if (toRemove != null)
+                    AppState.SelectedExercises.Remove(toRemove);
+
+                AppState.SelectedExerciseIds.Remove(exercise.Name);
+            }
+        }
+        public static string RemoveExercises(ObservableCollection<Exercise> exercises)
         {
             string error = "";
             if (AllExercises == null)
@@ -579,14 +627,26 @@ namespace GymTracker.Services
                 }
                 else
                 {
-                    var exercisedb = DbHelper.ToDbExercise(e);
-                    DbHelper.RemoveExercise(exercisedb.Id);
+                    DbHelper.RemoveExercise(e.ID);
                     App.Db.SaveChanges();
                     AllExercises.Remove(e);
                     error += $"Removed exercise: {exercise.Name}.\n";
                 }
             }
             return error;
+        }
+
+        public static void FillDisplayedExercises(ObservableCollection<Exercise> exercises)
+        {
+            exercises.Clear();
+             int i = 0;
+             foreach(Exercise e in AppState.FilteredExercises)
+             {
+                 if (i >= AppState.MaxExercises)
+                     break;
+                 exercises.Add(e);
+                 i++;
+             }
         }
 
         public static string UpdateExercise(Exercise updated)
@@ -610,8 +670,7 @@ namespace GymTracker.Services
             }
             AllExercises.Remove(exercise);
             AllExercises.Add(updated);
-            var dbexercise = DbHelper.ToDbExercise(exercise);
-            DbHelper.UpdateExercise(updated, updated.ID);
+            DbHelper.UpdateExercise(updated, exercise.ID);
             r += "Updated the exercise.\n";
             return r;
         }

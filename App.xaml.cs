@@ -9,9 +9,9 @@ namespace GymTracker
         public App()
         {
             InitializeComponent();
-            DbHelper.DeleteDatabase("gymtracker.db");
+            DbHelper.DeleteDatabase("DogoFit.db");
 
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "gymtracker.db");
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "DogoFit.db");
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite($"Data Source={dbPath}")
                 .Options;

@@ -21,7 +21,7 @@ public partial class SetSelection : ContentPage
     }
     private void CreateLayout()
     {
-        foreach (Exercise exercise in vm.SelectedExercises)
+        foreach (Exercise exercise in AppState.SelectedExercises)
         {
             Grid grid = new Grid { Padding = new Thickness(0, 0, 0, 10) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -70,7 +70,7 @@ public partial class SetSelection : ContentPage
                     SetLayout(set, exercise);
                 }
                 Button addSet = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
-                        TextColor = Colors.White, FontAttributes = FontAttributes.Bold};
+                        TextColor = Colors.White, FontAttributes = FontAttributes.Bold, Margin = new Thickness(0,10,0,0)};
                 addSet.Clicked += (s, e) => { vm.AddSet(exercise, SideType.None); Refresh(); };
                 vstack.Children.Add(addSet);
             }

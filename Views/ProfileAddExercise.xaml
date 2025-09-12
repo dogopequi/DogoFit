@@ -6,8 +6,9 @@
              x:Name="profileaddexercise"
              BackgroundColor="Black"
              Shell.NavBarIsVisible="False">
-    <VerticalStackLayout x:Name="vstack" HorizontalOptions="Center" VerticalOptions="Start" Margin="20,20,20,0" Spacing="10">
-        
-        
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout x:Name="vstack" HorizontalOptions="Center" VerticalOptions="Start" Margin="20,20,20,0" Spacing="10">
+        </VerticalStackLayout>
+
+    </ScrollView>
 </ContentPage>
