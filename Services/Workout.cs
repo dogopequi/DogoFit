@@ -1,15 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Windows.Input;
 
 namespace GymTracker.Services
 {
@@ -191,6 +182,11 @@ namespace GymTracker.Services
                 OnPropertyChanged(nameof(DurationString));
             }
         }
+
+        public int Sets => Exercises.SelectMany(e => e.CheckedSets).Count();
+        public int Reps => Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Reps);
+        public double Volume => Exercises.SelectMany(e => e.CheckedSets).Sum(s => s.Weight * s.Reps);
+        public string VolumeDisplay => $"{Volume:N2} {AppState.Profile.WeightUnit}";
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>

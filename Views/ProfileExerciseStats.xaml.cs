@@ -1,5 +1,4 @@
 using GymTracker.Models;
-using Microsoft.Maui.Graphics.Text;
 
 namespace GymTracker.Views;
 

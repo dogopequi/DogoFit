@@ -1,33 +1,98 @@
 ﻿using GymTracker.Services;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GymTracker.Models
 {
-    internal class WorkoutHistoryModel
+    internal class WorkoutHistoryModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Routine> routines { get; set; }
+        private int pageSize = 20;
+        private int currentPage = 1;
+        public bool HasRoutinesChanged = false;
+        public ICommand LoadMoreCommand { get; }
+
+        private ObservableCollection<Routine> _routines;
+        public ObservableCollection<Routine> Routines
+        {
+            get => _routines;
+            set
+            {
+                _routines = value;
+                OnPropertyChanged(nameof(Routines));
+            }
+        }
 
         public ICommand RemoveWorkoutCommand { get; }
         public Services.Profile Profile => AppState.Profile;
-        public WorkoutHistoryModel() 
+
+        public WorkoutHistoryModel()
         {
-            routines = AppState.Workouts;
+            var sorted = AppState.Workouts.OrderByDescending(w => w.StartTime).Take(pageSize);
+            Routines = new ObservableCollection<Routine>(sorted);
+            AppState.Workouts.CollectionChanged += Workouts_CollectionChanged;
+            AppState.Profile.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(Profile.UseMetric))
+                {
+                    RefreshRoutines();
+                }
+            };
             RemoveWorkoutCommand = new Command<Routine>(OnDeleteWorkout);
+            LoadMoreCommand = new Command(() =>
+            {
+                currentPage++;
+                var items = AppState.Workouts
+                    .OrderByDescending(w => w.StartTime)
+                    .Skip((currentPage - 1) * pageSize)
+                    .Take(pageSize);
+
+                foreach (var item in items)
+                    if (!Routines.Contains(item))
+                        Routines.Add(item);
+            });
         }
-        private async void OnDeleteWorkout(Routine routine)
+        public void RefreshRoutines()
         {
-            var result = await Shell.Current.DisplayAlert("Delete Workout", $"Are you sure you want to delete the workout '{routine.Name}'?", "Yes", "No");
+            var sorted = AppState.Workouts.OrderByDescending(w => w.StartTime).Take(pageSize);
+            Routines = new ObservableCollection<Routine>(sorted);
+            HasRoutinesChanged = true;
+        }
+
+        private void Workouts_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (Routine r in e.NewItems)
+                {
+                    int index = Routines.TakeWhile(x => x.StartTime > r.StartTime).Count();
+                    Routines.Insert(index, r);
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (Routine r in e.OldItems)
+                {
+                    if (Routines.Contains(r))
+                        Routines.Remove(r);
+                }
+            }
+        }
+
+        public async void OnDeleteWorkout(Routine routine)
+        {
+            var result = await Shell.Current.DisplayAlert(
+                "Delete Workout",
+                $"Are you sure you want to delete the workout '{routine.Name}'?",
+                "Yes",
+                "No"
+            );
+
             if (result)
             {
                 AppState.RemoveWorkout(routine);
+                Routines.Remove(routine);
             }
         }
 

@@ -1,14 +1,6 @@
-﻿using CommunityToolkit.Maui;
-using GymTracker.Services;
-using GymTracker.Views;
-using Microsoft.Maui.Controls;
-using System;
-using System.Collections.Generic;
+﻿using GymTracker.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace GymTracker.Models

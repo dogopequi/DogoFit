@@ -1,5 +1,4 @@
 using CommunityToolkit.Maui.Views;
-using System.Threading.Tasks;
 
 namespace GymTracker.Popups;
 

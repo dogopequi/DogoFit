@@ -19,7 +19,7 @@
     <ContentPage.BindingContext>
         <local:ProfileViewModel/>
     </ContentPage.BindingContext>
-    <Grid HorizontalOptions="Center">
+    <Grid HorizontalOptions="CenterAndExpand" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -28,34 +28,34 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ScrollView>
-            <VerticalStackLayout Padding="0" Spacing="20" Margin="0,10,0,0" HorizontalOptions="Start">
+            <VerticalStackLayout Padding="0" Spacing="20" Margin="0,10,0,0" HorizontalOptions="CenterAndExpand">
                 <Label Text="Statistics" FontSize="30" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold" Margin="0,0,0,20"/>
-                <Frame BorderColor="Black" CornerRadius="8" Padding="0" Margin="10,0,10,20" HorizontalOptions="Center" >
-                    <HorizontalStackLayout Padding="0" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="WORKOUTS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
-                            <Label x:Name="WorkoutsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="VOLUME" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
-                            <Label x:Name="VolumeLabel" Text="" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White"/>
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="SETS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
-                            <Label x:Name="SetsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="REPS" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
-                            <Label x:Name="RepsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="TIME" FontSize="15" HorizontalOptions="Center" TextColor="LightGray"/>
-                            <Label x:Name="TimeLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </HorizontalStackLayout>
-                </Frame>
-
-                <Button  Text="{Binding Profile.SplitButtonText}"
+                <ScrollView Orientation="Horizontal">
+                    <Grid ColumnSpacing="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" Text="WORKOUTS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="LightGray" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="0" Grid.Row="1" x:Name="WorkoutsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="1" Grid.Row="0" Text="VOLUME" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="LightGray" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="1" Grid.Row="1" x:Name="VolumeLabel" Text="" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" TextColor="White" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="2" Grid.Row="0" Text="SETS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="LightGray" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="2" Grid.Row="1" x:Name="SetsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="3" Grid.Row="0" Text="REPS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="LightGray" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="3" Grid.Row="1" x:Name="RepsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="4" Grid.Row="0" Text="TIME" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="LightGray" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="4" Grid.Row="1" x:Name="TimeLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    </Grid>
+                </ScrollView>
+                    <Button  Text="{Binding Profile.SplitButtonText}"
                         FontSize="15"
                         Margin="0,0,0,0"
                         FontAttributes="Bold"
@@ -106,16 +106,15 @@
                         <Label Text="Individual" FontSize="20" HorizontalOptions="Center" TextColor="AliceBlue" FontAttributes="Bold"/>
                     </VerticalStackLayout>
                 </Frame>
-                
-                
-                <Grid RowDefinitions="*,*">
 
-                    <lvc:CartesianChart x:Name="WeeklyChart"  Margin="0,0,0,0" ZoomMode="X"
+
+                <lvc:CartesianChart x:Name="WeeklyChart"
+                    Margin="0"
+                    ZoomMode="X"
                     HorizontalOptions="FillAndExpand"
-                    HeightRequest="200"
-                    VerticalOptions="FillAndExpand"/>
+                    HeightRequest="250"
+                    VerticalOptions="Start"/>
 
-                </Grid>
 
 
                 <HorizontalStackLayout

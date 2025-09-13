@@ -5,20 +5,11 @@
              x:Name="settings"
              Title="Settings"
              BackgroundColor="Black">
-    <VerticalStackLayout Spacing="20" Margin="0,20,0,0">
-        <Button
-        Text="GitHub"
-        VerticalOptions="Center" 
-        HorizontalOptions="Center"
-        BorderColor="Black"
-        Background="#2b2b2b"
-        TextColor="LightGray"
-        FontAttributes="Bold"
-        WidthRequest="200"
-        BorderWidth="1"
-        Command="{Binding GitHubCommand}"/>
-        <Button
-        Text="Export"
+    <ScrollView>
+        <Grid RowDefinitions="*,Auto">
+        <VerticalStackLayout Grid.Row="0" Spacing="20" Margin="0,20,0,0">
+            <Button
+        Text="Export" Padding="20"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
         BorderColor="Black"
@@ -28,8 +19,8 @@
         WidthRequest="200"
         BorderWidth="1"
         Clicked="Export"/>
-        <Button
-        Text="Import"
+            <Button
+        Text="Import" Padding="20"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
         BorderColor="Black"
@@ -39,8 +30,8 @@
         WidthRequest="200"
         BorderWidth="1"
         Clicked="Import"/>
-        <Button
-        Text="Exercises"
+            <Button
+        Text="Exercises" Padding="20"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
         BorderColor="Black"
@@ -50,8 +41,8 @@
         WidthRequest="200"
         BorderWidth="1"
         Clicked="ExercisePopup_Clicked"/>
-        <Button
-        Text="{Binding Profile.WeightUnit, StringFormat='Weight Unit: {0}'}"
+            <Button
+        Text="{Binding Profile.WeightUnit, StringFormat='Weight Unit: {0}'}" Padding="20"
         VerticalOptions="Center" 
         HorizontalOptions="Center"
         BorderColor="Black"
@@ -61,5 +52,49 @@
         WidthRequest="200"
         BorderWidth="1"
         Command="{Binding UnitSystemCommand}"/>
-    </VerticalStackLayout>
+            <Button
+        Text="Source"
+        VerticalOptions="Center" 
+        HorizontalOptions="Center"
+        BorderColor="Black"
+        Background="#2b2b2b"
+        TextColor="LightGray"
+        FontAttributes="Bold"
+        WidthRequest="200"
+        Padding="20"
+        BorderWidth="1"
+        Command="{Binding GitHubCommand}"/>
+            <Button
+        Text="Privacy Policy"
+        VerticalOptions="Center" 
+        HorizontalOptions="Center"
+        BorderColor="Black"
+        Background="#2b2b2b"
+        TextColor="LightGray"
+        FontAttributes="Bold"
+        WidthRequest="200"
+        Padding="20"
+        BorderWidth="1"
+        Command="{Binding PrivacyCommand}"/>
+            <Button
+        Text="Details and Dependencies"
+        VerticalOptions="Center" 
+        HorizontalOptions="Center"
+        BorderColor="Black"
+        Background="#2b2b2b"
+        TextColor="LightGray"
+        FontAttributes="Bold"
+        WidthRequest="200"
+        Padding="20"
+        BorderWidth="1"
+        Command="{Binding ReadmeCommand}"/>
+        </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="1" Spacing="20" Margin="0,0,0,40">
+            <Label Text="© 2025  Diogo Manteu. All rights reserved." FontSize="14"
+               HorizontalOptions="Center" HorizontalTextAlignment="Center" VerticalOptions="End"/>
+                <Label Text="Version 1.0.0" FontSize="14"
+       HorizontalOptions="Center" HorizontalTextAlignment="Center" VerticalOptions="End"/>
+        </VerticalStackLayout>
+    </Grid>
+    </ScrollView>
 </ContentPage>

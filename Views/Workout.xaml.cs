@@ -1,9 +1,6 @@
-using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Extensions;
-using CommunityToolkit.Maui.Views;
 using GymTracker.Models;
 using GymTracker.Services;
-using Microsoft.Maui.Controls.Shapes;
 
 namespace GymTracker;
 

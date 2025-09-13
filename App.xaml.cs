@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Maui.Controls;
 using GymTracker.Services;
 namespace GymTracker
 {

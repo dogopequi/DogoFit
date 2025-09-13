@@ -47,6 +47,8 @@ namespace GymTracker.Models
         };
         public ICommand OpenSettingsCommand { get; }
         public ICommand GitHubCommand { get; }
+        public ICommand PrivacyCommand { get; }
+        public ICommand ReadmeCommand { get; }
         public ICommand UnitSystemCommand { get; }
         public ICommand SelectExerciseCommand { get; }
         public ICommand ExercisesCommand { get; }
@@ -241,6 +243,8 @@ namespace GymTracker.Models
             Profile = AppState.Profile;
             OpenSettingsCommand = new Command(OpenSettings);
             GitHubCommand = new Command(OpenGitHub);
+            ReadmeCommand = new Command(OpenReadme);
+            PrivacyCommand = new Command(OpenPrivacy);
             UnitSystemCommand = new Command(ToggleWeightUnit);
             ExercisesCommand = new Command(OnExercises);
             StatisticsCommand = new Command(OnStatistics);
@@ -1432,7 +1436,14 @@ namespace GymTracker.Models
         {
             await Launcher.Default.OpenAsync("https://github.com/dogopequi/DogoFit");
         }
-
+        private async void OpenReadme()
+        {
+            await Launcher.Default.OpenAsync("https://github.com/dogopequi/DogoFit/blob/master/README.md");
+        }
+        private async void OpenPrivacy()
+        {
+            await Launcher.Default.OpenAsync("https://github.com/dogopequi/DogoFit/blob/master/PRIVACY_POLICY.md");
+        }
         public class ExportDataType
         {
             public ObservableCollection<Routine> Routines { get; set; }

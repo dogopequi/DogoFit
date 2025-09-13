@@ -1,5 +1,4 @@
-﻿using GymTracker.Services;
-using GymTracker.Views;
+﻿using GymTracker.Views;
 
 namespace GymTracker
 {

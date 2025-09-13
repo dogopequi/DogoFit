@@ -1,8 +1,5 @@
 using GymTracker.Models;
 using GymTracker.Services;
-using Microsoft.Maui;
-using System;
-using System.Numerics;
 
 namespace GymTracker;
 

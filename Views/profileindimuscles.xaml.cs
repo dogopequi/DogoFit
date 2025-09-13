@@ -1,7 +1,5 @@
 using GymTracker.Models;
 using GymTracker.Services;
-using LiveChartsCore.Measure;
-using Microsoft.Maui.Graphics.Text;
 
 namespace GymTracker.Views;
 

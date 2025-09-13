@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.Maui.Controls.Shapes;
 using System.Collections.ObjectModel;
 
 namespace GymTracker.Services
@@ -702,6 +702,37 @@ namespace GymTracker.Services
             }
 
             return (r, errors);
+        }
+
+        public static BoxView Helper_CreateSeparator()
+        {
+            var sep = new BoxView
+            {
+                HeightRequest = 1,
+                BackgroundColor = Color.FromArgb("#333333"),
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(0, 5, 0, 0)
+            };
+            return sep;
+        }
+
+        public static Border Helper_CreateContainer()
+        {
+            var container = new Border
+            {
+                StrokeShape = new RoundRectangle { CornerRadius = 12 },
+                StrokeThickness = 0,
+                BackgroundColor = Color.FromArgb("#1E1E1E"),
+                Padding = new Thickness(15),
+                Shadow = new Shadow
+                {
+                    Brush = Brush.Black,
+                    Opacity = 0.4f,
+                    Offset = new Point(0,4),
+                    Radius = 8
+                }
+            };
+            return container;
         }
     }
 }
