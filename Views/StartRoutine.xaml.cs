@@ -102,7 +102,7 @@ public partial class StartRoutine : ContentPage
 
             if (exercise.IsUnilateral)
             {
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise, "SET (L)");
+                AppState.SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise, eVstack, "SET (L)", CreateControls, CreateLabels, 5);
 
                 Button addsetbuttonLeft = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                     WidthRequest = 275, FontAttributes = FontAttributes.Bold};
@@ -110,7 +110,7 @@ public partial class StartRoutine : ContentPage
                 addsetbuttonLeft.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
                 eVstack.Children.Add(addsetbuttonLeft);
 
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise, "SET (R)");
+                AppState.SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise, eVstack, "SET (R)", CreateControls, CreateLabels, 5);
 
                 Button addsetbuttonRight = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                     WidthRequest = 275, FontAttributes = FontAttributes.Bold};
@@ -120,7 +120,7 @@ public partial class StartRoutine : ContentPage
             }
             else
             {
-                SetLayout(exercise.Sets, exercise, "SET");
+                AppState.SetLayout(exercise.Sets, exercise, eVstack, "SET", CreateControls, CreateLabels, 5);
                 Button addsetbutton = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                         WidthRequest = 275, FontAttributes = FontAttributes.Bold};
                 addsetbutton.BindingContext = exercise;
@@ -136,106 +136,78 @@ public partial class StartRoutine : ContentPage
         }
     }
 
-    private void SetLayout(IEnumerable<Set> sets, Exercise exercise, string settext)
+    private List<View> CreateControls(Exercise exercise, Set set)
     {
-        
-        var grid = new Grid
+        List<View> controls = new List<View>();
+        Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
+        switch(set.Type)
         {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = GridLength.Star },
-                new ColumnDefinition { Width = GridLength.Star },
-                new ColumnDefinition { Width = GridLength.Star },
-                new ColumnDefinition { Width = GridLength.Star },
-                new ColumnDefinition { Width = GridLength.Star }
-            },
-            RowDefinitions = { },
-            HorizontalOptions = LayoutOptions.Fill,
-            ColumnSpacing = 0,
-            RowSpacing = 5,
-            BackgroundColor = Colors.Transparent
-        };
+            case SetType.Normal:
+                setbutton.Text = set.ID.ToString();
+                setbutton.TextColor = Colors.White;
+                break;
+            case SetType.Warmup:
+                setbutton.Text = "W";
+                setbutton.TextColor = Colors.Orange;
+                break;
+            case SetType.Failure:
+                setbutton.Text = "F";
+                setbutton.TextColor = Colors.Red;
+                break;
+            case SetType.Drop:
+                setbutton.Text = "D";
+                setbutton.TextColor = Color.FromArgb("#008cff");
+                break;
+        }
+        setbutton.BindingContext = set;
+        setbutton.CommandParameter = exercise;
+        setbutton.Clicked += SetOptions_Clicked;
+        setbutton.Clicked += (s, e) => Refresh();
 
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
+        
+        Label lastvalue = new Label { Text = set.LastSet, BackgroundColor = Colors.Transparent, TextColor = Colors.Gray, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center,
+                FontSize = 15, WidthRequest = 50, MaxLines = 1, Margin = new Thickness(0,0,0,0), VerticalTextAlignment = TextAlignment.Center, VerticalOptions = LayoutOptions.Center};
+        
+        Entry repsvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
+                TextColor = Colors.White, HeightRequest = 40};
+        repsvalue.BindingContext = set;
+        repsvalue.SetBinding(Entry.TextProperty, new Binding("Reps", mode: BindingMode.TwoWay));
+
+        
+        Entry weightvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
+                TextColor = Colors.White, HeightRequest = 40};
+        weightvalue.BindingContext = set;
+        weightvalue.SetBinding(Entry.TextProperty, new Binding("Weight", mode: BindingMode.TwoWay));
+        
+
+        CheckBox checkbox = new CheckBox { HeightRequest = 40, BackgroundColor = Colors.Transparent, Scale = 1, IsChecked = set.IsChecked };
+        checkbox.BindingContext = set;
+        checkbox.SetBinding(CheckBox.IsCheckedProperty, new Binding("IsChecked", mode: BindingMode.TwoWay));
+        checkbox.CheckedChanged += (s, e) => { UpdateHeaderLabels(); };
+        
+        controls.Add(setbutton);
+        controls.Add(lastvalue);
+        controls.Add(repsvalue);
+        controls.Add(weightvalue);
+        controls.Add(checkbox);
+
+        return controls;
+    }
+    private List<Label> CreateLabels(string settext)
+    {
+        List<Label> labels = new List<Label>();
         Label setname = new Label { Text = settext, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
         Label lastname = new Label { Text = "LAST", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
         Label repsname = new Label { Text = "REPS", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
         Label weightname = new Label { Text = "WEIGHT", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
-        Label empty = new Label { Text = "✔", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
-        grid.Add(setname, 0, 0);
-        grid.Add(lastname, 1, 0);
-        grid.Add(repsname, 2, 0);
-        grid.Add(weightname, 3, 0);
-        grid.Add(empty, 4, 0);
-        int row = 1;
-        foreach (Set set in sets)
-        {
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            var setseparator = AppState.Helper_CreateSeparator();
-            Grid.SetRow(setseparator, row);
-            Grid.SetColumn(setseparator, 0);
-            Grid.SetColumnSpan(setseparator, 5);
-            grid.Children.Add(setseparator);
-
-            row++;
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(35) });
-            Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
-            switch(set.Type)
-            {
-                case SetType.Normal:
-                    setbutton.Text = set.ID.ToString();
-                    setbutton.TextColor = Colors.White;
-                    break;
-                case SetType.Warmup:
-                    setbutton.Text = "W";
-                    setbutton.TextColor = Colors.Orange;
-                    break;
-                case SetType.Failure:
-                    setbutton.Text = "F";
-                    setbutton.TextColor = Colors.Red;
-                    break;
-                case SetType.Drop:
-                    setbutton.Text = "D";
-                    setbutton.TextColor = Color.FromArgb("#008cff");
-                    break;
-            }
-            setbutton.BindingContext = set;
-            setbutton.CommandParameter = exercise;
-            setbutton.Clicked += SetOptions_Clicked;
-            setbutton.Clicked += (s, e) => Refresh();
-
-
-            
-            Label lastvalue = new Label { Text = set.LastSet, BackgroundColor = Colors.Transparent, TextColor = Colors.Gray, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center,
-                    FontSize = 15, WidthRequest = 50, MaxLines = 1};
-           
-            Entry repsvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
-                    TextColor = Colors.White, HeightRequest = 40};
-            repsvalue.BindingContext = set;
-            repsvalue.SetBinding(Entry.TextProperty, new Binding("Reps", mode: BindingMode.TwoWay));
-
-            
-            Entry weightvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
-                    TextColor = Colors.White, HeightRequest = 40};
-            weightvalue.BindingContext = set;
-            weightvalue.SetBinding(Entry.TextProperty, new Binding("Weight", mode: BindingMode.TwoWay));
-           
-
-            CheckBox checkbox = new CheckBox { HeightRequest = 40, BackgroundColor = Colors.Transparent, Scale = 1, IsChecked = set.IsChecked };
-            checkbox.BindingContext = set;
-            checkbox.SetBinding(CheckBox.IsCheckedProperty, new Binding("IsChecked", mode: BindingMode.TwoWay));
-            checkbox.CheckedChanged += (s, e) => { UpdateHeaderLabels(); };
-
-            grid.Add(setbutton, 0, row);
-            grid.Add(lastvalue, 1, row);
-            grid.Add(repsvalue, 2, row);
-            grid.Add(weightvalue, 3, row);
-            grid.Add(checkbox, 4, row);
-            row++;
-        }
-        eVstack.Children.Add(grid);
-
+        Label checkname = new Label { Text = "✔", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
+        labels.Add(setname);
+        labels.Add(lastname);
+        labels.Add(repsname);
+        labels.Add(weightname);
+        labels.Add(checkname);
+        return labels;
     }
     private void UpdateHeaderLabels()
     {

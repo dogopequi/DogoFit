@@ -2,6 +2,7 @@
 using GymTracker.Services;
 using Microsoft.Maui.Controls.Shapes;
 using System.Globalization;
+using System.Security.AccessControl;
 namespace GymTracker
 {
     public partial class MainPage : ContentPage
@@ -22,14 +23,40 @@ namespace GymTracker
         private void CreateLayout()
         {
             if (vm.Routines.Count() < 1)
+            {
                 DataLabel.IsVisible = true;
+                SearchStack.IsVisible = false;
+            }
             else
+            {
                 DataLabel.IsVisible = false;
-            if (AppState.Workouts.Count() > 20)
-                loadMoreButton.IsVisible = true;
-            else
-                loadMoreButton.IsVisible = false;
+                SearchStack.IsVisible = true;
+            }
+            loadMoreButton.IsVisible = vm.MoreButtonVisibility();
+
             loadMoreButton.SetBinding(Button.CommandProperty, "LoadMoreCommand");
+
+            StartPicker.Date = DateTime.Today;
+            EndPicker.Date = DateTime.Today;
+            SearchButton.Clicked += (s, e) =>
+            {
+                var start = StartPicker.Date;
+                var end = EndPicker.Date.AddDays(1).AddTicks(-1);
+                vm.ApplyFilter = true;
+                vm.FilterWorkouts(start, end);
+                collectionView.ItemsSource = null;
+                collectionView.ItemsSource = vm.Routines;
+                loadMoreButton.IsVisible = vm.MoreButtonVisibility();
+            };
+            ClearButton.Clicked += (s, e) =>
+            {
+                vm.ApplyFilter = false;
+                vm.RefreshRoutines(null);
+                collectionView.ItemsSource = null;
+                collectionView.ItemsSource = vm.Routines;
+                loadMoreButton.IsVisible = vm.MoreButtonVisibility();
+            };
+
             collectionView.ItemsSource = vm.Routines;
             collectionView.ItemTemplate = new DataTemplate(() =>
             {
@@ -49,6 +76,18 @@ namespace GymTracker
                 };
                 nameLabel.SetBinding(Label.TextProperty, "Name");
                 outerStack.Children.Add(nameLabel);
+
+                var timeLabelValue = new Label 
+                { 
+                    FontSize = 16, 
+                    FontAttributes = FontAttributes.Bold, 
+                    TextColor = Colors.White,
+                    HorizontalOptions = LayoutOptions.Center,
+                    HorizontalTextAlignment = TextAlignment.Center
+                };
+                timeLabelValue.SetBinding(Label.TextProperty, "StartTimeFormatted");
+
+                outerStack.Children.Add(timeLabelValue);
 
                 var scrollView = new ScrollView 
                 { 
@@ -204,18 +243,18 @@ namespace GymTracker
                             if (ex.IsUnilateral)
                             {
                                 var leftStack = new VerticalStackLayout { Spacing = 20 };
-                                SetLayout(ex.CheckedSets.Where(s => s.Side == SideType.Left), ex, leftStack, "SET (L)");
+                                AppState.SetLayout(ex.CheckedSets.Where(s => s.Side == SideType.Left), ex, leftStack, "SET (L)", CreateControls, AppState.CreateSetLabels, 3);
                                 stack.Children.Add(leftStack);
 
                 
                                 var rightStack = new VerticalStackLayout { Spacing = 20 };
-                                SetLayout(ex.CheckedSets.Where(s => s.Side == SideType.Right), ex, rightStack, "SET (R)");
+                                AppState.SetLayout(ex.CheckedSets.Where(s => s.Side == SideType.Right), ex, rightStack, "SET (R)", CreateControls, AppState.CreateSetLabels, 3);
                                 stack.Children.Add(rightStack);
                             }
                             else
                             {
                                 var setVStack = new VerticalStackLayout { Spacing = 20, Margin = new Thickness(0, 10, 0, 0) };
-                                SetLayout(ex.CheckedSets, ex, setVStack, "SET");
+                                AppState.SetLayout(ex.CheckedSets, ex, setVStack, "SET", CreateControls, AppState.CreateSetLabels, 3);
                                 stack.Children.Add(setVStack);
                             }
                         }
@@ -231,7 +270,7 @@ namespace GymTracker
                     Text = "Delete",
                     TextColor = Colors.Red,
                     BackgroundColor = Color.FromArgb("#2b2b2b"),
-                    WidthRequest = 150,
+                    WidthRequest = 200,
                     HorizontalOptions = LayoutOptions.Center
                 };
                 deleteButton.Clicked += (s, e) =>
@@ -288,95 +327,61 @@ namespace GymTracker
             grid.Add(valueLabel, column, 1);
         }
 
-        private void SetLayout(IEnumerable<Set> sets, Exercise exercise, VerticalStackLayout stack, string settext)
+        private List<View> CreateControls(Exercise exercise, Set set)
         {
-            var grid = new Grid
+            List<View> controls = new List<View>();
+            Label svalue = new Label
             {
-                ColumnDefinitions =
-                {
-                    new ColumnDefinition { Width = GridLength.Star },
-                    new ColumnDefinition { Width = GridLength.Star },
-                    new ColumnDefinition { Width = GridLength.Star }
-                },
-                RowDefinitions = { },
-                HorizontalOptions = LayoutOptions.Fill,
-                ColumnSpacing = 0,
-                RowSpacing = 5, BackgroundColor = Colors.Transparent
+                HorizontalTextAlignment = TextAlignment.Center,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 18,
+                HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
+            };
+            switch (set.Type)
+            {
+                case SetType.Normal:
+                    svalue.Text = set.ID.ToString();
+                    svalue.TextColor = Colors.White;
+                    break;
+                case SetType.Warmup:
+                    svalue.Text = "W";
+                    svalue.TextColor = Colors.Orange;
+                    break;
+                case SetType.Failure:
+                    svalue.Text = "F";
+                    svalue.TextColor = Colors.Red;
+                    break;
+                case SetType.Drop:
+                    svalue.Text = "D";
+                    svalue.TextColor = Color.FromRgba("#008cff");
+                    break;
+            }
+
+            Label rvalue = new Label
+            {
+                Text = set.Reps.ToString(),
+                HorizontalTextAlignment = TextAlignment.Center,
+                TextColor = Colors.LightGray,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 18,
+                HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
+            };
+            Label wvalue = new Label
+            {
+                Text = set.Weight.ToString("N2") + AppState.Profile.WeightUnit,
+                HorizontalTextAlignment = TextAlignment.Center,
+                TextColor = Colors.LightGray,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 18,
+                HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
             };
 
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            Label setlabel = new Label { Text = settext, BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
-            grid.Add(setlabel, 0, 0);
-            Label replabel = new Label { Text = "REPS", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
-            grid.Add(replabel, 1, 0);
-            Label weightlabel = new Label { Text = "WEIGHT", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
-            grid.Add(weightlabel, 2, 0);
-
-            int row = 1;
-            foreach (Set set in sets)
-            {
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                var setseparator = AppState.Helper_CreateSeparator();
-                Grid.SetRow(setseparator, row);
-                Grid.SetColumn(setseparator, 0);
-                Grid.SetColumnSpan(setseparator, 3);
-                grid.Children.Add(setseparator);
-
-                row++;
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                Label svalue = new Label
-                {
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    FontAttributes = FontAttributes.Bold,
-                    FontSize = 18,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
-                };
-                switch (set.Type)
-                {
-                    case SetType.Normal:
-                        svalue.Text = set.ID.ToString();
-                        svalue.TextColor = Colors.White;
-                        break;
-                    case SetType.Warmup:
-                        svalue.Text = "W";
-                        svalue.TextColor = Colors.Orange;
-                        break;
-                    case SetType.Failure:
-                        svalue.Text = "F";
-                        svalue.TextColor = Colors.Red;
-                        break;
-                    case SetType.Drop:
-                        svalue.Text = "D";
-                        svalue.TextColor = Color.FromRgba("#008cff");
-                        break;
-                }
-
-                Label rvalue = new Label
-                {
-                    Text = set.Reps.ToString(),
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    TextColor = Colors.LightGray,
-                    FontAttributes = FontAttributes.Bold,
-                    FontSize = 18,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
-                };
-                Label wvalue = new Label
-                {
-                    Text = set.Weight.ToString("N2") + AppState.Profile.WeightUnit,
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    TextColor = Colors.LightGray,
-                    FontAttributes = FontAttributes.Bold,
-                    FontSize = 18,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
-                };
-                grid.Add(svalue, 0, row);
-                grid.Add(rvalue, 1, row);
-                grid.Add(wvalue, 2, row);
-                row++;
-            }
-            stack.Children.Add(grid);
+            controls.Add(svalue);
+            controls.Add(rvalue);
+            controls.Add(wvalue);
+            return controls;
         }
+
         private void UpdateSplits<T>(IEnumerable<T> sourceList, Func<Exercise, T, bool> filter, VerticalStackLayout targetStack, Routine routine)
         {
             int totalSets = routine.Exercises

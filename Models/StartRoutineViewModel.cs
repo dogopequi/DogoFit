@@ -75,19 +75,7 @@ namespace GymTracker.Models
                 routine = new Routine();
                 routine.Start();
             }
-            if (routine.Exercises != null)
-            {
-                foreach (var exercise in routine.Exercises)
-                {
-                    foreach (var set in exercise.Sets)
-                    {
-                        var lastSet = AppState.GetLastSetForExercise(exercise.Name, set.ID, set.Side);
-                        set.LastSet = lastSet != null
-                            ? $"{lastSet.Reps}x{lastSet.Weight:0}"
-                            : "-";
-                    }
-                }
-            }
+            FillLastSets();
             TakenExercises = new ObservableCollection<string>(routine.Exercises.Select(e => e.Name));
             Categories = AppState.Categories;
             AppState.FilterByCategory("All", false);
@@ -226,8 +214,26 @@ namespace GymTracker.Models
             }
 
             AppState.ClearExerciseFilters();
+            FillLastSets();
 
             await Shell.Current.Navigation.PopAsync();
+        }
+
+        private void FillLastSets()
+        {
+            if (routine.Exercises != null)
+            {
+                foreach (var exercise in routine.Exercises)
+                {
+                    foreach (var set in exercise.Sets)
+                    {
+                        var lastSet = AppState.GetLastSetForExercise(exercise.Name, set.ID, set.Side);
+                        set.LastSet = lastSet != null
+                            ? $"{lastSet.Reps}x{lastSet.Weight:0}"
+                            : "-";
+                    }
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

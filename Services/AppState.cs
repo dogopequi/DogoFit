@@ -761,7 +761,19 @@ namespace GymTracker.Services
             return container;
         }
 
-        private static void SetLayout(IEnumerable<Set> sets, Exercise exercise, VerticalStackLayout stack, string settext, Func<bool, List<View>> createControls,  Func<bool, List<Label>> createLabels, int columns)
+        public static List<Label> CreateSetLabels(string settext)
+        {
+            List<Label> labels = new List<Label>();
+            Label setlabel = new Label { Text = settext, BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            Label replabel = new Label { Text = "REPS", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            Label weightlabel = new Label { Text = "WEIGHT", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            labels.Add(setlabel);
+            labels.Add(replabel);
+            labels.Add(weightlabel);
+            return labels;
+        }
+
+        public static void SetLayout(IEnumerable<Set> sets, Exercise exercise, VerticalStackLayout stack, string settext, Func<Exercise, Set, List<View>> createControls,  Func<string, List<Label>> createLabels, int columns)
         {
             var grid = new Grid
             {
@@ -779,7 +791,7 @@ namespace GymTracker.Services
 
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            List<Label> labels = createLabels(true);
+            List<Label> labels = createLabels(settext);
             int j = 0;
             foreach(var label in labels)
             {
@@ -799,7 +811,7 @@ namespace GymTracker.Services
                 row++;
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                List<View> controls = createControls(true);
+                List<View> controls = createControls(exercise, set);
 
                 int i = 0;
                 foreach(var view in controls)

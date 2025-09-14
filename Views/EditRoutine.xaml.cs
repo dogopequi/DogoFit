@@ -43,14 +43,14 @@ public partial class EditRoutine : ContentPage
 
             if (exercise.IsUnilateral)
             {
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise, "SET (L)");
+                AppState.SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise, vstack, "SET (L)", CreateControls, AppState.CreateSetLabels, 3);
                 Button addSetLeft = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold, Margin = new Thickness(0,10,0,0)};
                 addSetLeft.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
                 vstack.Children.Add(addSetLeft);
 
 
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise, "SET (R)");
+                AppState.SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise, vstack, "SET (R)", CreateControls, AppState.CreateSetLabels, 3);
                 Button addSetRight = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold, Margin = new Thickness(0,10,0,0)};
                 addSetRight.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Right); Refresh(); };
@@ -58,7 +58,7 @@ public partial class EditRoutine : ContentPage
             }
             else
             {
-                SetLayout(exercise.Sets, exercise, "SET");
+                AppState.SetLayout(exercise.Sets, exercise, vstack, "SET", CreateControls, AppState.CreateSetLabels, 3);
                 Button addSet = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold};
                 addSet.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.None); Refresh(); };
@@ -76,89 +76,53 @@ public partial class EditRoutine : ContentPage
         vstack.Clear();
         CreateLayout();
     }
-
-    private void SetLayout(IEnumerable<Set> sets, Exercise exercise, string settext)
+    private List<View> CreateControls(Exercise exercise, Set set)
     {
-        var grid = new Grid
+        List<View> controls = new List<View>();
+        Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
+        switch(set.Type)
         {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = GridLength.Star },
-                new ColumnDefinition { Width = GridLength.Star },
-                new ColumnDefinition { Width = GridLength.Star }
-            },
-            RowDefinitions = { },
-            HorizontalOptions = LayoutOptions.Fill,
-            ColumnSpacing = 0,
-            RowSpacing = 5, BackgroundColor = Colors.Transparent
+            case SetType.Normal:
+                setbutton.Text = set.ID.ToString();
+                setbutton.TextColor = Colors.White;
+                break;
+            case SetType.Warmup:
+                setbutton.Text = "W";
+                setbutton.TextColor = Colors.Orange;
+                break;
+            case SetType.Failure:
+                setbutton.Text = "F";
+                setbutton.TextColor = Colors.Red;
+                break;
+            case SetType.Drop:
+                setbutton.Text = "D";
+                setbutton.TextColor = Color.FromArgb("#008cff");
+                break;
+        }
+        setbutton.BindingContext = set;
+        setbutton.CommandParameter = exercise;
+        setbutton.Clicked += async (s, e) =>
+        {
+            await SetOptions_Clicked(s, e);
+            Refresh();
         };
 
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-        Label setname = new Label { Text = settext, BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold };
-        Label repsname = new Label { Text = "REPS", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold };
-        Label weightname = new Label { Text = "WEIGHT", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold };
-        grid.Add(setname, 0, 0);
-        grid.Add(repsname, 1, 0);
-        grid.Add(weightname, 2, 0);
-        int row = 1;
-        foreach(Set set in sets)
-        {
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            var setseparator = AppState.Helper_CreateSeparator();
-            Grid.SetRow(setseparator, row);
-            Grid.SetColumn(setseparator, 0);
-            Grid.SetColumnSpan(setseparator, 3);
-            grid.Children.Add(setseparator);
-
-            row++;
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
-            switch(set.Type)
-            {
-                case SetType.Normal:
-                    setbutton.Text = set.ID.ToString();
-                    setbutton.TextColor = Colors.White;
-                    break;
-                case SetType.Warmup:
-                    setbutton.Text = "W";
-                    setbutton.TextColor = Colors.Orange;
-                    break;
-                case SetType.Failure:
-                    setbutton.Text = "F";
-                    setbutton.TextColor = Colors.Red;
-                    break;
-                case SetType.Drop:
-                    setbutton.Text = "D";
-                    setbutton.TextColor = Color.FromArgb("#008cff");
-                    break;
-            }
-            setbutton.BindingContext = set;
-            setbutton.CommandParameter = exercise;
-            setbutton.Clicked += async (s, e) =>
-            {
-                await SetOptions_Clicked(s, e);
-                Refresh();
-            };
+        
+        Entry repsvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
+                TextColor = Colors.White, HeightRequest = 40};
+        repsvalue.BindingContext = set;
+        repsvalue.SetBinding(Entry.TextProperty, new Binding("Reps", mode: BindingMode.TwoWay));
 
         
-            Entry repsvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
-                    TextColor = Colors.White, HeightRequest = 40};
-            repsvalue.BindingContext = set;
-            repsvalue.SetBinding(Entry.TextProperty, new Binding("Reps", mode: BindingMode.TwoWay));
+        Entry weightvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
+                TextColor = Colors.White, HeightRequest = 40};
+        weightvalue.BindingContext = set;
+        weightvalue.SetBinding(Entry.TextProperty, new Binding("Weight", mode: BindingMode.TwoWay));
 
-        
-            Entry weightvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
-                    TextColor = Colors.White, HeightRequest = 40};
-            weightvalue.BindingContext = set;
-            weightvalue.SetBinding(Entry.TextProperty, new Binding("Weight", mode: BindingMode.TwoWay));
-            grid.Add(setbutton, 0, row);
-            grid.Add(repsvalue, 1, row);
-            grid.Add(weightvalue, 2, row);
-            row++;
-
-        }
-        vstack.Children.Add(grid);
+        controls.Add(setbutton);
+        controls.Add(repsvalue);
+        controls.Add(weightvalue);
+        return controls;
     }
     private async Task SetOptions_Clicked(object sender, EventArgs e)
     {

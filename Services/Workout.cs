@@ -65,6 +65,8 @@ namespace GymTracker.Services
             }
         }
 
+        [JsonIgnore]
+        public string StartTimeFormatted => StartTime.ToString("dd/MM/yyyy HH'h'mm");
 
 
         [JsonIgnore]
