@@ -83,7 +83,7 @@ namespace GymTracker.Models
                     {
                         var lastSet = AppState.GetLastSetForExercise(exercise.Name, set.ID, set.Side);
                         set.LastSet = lastSet != null
-                            ? $"{lastSet.Reps}x{lastSet.Weight}"
+                            ? $"{lastSet.Reps}x{lastSet.Weight:0}"
                             : "-";
                     }
                 }

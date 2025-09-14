@@ -8,38 +8,32 @@
              Shell.NavBarIsVisible="False"
              x:Name="startroutine"
              xmlns:services="clr-namespace:GymTracker.Services">
-    <Grid x:Name="StartRoutineGrid" Padding="10" RowDefinitions="Auto,*,Auto, Auto" RowSpacing="10">
+    <Grid x:Name="StartRoutineGrid" Padding="10" RowDefinitions="Auto,*,Auto, Auto" RowSpacing="10" HorizontalOptions="CenterAndExpand">
 
-        <VerticalStackLayout Padding="10" Spacing="15" Margin="0,0,0,0" HorizontalOptions="Center">
-            <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
-                <Label Text="{Binding  routine.Name, StringFormat='{0}'}" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
-            </Frame>
-            <HorizontalStackLayout Padding="10" Spacing="10" Margin="0,0,0,0" HorizontalOptions="Center">
-                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="VOLUME" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label x:Name="VolumeLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="SETS" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label x:Name="SetsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="REPS" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label x:Name="RepsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-                <Frame BorderColor="Black" CornerRadius="8" Padding="10" Margin="0">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="TIME" HorizontalOptions="Center" TextColor="LightGray" FontAttributes="Bold" FontSize="15"/>
-                        <Label Text="{Binding routine.DurationString}" TextColor="White" FontSize="16" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
-                </Frame>
-            </HorizontalStackLayout>
+        <VerticalStackLayout Padding="10" Spacing="15" Margin="0,0,0,0" HorizontalOptions="CenterAndExpand">
+            <Label Text="{Binding  routine.Name, StringFormat='{0}'}" TextColor="#008cff" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+            <ScrollView Orientation="Horizontal" HorizontalOptions="Center">
+                <Grid ColumnSpacing="20" HorizontalOptions="CenterAndExpand">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Grid.Row="0" Text="VOLUME" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="0" Grid.Row="1" x:Name="VolumeLabel" Text="" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" TextColor="White" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="1" Grid.Row="0" Text="SETS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="1" Grid.Row="1" x:Name="SetsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="2" Grid.Row="0" Text="REPS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="2" Grid.Row="1" x:Name="RepsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="3" Grid.Row="0" Text="TIME" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="3" Grid.Row="1" Text="{Binding routine.DurationString}" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                </Grid>
+            </ScrollView>
         </VerticalStackLayout>
         <ScrollView  Grid.Row="1">
             <VerticalStackLayout x:Name="eVstack" Spacing="10" Padding="10" Margin="5">

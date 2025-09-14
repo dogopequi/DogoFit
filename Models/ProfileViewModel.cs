@@ -39,6 +39,7 @@ namespace GymTracker.Models
     }
     public class ProfileViewModel
     {
+        public bool DoesUpdatePieChart = true;
         public SolidColorPaint LegendTextPaint { get; set; } =
         new SolidColorPaint
         {
@@ -739,6 +740,8 @@ namespace GymTracker.Models
 
         private void UpdatePieChart<T>(IEnumerable<T> Muscles, PieChart chart, List<Exercise> exercises)
         {
+            if (DoesUpdatePieChart == false)
+                return;
             PieChartLabel.IsVisible = false;
             chart.HeightRequest = 500;
             if(exercises.Count <= 0)
@@ -771,8 +774,8 @@ namespace GymTracker.Models
                 }
                 muscleSets.Add(AppState.MGMToString(e), mExercises.SelectMany(s => s.CheckedSets).Count());
                 muscleReps.Add(AppState.MGMToString(e), mExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps));
-                muscleVolume.Add(AppState.MGMToString(e), mExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight));
-                muscleIntensity.Add(AppState.MGMToString(e), GetIntensity(mExercises));
+                muscleVolume.Add(AppState.MGMToString(e), Math.Round(mExercises.SelectMany(s => s.CheckedSets).Sum(s => s.Reps * s.Weight), 2));
+                muscleIntensity.Add(AppState.MGMToString(e), Math.Round(GetIntensity(mExercises), 2));
             }
             switch (DC)
             {
@@ -1462,14 +1465,14 @@ namespace GymTracker.Models
         public void AddTimeButton(TimeChoices tc, String text, HorizontalStackLayout container)
         {
             Button button = new Button { Text = text, TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
-            button.Clicked += (s, e) => TC = tc;
+            button.Clicked += (s, e) => { DoesUpdatePieChart = true;   TC = tc; };
             container.Children.Add(button);
             TimeButtons.Add((button, tc));
         }
         public void AddDisplayButton(DisplayChoices dc, String text, HorizontalStackLayout container)
         {
             Button button = new Button { Text = text, TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
-            button.Clicked += (s, e) => DC = dc;
+            button.Clicked += (s, e) => { DoesUpdatePieChart = true; DC = dc;  };
             container.Children.Add(button);
             DisplayButtons.Add((button, dc));
         }

@@ -23,9 +23,19 @@
                Grid.Row="1"/>
 
         <CollectionView x:Name="collectionView" Margin="0,20,0,0" BackgroundColor="Black" HorizontalOptions="CenterAndExpand"
-                        Grid.Row="2"/>
+                        Grid.Row="2">
+            <CollectionView.Footer>
+                <Button x:Name="loadMoreButton"
+                Text="Load More"
+                TextColor="White"
+                BackgroundColor="#2b2b2b"
+                WidthRequest="200"
+                HorizontalOptions="Center"
+                Margin="0,20,0,20"
+                IsVisible="False"/>
+            </CollectionView.Footer>
+        </CollectionView>
 
-        <Button x:Name="loadMoreButton" Grid.Row="3" Text="Load More" TextColor="White" BackgroundColor="#2b2b2b" WidthRequest="200" HorizontalOptions="Center" Margin="0,20,0,0"/>
     </Grid>
 </ContentPage>
 

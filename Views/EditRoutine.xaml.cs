@@ -25,7 +25,6 @@ public partial class EditRoutine : ContentPage
             Grid grid = new Grid { Padding = new Thickness(0, 0, 0, 10) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-
             Label name = new Label { Text = exercise.Name, FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#008cff"),
                     HorizontalTextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,20)};
             Button delete = new Button { Text = "X", FontSize = 20, Margin = new Thickness(0,-20,0,0), BackgroundColor = Colors.Transparent,
@@ -44,18 +43,14 @@ public partial class EditRoutine : ContentPage
 
             if (exercise.IsUnilateral)
             {
-                Label leftHeader = new Label { Text = "Left Side", TextColor = Colors.White, FontSize = 18, HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center, Padding = 20 };
-                vstack.Children.Add(leftHeader);
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise);
+                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise, "SET (L)");
                 Button addSetLeft = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold, Margin = new Thickness(0,10,0,0)};
                 addSetLeft.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
                 vstack.Children.Add(addSetLeft);
 
 
-                Label rightHeader = new Label { Text = "Right Side", TextColor = Colors.White, FontSize = 18, HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center, Padding = 20 };
-                vstack.Children.Add(rightHeader);
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise);
+                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise, "SET (R)");
                 Button addSetRight = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold, Margin = new Thickness(0,10,0,0)};
                 addSetRight.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Right); Refresh(); };
@@ -63,7 +58,7 @@ public partial class EditRoutine : ContentPage
             }
             else
             {
-                SetLayout(exercise.Sets, exercise);
+                SetLayout(exercise.Sets, exercise, "SET");
                 Button addSet = new Button { Text = "Add Set", FontSize = 14, BackgroundColor = Color.FromRgba("#2b2b2b"), WidthRequest = 275, Padding = 5,
                         TextColor = Colors.White, FontAttributes = FontAttributes.Bold};
                 addSet.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.None); Refresh(); };
@@ -82,7 +77,7 @@ public partial class EditRoutine : ContentPage
         CreateLayout();
     }
 
-    private void SetLayout(IEnumerable<Set> sets, Exercise exercise)
+    private void SetLayout(IEnumerable<Set> sets, Exercise exercise, string settext)
     {
         var grid = new Grid
         {
@@ -95,20 +90,28 @@ public partial class EditRoutine : ContentPage
             RowDefinitions = { },
             HorizontalOptions = LayoutOptions.Fill,
             ColumnSpacing = 0,
-            RowSpacing = 20, BackgroundColor = Colors.Transparent
+            RowSpacing = 5, BackgroundColor = Colors.Transparent
         };
 
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-        Label setname = new Label { Text = "Set", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold };
-        Label repsname = new Label { Text = "Reps", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold };
-        Label weightname = new Label { Text = "Weight", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold };
+        Label setname = new Label { Text = settext, BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold };
+        Label repsname = new Label { Text = "REPS", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold };
+        Label weightname = new Label { Text = "WEIGHT", BackgroundColor = Colors.Transparent, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold };
         grid.Add(setname, 0, 0);
         grid.Add(repsname, 1, 0);
         grid.Add(weightname, 2, 0);
         int row = 1;
         foreach(Set set in sets)
         {
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            var setseparator = AppState.Helper_CreateSeparator();
+            Grid.SetRow(setseparator, row);
+            Grid.SetColumn(setseparator, 0);
+            Grid.SetColumnSpan(setseparator, 3);
+            grid.Children.Add(setseparator);
+
+            row++;
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
             switch(set.Type)

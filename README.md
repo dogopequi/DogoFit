@@ -7,17 +7,17 @@ This is a learning project, and it's inspired by [Hevy](https://www.hevyapp.com/
 ## Dependencies
 
 - [Community Toolkit Maui](https://github.com/CommunityToolkit/Maui/blob/main/LICENSE) (MIT)
-- [.NET MAUI](https://github.com/dotnet/maui/blob/main/LICENSE.txt) (MIT)
-- [MAUI Controls / Compatibility](https://github.com/dotnet/maui/blob/main/LICENSE.txt) (MIT)
+- [.NET Maui](https://github.com/dotnet/maui/blob/main/LICENSE.txt) (MIT)
+- [Maui Controls / Compatibility](https://github.com/dotnet/maui/blob/main/LICENSE.txt) (MIT)
 - [LiveCharts2](https://github.com/beto-rodriguez/LiveCharts2/blob/master/LICENSE) (MIT)
 - [EntityFrameworkCore](https://github.com/dotnet/efcore/blob/main/LICENSE.txt) (MIT)
 - [Microsoft.Data.Sqlite](https://github.com/dotnet/efcore/blob/main/LICENSE.txt) (MIT)
 
 ## Details
 
-The application is written in C#, using the libraries listed above.
+DogoFit is written in C#, using the libraries listed above.
 
-This application will only be released for Android. You can get at [GooglePlay](https://github.com/dogopequi/DogoFit), or download it in the [Releases](https://github.com/dogopequi/DogoFit) section.
+This application will only be released for Android. You can get it on [GooglePlay](https://github.com/dogopequi/DogoFit), or download it in the [Releases](https://github.com/dogopequi/DogoFit) section.
 
 ## Features
 
@@ -34,7 +34,8 @@ This application will only be released for Android. You can get at [GooglePlay](
 - Split information (Function, Muscle Group, Individual muscles)
 - Statistics (Intensity, Volume, Sets, Reps, Duration, Workouts) sorted by date
 - Data stored locally
-- Data can be exported and imported in Settings (JSON file), individually or all at the same time
-- No advertisements
-- No internet connection required
-- No paywall or subscription
+- Data can be exported and imported in Settings (JSON file), individually or all at once
+
+## What's Next
+
+I plan to add functionality to save data on the cloud along with authentication, but I have not decided on what services I will use.

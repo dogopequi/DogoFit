@@ -19,7 +19,7 @@ public partial class profileindimuscles : ContentPage
         foreach(Muscles m in AppState.MusclesList)
         {
             Button button = new Button { Text = AppState.MuscleToString(m), TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
-            button.Clicked += (s, e) => vm.MC = m;
+            button.Clicked += (s, e) => {  vm.DoesUpdatePieChart = false; vm.MC = m;};
             IM_ChoiceButtonContainer.Children.Add(button);
             vm.MusclesButtons.Add((button, m));
         }

@@ -102,9 +102,7 @@ public partial class StartRoutine : ContentPage
 
             if (exercise.IsUnilateral)
             {
-                Label leftHeader = new Label { Text = "Left Side", TextColor = Colors.White, FontSize = 18, HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center };
-                eVstack.Children.Add(leftHeader);
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise);
+                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Left), exercise, "SET (L)");
 
                 Button addsetbuttonLeft = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                     WidthRequest = 275, FontAttributes = FontAttributes.Bold};
@@ -112,9 +110,7 @@ public partial class StartRoutine : ContentPage
                 addsetbuttonLeft.Clicked += (s, e) => { AppState.OnAddSetToExercise(exercise, SideType.Left); Refresh(); };
                 eVstack.Children.Add(addsetbuttonLeft);
 
-                Label rightHeader = new Label { Text = "Right Side", TextColor = Colors.White, FontSize = 18, HorizontalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center };
-                eVstack.Children.Add(rightHeader);
-                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise);
+                SetLayout(exercise.Sets.Where(s => s.Side == SideType.Right), exercise, "SET (R)");
 
                 Button addsetbuttonRight = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                     WidthRequest = 275, FontAttributes = FontAttributes.Bold};
@@ -124,7 +120,7 @@ public partial class StartRoutine : ContentPage
             }
             else
             {
-                SetLayout(exercise.Sets, exercise);
+                SetLayout(exercise.Sets, exercise, "SET");
                 Button addsetbutton = new Button {Text = "Add set", FontSize = 14, BackgroundColor = Color.FromArgb("#2b2b2b"), BorderWidth = 0, TextColor = Colors.White, Padding = 5,
                         WidthRequest = 275, FontAttributes = FontAttributes.Bold};
                 addsetbutton.BindingContext = exercise;
@@ -140,7 +136,7 @@ public partial class StartRoutine : ContentPage
         }
     }
 
-    private void SetLayout(IEnumerable<Set> sets, Exercise exercise)
+    private void SetLayout(IEnumerable<Set> sets, Exercise exercise, string settext)
     {
         
         var grid = new Grid
@@ -156,17 +152,17 @@ public partial class StartRoutine : ContentPage
             RowDefinitions = { },
             HorizontalOptions = LayoutOptions.Fill,
             ColumnSpacing = 0,
-            RowSpacing = 20,
+            RowSpacing = 5,
             BackgroundColor = Colors.Transparent
         };
 
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-        Label setname = new Label { Text = "SET", HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
-        Label lastname = new Label { Text = "LAST", HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
-        Label repsname = new Label { Text = "REPS", HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
-        Label weightname = new Label { Text = "WEIGHT", HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
-        Label empty = new Label { Text = "", HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.LightGray, FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
+        Label setname = new Label { Text = settext, HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
+        Label lastname = new Label { Text = "LAST", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
+        Label repsname = new Label { Text = "REPS", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
+        Label weightname = new Label { Text = "WEIGHT", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
+        Label empty = new Label { Text = "✔", HorizontalTextAlignment = TextAlignment.Center, TextColor = Color.FromArgb("#FFB300"), FontAttributes = FontAttributes.Bold, BackgroundColor = Colors.Transparent };
         grid.Add(setname, 0, 0);
         grid.Add(lastname, 1, 0);
         grid.Add(repsname, 2, 0);
@@ -175,6 +171,14 @@ public partial class StartRoutine : ContentPage
         int row = 1;
         foreach (Set set in sets)
         {
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            var setseparator = AppState.Helper_CreateSeparator();
+            Grid.SetRow(setseparator, row);
+            Grid.SetColumn(setseparator, 0);
+            Grid.SetColumnSpan(setseparator, 5);
+            grid.Children.Add(setseparator);
+
+            row++;
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(35) });
             Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
             switch(set.Type)
@@ -204,7 +208,7 @@ public partial class StartRoutine : ContentPage
 
             
             Label lastvalue = new Label { Text = set.LastSet, BackgroundColor = Colors.Transparent, TextColor = Colors.Gray, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center,
-                    Margin = new Thickness(0, 3, 0, 0), FontSize = 15, WidthRequest = 50, MaxLines = 1};
+                    FontSize = 15, WidthRequest = 50, MaxLines = 1};
            
             Entry repsvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
                     TextColor = Colors.White, HeightRequest = 40};

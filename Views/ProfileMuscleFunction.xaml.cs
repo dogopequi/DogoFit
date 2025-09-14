@@ -19,7 +19,7 @@ public partial class ProfileMuscleFunction : ContentPage
         foreach(MuscleFunctions mf in AppState.MuscleFunctionsList)
         {
             Button button = new Button { Text = AppState.MuscleFunctionToString(mf), TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
-            button.Clicked += (s, e) => vm.MF = mf;
+            button.Clicked += (s, e) => { vm.DoesUpdatePieChart = false;  vm.MF = mf; };
             MF_ChoiceButtonContainer.Children.Add(button);
             vm.MuscleFunctionButtons.Add((button, mf));
         }

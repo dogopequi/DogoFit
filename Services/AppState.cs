@@ -438,20 +438,46 @@ namespace GymTracker.Services
                 {
                     var exerciseTemplate = AllExercises[rnd.Next(AllExercises.Count)];
                     Exercise exercise = new Exercise(exerciseTemplate);
-
+                    
                     int setCount = rnd.Next(3, 6);
+                    
                     for (int s = 0; s < setCount; s++)
                     {
-                        exercise.AddSet(new Set
+                        if (exerciseTemplate.IsUnilateral)
                         {
-                            ID = s,
-                            IsChecked = true,
-                            Reps = rnd.Next(5, 16),
-                            Weight = Math.Round(rnd.NextDouble() * 100, 1),
-                            Type = SetType.Normal,
-                            Side = SideType.None
-                        });
+                            exercise.AddSet(new Set
+                            {
+                                ID = s * 2,
+                                IsChecked = true,
+                                Reps = rnd.Next(5, 16),
+                                Weight = Math.Round(rnd.NextDouble() * 100, 1),
+                                Type = SetType.Normal,
+                                Side = SideType.Left
+                            });
+                            exercise.AddSet(new Set
+                            {
+                                ID = s * 2 + 1,
+                                IsChecked = true,
+                                Reps = rnd.Next(5, 16),
+                                Weight = Math.Round(rnd.NextDouble() * 100, 1),
+                                Type = SetType.Normal,
+                                Side = SideType.Right
+                            });
+                        }
+                        else
+                        {
+                            exercise.AddSet(new Set
+                            {
+                                ID = s,
+                                IsChecked = true,
+                                Reps = rnd.Next(5, 16),
+                                Weight = Math.Round(rnd.NextDouble() * 100, 1),
+                                Type = SetType.Normal,
+                                Side = SideType.None
+                            });
+                        }
                     }
+
 
                     workout.AddExercise(exercise);
                 }
@@ -722,7 +748,7 @@ namespace GymTracker.Services
             {
                 StrokeShape = new RoundRectangle { CornerRadius = 12 },
                 StrokeThickness = 0,
-                BackgroundColor = Color.FromArgb("#1E1E1E"),
+                BackgroundColor = Colors.Transparent,
                 Padding = new Thickness(15),
                 Shadow = new Shadow
                 {
@@ -733,6 +759,56 @@ namespace GymTracker.Services
                 }
             };
             return container;
+        }
+
+        private static void SetLayout(IEnumerable<Set> sets, Exercise exercise, VerticalStackLayout stack, string settext, Func<bool, List<View>> createControls,  Func<bool, List<Label>> createLabels, int columns)
+        {
+            var grid = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Star }
+                },
+                RowDefinitions = { },
+                HorizontalOptions = LayoutOptions.Fill,
+                ColumnSpacing = 0,
+                RowSpacing = 5, BackgroundColor = Colors.Transparent
+            };
+
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            List<Label> labels = createLabels(true);
+            int j = 0;
+            foreach(var label in labels)
+            {
+                grid.Add(label, j++, 0);
+            }
+
+            int row = 1;
+            foreach (Set set in sets)
+            {
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                var setseparator = AppState.Helper_CreateSeparator();
+                Grid.SetRow(setseparator, row);
+                Grid.SetColumn(setseparator, 0);
+                Grid.SetColumnSpan(setseparator, columns);
+                grid.Children.Add(setseparator);
+
+                row++;
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                List<View> controls = createControls(true);
+
+                int i = 0;
+                foreach(var view in controls)
+                {
+                    grid.Add(view, i++, row);
+                }
+                row++;
+            }
+            stack.Children.Add(grid);
         }
     }
 }

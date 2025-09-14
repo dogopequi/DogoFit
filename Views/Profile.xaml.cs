@@ -95,17 +95,17 @@ public partial class Profile : ContentPage
 
             var gridLabel = new Label
             {
-                Text = "", HorizontalOptions = LayoutOptions.Start, VerticalOptions = LayoutOptions.Center
+                Text = "", HorizontalOptions = LayoutOptions.Start, VerticalOptions = LayoutOptions.Center,  TextColor = Colors.White
             };
             Grid.SetColumn(gridLabel, 2);
 
             var itemLabel = new Label
             {
-                Text = "", HorizontalOptions = LayoutOptions.Start, FontSize = 15
+                Text = "", HorizontalOptions = LayoutOptions.Start, FontSize = 15, TextColor = Color.FromRgba("#FFB300")
             };
             var bindItemLabel = new Label
             {
-                Text = "", FontSize = 16, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center
+                Text = "", FontSize = 16, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center,  TextColor = Colors.White
             };
 
             vstack.Children.Add(itemLabel);

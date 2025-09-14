@@ -19,7 +19,7 @@ public partial class ProfileMuscleGroup : ContentPage
         foreach(MuscleGroups mg in AppState.MuscleGroupsList)
         {
             Button button = new Button { Text = AppState.MuscleGroupToString(mg), TextColor = Colors.White, FontSize = 15.0, BackgroundColor = Color.FromArgb("#008cff") };
-            button.Clicked += (s, e) => vm.MG = mg;
+            button.Clicked += (s, e) => { vm.DoesUpdatePieChart = false;  vm.MG = mg; };
             MG_ChoiceButtonContainer.Children.Add(button);
             vm.MuscleGroupsButtons.Add((button, mg));
         }

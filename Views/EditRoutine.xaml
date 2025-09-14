@@ -17,7 +17,7 @@
                         FontSize="20"/>
         <ScrollView Grid.Row="1">
 
-            <VerticalStackLayout x:Name="vstack" Spacing="5" Padding="10" Margin="5">
+            <VerticalStackLayout x:Name="vstack" Spacing="10" Padding="10" Margin="5">
         </VerticalStackLayout>
         </ScrollView>
         <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,20,0,0">

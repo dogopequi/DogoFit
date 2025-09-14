@@ -96,6 +96,17 @@ namespace GymTracker
                 
                         if (routine.IsSplitsVisible)
                         {
+                            var functionLabel = new Label
+                            {
+                                Text = "Function",
+                                FontSize = 20,
+                                HorizontalOptions = LayoutOptions.Center,
+                                TextColor = Colors.White,
+                                FontAttributes = FontAttributes.Bold,
+                                Margin = new Thickness(0, 10, 0, 0)
+                            };
+                            splitsStack.Children.Add(functionLabel);
+
                             UpdateSplits(AppState.MuscleFunctionsList, (exercise, split) => exercise.Function == split, splitsStack, routine);
                             
                             var groupLabel = new Label
@@ -103,7 +114,7 @@ namespace GymTracker
                                 Text = "Group",
                                 FontSize = 20,
                                 HorizontalOptions = LayoutOptions.Center,
-                                TextColor = Colors.AliceBlue,
+                                TextColor = Colors.White,
                                 FontAttributes = FontAttributes.Bold,
                                 Margin = new Thickness(0, 10, 0, 0)
                             };
@@ -165,8 +176,6 @@ namespace GymTracker
                     exLabel.SetBinding(Label.TextProperty, "Name");
                     exerciseStack.Children.Add(exLabel);
 
-                    var nameseparator = AppState.Helper_CreateSeparator();
-                    exerciseStack.Children.Add(nameseparator);
                 
                     var descLabel = new Label
                     {
@@ -257,7 +266,7 @@ namespace GymTracker
             {
                 Text = header,
                 FontSize = 15,
-                TextColor = Color.FromArgb("#008cff"),
+                TextColor = Color.FromArgb("#FFB300"),
                 FontAttributes = FontAttributes.Bold,
                 HorizontalOptions = LayoutOptions.Fill,
                 HorizontalTextAlignment = TextAlignment.Center,
@@ -292,16 +301,16 @@ namespace GymTracker
                 RowDefinitions = { },
                 HorizontalOptions = LayoutOptions.Fill,
                 ColumnSpacing = 0,
-                RowSpacing = 0, BackgroundColor = Colors.Transparent
+                RowSpacing = 5, BackgroundColor = Colors.Transparent
             };
 
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            Label setlabel = new Label { Text = settext, BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#008cff"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            Label setlabel = new Label { Text = settext, BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
             grid.Add(setlabel, 0, 0);
-            Label replabel = new Label { Text = "REPS", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#008cff"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            Label replabel = new Label { Text = "REPS", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
             grid.Add(replabel, 1, 0);
-            Label weightlabel = new Label { Text = "WEIGHT", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#008cff"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            Label weightlabel = new Label { Text = "WEIGHT", BackgroundColor = Colors.Transparent, TextColor = Color.FromArgb("#FFB300"), FontSize = 15, HorizontalTextAlignment = TextAlignment.Center, HorizontalOptions = LayoutOptions.CenterAndExpand };
             grid.Add(weightlabel, 2, 0);
 
             int row = 1;
@@ -320,7 +329,7 @@ namespace GymTracker
                 {
                     HorizontalTextAlignment = TextAlignment.Center,
                     FontAttributes = FontAttributes.Bold,
-                    FontSize = 20,
+                    FontSize = 18,
                     HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
                 };
                 switch (set.Type)
@@ -349,7 +358,7 @@ namespace GymTracker
                     HorizontalTextAlignment = TextAlignment.Center,
                     TextColor = Colors.LightGray,
                     FontAttributes = FontAttributes.Bold,
-                    FontSize = 20,
+                    FontSize = 18,
                     HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
                 };
                 Label wvalue = new Label
@@ -358,7 +367,7 @@ namespace GymTracker
                     HorizontalTextAlignment = TextAlignment.Center,
                     TextColor = Colors.LightGray,
                     FontAttributes = FontAttributes.Bold,
-                    FontSize = 20,
+                    FontSize = 18,
                     HorizontalOptions = LayoutOptions.CenterAndExpand, BackgroundColor = Colors.Transparent
                 };
                 grid.Add(svalue, 0, row);
@@ -373,8 +382,6 @@ namespace GymTracker
             int totalSets = routine.Exercises
                 .SelectMany(s => s.CheckedSets)
                 .Count();
-
-            targetStack.Children.Clear();
 
             foreach (var item in sourceList)
             {
@@ -401,17 +408,17 @@ namespace GymTracker
 
                 var gridLabel = new Label
                 {
-                    Text = "", HorizontalOptions = LayoutOptions.Start, VerticalOptions = LayoutOptions.Center
+                    Text = "", HorizontalOptions = LayoutOptions.Start, VerticalOptions = LayoutOptions.Center,  TextColor = Colors.White
                 };
                 Grid.SetColumn(gridLabel, 2);
 
                 var itemLabel = new Label
                 {
-                    Text = "", HorizontalOptions = LayoutOptions.Start, FontSize = 15
+                    Text = "", HorizontalOptions = LayoutOptions.Start, FontSize = 15, TextColor = Color.FromRgba("#FFB300")
                 };
                 var bindItemLabel = new Label
                 {
-                    Text = "", FontSize = 16, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center
+                    Text = "", FontSize = 16, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center, TextColor = Colors.White
                 };
 
                 vstack.Children.Add(itemLabel);
