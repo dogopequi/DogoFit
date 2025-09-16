@@ -1,6 +1,6 @@
 ﻿# Privacy Policy for DogoFit
 
-DogoFit does not collect personal information from users. All workout data is stored locally on your device.
+DogoFit does not collect personal information from users. All data is stored locally on your device.
 
 This app is not intended for children under 13.
 
