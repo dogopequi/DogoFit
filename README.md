@@ -17,7 +17,7 @@ This is a learning project, and it's inspired by [Hevy](https://www.hevyapp.com/
 
 DogoFit is written in C#, using the libraries listed above.
 
-This application will only be released for Android. You can get it on [GooglePlay](https://github.com/dogopequi/DogoFit), or download it in the [Releases](https://github.com/dogopequi/DogoFit) section.
+This application will only be released for Android. You can get it on [GooglePlay](https://play.google.com/store/apps/details?id=com.dogofit), or download it in the [Releases](https://github.com/dogopequi/DogoFit/releases) section.
 
 ## Features
 
@@ -35,7 +35,3 @@ This application will only be released for Android. You can get it on [GooglePla
 - Statistics (Intensity, Volume, Sets, Reps, Duration, Workouts) sorted by date
 - Data stored locally
 - Data can be exported and imported in Settings (JSON file), individually or all at once
-
-## What's Next
-
-I plan to add functionality to save data on the cloud along with authentication, but I have not decided on what services I will use.

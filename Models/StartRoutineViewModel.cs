@@ -219,7 +219,7 @@ namespace GymTracker.Models
             await Shell.Current.Navigation.PopAsync();
         }
 
-        private void FillLastSets()
+        public void FillLastSets()
         {
             if (routine.Exercises != null)
             {

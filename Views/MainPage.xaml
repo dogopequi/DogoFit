@@ -21,26 +21,42 @@
                FontSize="20"
                TextColor="White"
                Grid.Row="1"/>
-        <VerticalStackLayout  x:Name="SearchStack" Spacing="10" Grid.Row="2">
-            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                <DatePicker x:Name="StartPicker" Format="dd/MM/yyyy"/>
-                <DatePicker x:Name="EndPicker" Format="dd/MM/yyyy"/>
-            </HorizontalStackLayout>
-            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+        <Grid x:Name="SearchGrid" Grid.Row="2" RowSpacing="10" ColumnSpacing="20" HorizontalOptions="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <DatePicker x:Name="StartPicker" 
+                Grid.Row="0" Grid.Column="0" 
+                Format="dd/MM/yyyy"
+                HorizontalOptions="Center"/>
+
+            <DatePicker x:Name="EndPicker" 
+                Grid.Row="0" Grid.Column="1" 
+                Format="dd/MM/yyyy"
+                HorizontalOptions="Center"/>
+
             <Button x:Name="SearchButton"
-                Text="Search"
-                TextColor="White"
-                BackgroundColor="#2b2b2b"
-                HorizontalOptions="Center"
-                Margin="0,0,0,0"/>
-                <Button x:Name="ClearButton"
-                Text="Clear"
-                TextColor="White"
-                BackgroundColor="#2b2b2b"
-                HorizontalOptions="Center"
-                Margin="0,0,0,0"/>
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
+            Grid.Row="1" Grid.Column="0"
+            Text="Search"
+            TextColor="White"
+            BackgroundColor="#2b2b2b"
+            HorizontalOptions="Center"/>
+
+            <Button x:Name="ClearButton"
+            Grid.Row="1" Grid.Column="1"
+            Text="Clear"
+            TextColor="White"
+            BackgroundColor="#2b2b2b"
+            HorizontalOptions="Center"/>
+        </Grid>
+
 
         <CollectionView x:Name="collectionView" Margin="0,20,0,0" BackgroundColor="Black" HorizontalOptions="CenterAndExpand"
                         Grid.Row="3">

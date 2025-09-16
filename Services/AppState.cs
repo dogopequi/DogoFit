@@ -387,7 +387,7 @@ namespace GymTracker.Services
             Categories = new ObservableCollection<Category>(Categories.GroupBy(c => c.Name).Select(g => g.First()));
             FilteredExercises = new ObservableCollection<Exercise>(AllExercises.Select(e => new Exercise(e)));
 
-           TestWorkouts();
+           //TestWorkouts();
 
         }
 
@@ -664,7 +664,7 @@ namespace GymTracker.Services
 
         public static void FillDisplayedExercises(ObservableCollection<Exercise> exercises)
         {
-            exercises.Clear();
+             exercises.Clear();
              int i = 0;
              foreach(Exercise e in AppState.FilteredExercises)
              {

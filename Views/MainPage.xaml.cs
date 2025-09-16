@@ -25,12 +25,12 @@ namespace GymTracker
             if (vm.Routines.Count() < 1)
             {
                 DataLabel.IsVisible = true;
-                SearchStack.IsVisible = false;
+                SearchGrid.IsVisible = false;
             }
             else
             {
                 DataLabel.IsVisible = false;
-                SearchStack.IsVisible = true;
+                SearchGrid.IsVisible = true;
             }
             loadMoreButton.IsVisible = vm.MoreButtonVisibility();
 
@@ -97,7 +97,7 @@ namespace GymTracker
 
                 var statsGrid = new Grid
                 {
-                    ColumnSpacing = 40,
+                    ColumnSpacing = 15,
                     RowDefinitions =
                     {
                         new RowDefinition { Height = GridLength.Auto },

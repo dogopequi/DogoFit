@@ -28,6 +28,7 @@ public partial class StartRoutine : ContentPage
 
     private void Refresh()
     {
+        vm.FillLastSets();
         UpdateHeaderLabels();
         eVstack.Clear();
         CreateWorkoutLayout();
@@ -139,7 +140,7 @@ public partial class StartRoutine : ContentPage
     private List<View> CreateControls(Exercise exercise, Set set)
     {
         List<View> controls = new List<View>();
-        Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
+        Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Color.FromArgb("#111111") };
         switch(set.Type)
         {
             case SetType.Normal:
@@ -168,7 +169,8 @@ public partial class StartRoutine : ContentPage
         
         Label lastvalue = new Label { Text = set.LastSet, BackgroundColor = Colors.Transparent, TextColor = Colors.Gray, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.Center,
                 FontSize = 15, WidthRequest = 50, MaxLines = 1, Margin = new Thickness(0,0,0,0), VerticalTextAlignment = TextAlignment.Center, VerticalOptions = LayoutOptions.Center};
-        
+        lastvalue.BindingContext = set;
+        lastvalue.SetBinding(Label.TextProperty, nameof(Set.LastSet));
         Entry repsvalue = new Entry { Placeholder = "0", BackgroundColor = Colors.Transparent, Keyboard = Keyboard.Numeric, WidthRequest = 50, HorizontalTextAlignment = TextAlignment.Center, FontSize = 16,
                 TextColor = Colors.White, HeightRequest = 40};
         repsvalue.BindingContext = set;

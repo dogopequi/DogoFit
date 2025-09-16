@@ -81,7 +81,7 @@ public partial class SetSelection : ContentPage
     private List<View> CreateControls(Exercise exercise, Set set)
     {
         List<View> controls = new List<View>();
-        Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Colors.Black };
+        Button setbutton = new Button { FontAttributes = FontAttributes.Bold, FontSize = 16, Margin = new Thickness(0, 0, 0, 0), BackgroundColor = Color.FromArgb("#111111") };
         switch(set.Type)
         {
             case SetType.Normal:

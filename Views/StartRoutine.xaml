@@ -19,19 +19,19 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0" Grid.Row="0" Text="VOLUME" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
-                    <Label Grid.Column="0" Grid.Row="1" x:Name="VolumeLabel" Text="" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" TextColor="White" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="0" Grid.Row="1" x:Name="VolumeLabel" Text="" FontSize="14" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" TextColor="White" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
                     <Label Grid.Column="1" Grid.Row="0" Text="SETS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
-                    <Label Grid.Column="1" Grid.Row="1" x:Name="SetsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="1" Grid.Row="1" x:Name="SetsLabel" Text="" TextColor="White" FontSize="14" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
                     <Label Grid.Column="2" Grid.Row="0" Text="REPS" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
-                    <Label Grid.Column="2" Grid.Row="1" x:Name="RepsLabel" Text="" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="2" Grid.Row="1" x:Name="RepsLabel" Text="" TextColor="White" FontSize="14" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
                     <Label Grid.Column="3" Grid.Row="0" Text="TIME" FontSize="15" HorizontalOptions="CenterAndExpand" TextColor="#FFB300" HorizontalTextAlignment="Center"/>
-                    <Label Grid.Column="3" Grid.Row="1" Text="{Binding routine.DurationString}" TextColor="White" FontSize="16" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="3" Grid.Row="1" Text="{Binding routine.DurationString}" TextColor="White" FontSize="14" HorizontalOptions="CenterAndExpand" FontAttributes="Bold" LineBreakMode="NoWrap" HorizontalTextAlignment="Center"/>
                 </Grid>
             </ScrollView>
         </VerticalStackLayout>
