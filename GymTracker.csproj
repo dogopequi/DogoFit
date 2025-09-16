@@ -51,8 +51,7 @@
 	  <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
 	</PropertyGroup>
 	<PropertyGroup>
-		<AndroidEnableProguard>true</AndroidEnableProguard>
-		<AndroidLinkMode>SdkAndUserAssemblies</AndroidLinkMode>
+		<AndroidEnableProguard>false</AndroidEnableProguard>
 	</PropertyGroup>
 	<PropertyGroup>
 		<AndroidEnableDebugSymbols>true</AndroidEnableDebugSymbols>
@@ -118,7 +117,6 @@
 	  <AndroidSigningStorePass>dogodogo</AndroidSigningStorePass>
 	  <AndroidSigningKeyPass>dogodogo</AndroidSigningKeyPass>
 	  <AndroidSigningKeyAlias>dogofitkey</AndroidSigningKeyAlias>
-	  <AndroidLinkTool>r8</AndroidLinkTool>
 	  <ApplicationVersion>2</ApplicationVersion>
 	  <ApplicationDisplayVersion>1.2.0</ApplicationDisplayVersion>
 	</PropertyGroup>

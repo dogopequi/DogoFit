@@ -17,7 +17,7 @@ This is a learning project, and it's inspired by [Hevy](https://www.hevyapp.com/
 
 DogoFit is written in C#, using the libraries listed above.
 
-This application will only be released for Android. You can get it on [GooglePlay](https://play.google.com/store/apps/details?id=com.dogofit), or download it in the [Releases](https://github.com/dogopequi/DogoFit/releases) section.
+This application will only be released for Android. You can get it on [GooglePlay](https://play.google.com/store/apps/details?id=com.dogo.dogofit), or download it in the [Releases](https://github.com/dogopequi/DogoFit/releases) section.
 
 ## Features
 
